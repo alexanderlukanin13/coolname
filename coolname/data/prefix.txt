@@ -1,0 +1,21 @@
+# ===============================================================
+# Words that can be used only immediately before the main subject
+# ===============================================================
+
+# Metric prefixes & other size-related prefixes
+giga
+mega
+micro
+mini
+nano
+pygmy
+
+# Superiority prefixes
+super
+uber
+ultra
+
+# Misc modifiers
+cyber
+mutant
+space

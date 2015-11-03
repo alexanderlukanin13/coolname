@@ -1,0 +1,110 @@
+# ==============================================
+# Adjective for "of-noun"
+#
+# Example:
+#     black dog of <ultimate> achievement
+#
+# If you want to contribute, check that the word
+# makes sense in following phrases:
+#     black dog of <adjective> faith
+#     black dog of <adjective> perfection
+#     black dog of <adjective> storm
+#     black dog of <adjective> coffee
+# ==============================================
+
+absolute
+abstract
+algebraic
+amazing
+amusing
+ancient
+angelic
+astonishing
+authentic
+awesome
+beautiful
+classic
+delightful
+demonic
+eminent
+eternal
+excellent
+exotic
+extreme
+fabulous
+famous
+fantastic
+fascinating
+flawless
+fortunate
+glorious
+great
+heavenly
+holistic
+ideal
+illegal
+imaginary
+immense
+imminent
+immortal
+impossible
+impressive
+improbable
+incredible
+inevitable
+infinite
+inspiring
+interesting
+legal
+magic
+majestic
+major
+marvelous
+massive
+mysterious
+nonstop
+luxurious
+optimal
+original
+pastoral
+perfect
+perpetual
+pragmatic
+premium
+radical
+rampant
+regular
+remarkable
+satisfying
+serious
+scientific
+sexy
+sheer
+simple
+silent
+spectacular
+splendid
+stereotyped
+stimulating
+strange
+striking
+strongest
+sublime
+sudden
+terrific
+therapeutic
+ultimate
+uncanny
+undeniable
+unearthly
+unexpected
+unknown
+unmatched
+unnatural
+unreal
+unusual
+utter
+weird
+wonderful
+wondrous
+

@@ -1,0 +1,15 @@
+# ==============================================================================
+# Legendary creatures.
+# We specify only a few most memorable ones, not diving too deep into mythology.
+# If you want to contribute:
+# 1. Please do not include human-like species (centaur, werewolf, etc.).
+# 2. Make sure word gets 1M+ Google hits.
+# 3. Keep lists sorted alphabetically.
+# ==============================================================================
+
+basilisk
+chupacabra
+dragon
+griffin
+pegasus
+unicorn

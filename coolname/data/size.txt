@@ -1,0 +1,21 @@
+# ===================================
+# Adjectives related to physical size
+# ===================================
+
+big
+colossal
+enormous
+gigantic
+great
+huge
+hulking
+humongous
+large
+little
+massive
+miniature
+petite
+portable
+small
+tiny
+towering

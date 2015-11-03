@@ -1,0 +1,96 @@
+{
+    "all": {
+        "comment": "Entry point",
+        "type": "nested",
+        "lists": ["2", "3", "4"]
+    },
+    "2": {
+        "comment": "Two words",
+        "type": "nested",
+        "lists": ["an"]
+    },
+    "3": {
+        "comment": "Three words",
+        "type": "nested",
+        "lists": ["aan", "ano", "nuo"]
+    },
+    "4": {
+        "comment": "Four words",
+        "type": "nested",
+        "lists": ["aano", "anuo"]
+    },
+    "an": {
+        "comment": "adjective-noun",
+        "type": "cartesian",
+        "lists": ["adj_any", "subj"]
+    },
+    "aan": {
+        "comment": "adjective-adjective-noun",
+        "type": "cartesian",
+        "lists": ["adj_far", "adj_near", "subj"]
+    },
+    "ano": {
+        "comment": "adjective-noun-of-noun",
+        "type": "cartesian",
+        "lists": ["adj_any", "subj", "of", "of_noun"]
+    },
+    "nuo": {
+        "comment": "noun-of-adjective-noun",
+        "type": "cartesian",
+        "lists": ["subj", "of", "of_modifier", "of_noun"]
+    },
+    "aano": {
+        "comment": "adjective-adjective-noun-of-noun",
+        "type": "cartesian",
+        "lists": ["adj_far", "adj_near", "subj", "of", "of_noun"]
+    },
+    "anuo": {
+        "comment": "adjective-noun-of-adjective-noun",
+        "type": "cartesian",
+        "lists": ["adj_any", "subj", "of", "of_modifier", "of_noun"]
+    },
+    "adj_far": {
+        "comment": "First adjective (with more following)",
+        "type": "nested",
+        "lists": [
+            "adjective",
+            "adjective_first",
+            "noun_adjective",
+            "size"
+        ]
+    },
+    "adj_near": {
+        "comment": "Last adjective (closest to the subject)",
+        "type": "nested",
+        "lists": [
+            "adjective",
+            "color",
+            "noun_adjective",
+            "prefix"
+        ]
+    },
+    "adj_any": {
+        "comment": "The only adjective (includes everything)",
+        "type": "nested",
+        "lists": [
+            "adjective",
+            "color",
+            "noun_adjective",
+            "prefix",
+            "size"
+        ]
+    },
+    "subj": {
+        "comment": "The subject (animal)",
+        "type": "nested",
+        "lists": [
+            "animal",
+            "animal_breed",
+            "animal_legendary"
+        ]
+    },
+    "of": {
+        "type": "const",
+        "value": "of"
+    }
+}

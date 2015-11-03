@@ -1,0 +1,252 @@
+# -------------------------------------------------
+# Nouns that can be used in the end after the "of".
+#
+# Example:
+#     big dog of <bliss>
+#
+# If you want to contribute:
+# 1. Insert word into the most appropriate list.
+#     When in doubt, search for synonyms, maybe they are already here.
+#     If it still doesn't make sense, feel free to contact the package owner.
+# 2. Keep lists sorted alphabetically.
+# -------------------------------------------------
+
+# Emotions & Happiness
+anger
+bliss
+contentment
+courage
+ecstasy
+excitement
+faith
+felicity
+fury
+gaiety
+glee
+glory
+greatness
+inspiration
+jest
+joy
+happiness
+holiness
+merriment
+patience
+peace
+persistence
+pleasure
+recreation
+relaxation
+romance
+serenity
+tranquility
+
+# Abstract Concepts
+apotheosis
+chaos
+energy
+essence
+eternity
+excellence
+experience
+freedom
+nirvana
+order
+perfection
+spirit
+
+# Social
+acceptance
+brotherhood
+culture
+discourse
+justice
+piety
+security
+support
+tolerance
+trust
+warranty
+
+# Money & Power
+abundance
+admiration
+assurance
+authority
+awe
+certainty
+control
+domination
+enterprise
+fame
+grandeur
+influence
+luxury
+management
+opposition
+plenty
+popularity
+prestige
+prosperity
+reputation
+reverence
+superiority
+triumph
+wealth
+
+# Intelligence and Abilities
+aptitude
+competence
+efficiency
+expertise
+skill
+
+# Strength
+action
+agility
+amplitude
+attack
+charisma
+chivalry
+defense
+defiance
+devotion
+dignity
+endurance
+exercise
+force
+fortitude
+gallantry
+health
+honor
+infinity
+inquire
+intensity
+luck
+mastery
+might
+opportunity
+penetration
+performance
+pluck
+potency
+prowess
+resistance
+serendipity
+stamina
+strength
+temperance
+tenacity
+valor
+vigor
+vitality
+will
+
+# Progress
+advance
+conversion
+correction
+development
+diversity
+elevation
+enhancement
+enrichment
+enthusiasm
+focus
+fruition
+growth
+improvement
+innovation
+modernism
+novelty
+proficiency
+progress
+realization
+refinement
+renovation
+revolution
+success
+tempering
+upgrade
+
+# Completion
+ampleness
+completion
+satiation
+saturation
+sufficiency
+vastness
+wholeness
+
+# Charm & Beauty
+attraction
+beauty
+bloom
+cleaning
+courtesy
+glamour
+elegance
+fascination
+kindness
+joviality
+politeness
+refinement
+symmetry
+sympathy
+tact
+
+# Science & art
+calibration
+economy
+examination
+philosophy
+poetry
+research
+science
+
+# Politics (and this is as far as we want to go)
+democracy
+feminism
+
+# Pleasurable things
+coffee
+flowers
+fragrance
+honeydew
+
+# Weather
+blizzard
+current
+dew
+downpour
+drizzle
+hail
+hurricane
+lightning
+rain
+snow
+storm
+sunshine
+tempest
+thunder
+tornado
+typhoon
+weather
+wind
+whirlwind
+
+# Misc
+adventure
+atheism
+camouflage
+endeavor
+fertility
+karma
+masquerade
+sorcery
+witchcraft
+wizardry
+wonder
+
+# Participles
+purring

@@ -1,0 +1,568 @@
+# ========================================================
+# Wild animals (in the widest sense of the word "animal").
+# Also, some generic terms for domestic animals.
+#
+# Animals are grouped by scientific classification
+# (typically by Class -> Order, but it may vary).
+# ========================================================
+
+# Annelida
+earthworm
+leech
+
+# Arthropoda -> Arachnomorpha
+scorpion
+spider
+tarantula
+
+# Arthropoda -> Crustacea
+crab
+crayfish
+lobster
+pillbug
+prawn
+shrimp
+
+# Arthropoda -> Insecta
+ant
+bee
+beetle
+bug
+bumblebee
+butterfly
+caterpillar
+cicada
+cricket
+dragonfly
+earwig
+firefly
+grasshopper
+honeybee
+hornet
+inchworm
+ladybug
+locust
+mantis
+mayfly
+mosquito
+moth
+sawfly
+silkworm
+termite
+wasp
+woodlouse
+
+# Arthropoda -> Myriapoda
+centipede
+millipede
+
+# Artiodactyla -> Antilocapridae
+pronghorn
+
+# Artiodactyla -> Bovidae
+antelope
+bison
+buffalo
+bull
+chamois
+cow
+gazelle
+gaur
+goat
+ibex
+impala
+kudu
+markhor
+mouflon
+nyala
+sheep
+wildebeest
+yak
+zebu
+
+# Artiodactyla -> Camelidae
+alpaca
+camel
+llama
+vicugna
+
+# Artiodactyla -> Cervidae
+caribou
+chital
+deer
+elk
+moose
+pudu
+reindeer
+sambar
+wapiti
+
+# Artiodactyla -> Cetacea
+beluga
+dolphin
+narwhal
+orca
+porpoise
+whale
+
+# Artiodactyla -> Equidae
+donkey
+horse
+stallion
+zebra
+
+# Artiodactyla-> Giraffidae
+giraffe
+okapi
+
+# Artiodactyla-> Hippopotamidae
+hippo
+
+# Artiodactyla -> Rhinocerotidae
+rhino
+
+# Artiodactyla -> Suidae
+boar
+hog
+pig
+swine
+warthog
+
+# Artiodactyla -> Tayassuidae
+peccary
+
+# Aves -> Accipitriformes
+buzzard
+eagle
+harrier
+hawk
+vulture
+
+# Aves -> Anseriformes
+duck
+goose
+swan
+teal
+
+# Aves
+bird
+
+# Aves -> Apodiformes
+hummingbird
+swift
+
+# Aves -> Apterygiformes
+kiwi
+
+# Aves -> Caprimulgiformes
+potoo
+
+# Aves -> Cariamiformes
+seriema
+
+# Aves -> Casuariiformes
+cassowary
+emu
+
+# Aves -> Cathartiformes
+condor
+
+# Aves -> Charadriiformes
+auk
+avocet
+guillemot
+kittiwake
+puffin
+seagull
+skua
+
+# Aves -> Ciconiiformes
+stork
+
+# Aves -> Columbiformes
+dodo
+dove
+pigeon
+
+# Aves -> Coraciiformes
+tody
+
+# Aves -> Cuculiformes
+bustard
+coua
+coucal
+cuckoo
+koel
+malkoha
+roadrunner
+
+# Aves -> Eurypygiformes
+kagu
+
+# Aves -> Falconiformes
+caracara
+falcon
+kestrel
+
+# Aves -> Galliformes
+chachalaca
+chicken
+curassow
+grouse
+guan
+junglefowl
+partridge
+peacock
+pheasant
+quail
+rooster
+turkey
+
+# Aves -> Gaviiformes
+loon
+
+# Aves -> Gruiformes
+coot
+crane
+
+# Aves -> Musophagiformes
+turaco
+
+# Aves -> Opisthocomiformes
+hoatzin
+
+# Aves -> Passeriformes
+crow
+jackdaw
+jaybird
+finch
+lyrebird
+magpie
+myna
+raven
+robin
+rook
+sparrow
+starling
+swallow
+wren
+
+# Aves -> Pelecaniformes
+heron
+ibis
+
+# Aves -> Piciformes
+jacamar
+piculet
+toucan
+toucanet
+woodpecker
+
+# Aves -> Phoenicopteriformes
+flamingo
+
+# Aves -> Podicipediformes
+grebe
+
+# Aves -> Procellariiformes
+albatross
+fulmar
+petrel
+spoonbill
+
+# Aves -> Psittaciformes
+ara
+cockatoo
+lorikeet
+macaw
+parakeet
+parrot
+
+# Aves -> Sphenisciformes
+penguin
+
+# Aves -> Struthionidae
+ostrich
+
+# Aves -> Strigiformes
+boobook
+owl
+
+# Aves -> Suliformes
+booby
+cormorant
+frigatebird
+pelican
+
+# Aves -> Trogoniformes
+quetzal
+trogon
+
+# Chordata -> Amphibia
+axolotl
+bullfrog
+frog
+newt
+salamander
+toad
+
+# Chordata -> Actinopterygii
+barracuda
+carp
+catfish
+dogfish
+goldfish
+guppy
+eel
+flounder
+herring
+lionfish
+mackerel
+oarfish
+perch
+salmon
+seahorse
+sturgeon
+sunfish
+tench
+trout
+tuna
+wrasse
+
+# Chordata -> Chondrichthyes
+sawfish
+shark
+stingray
+
+# Cnidaria -> Medusozoa
+jellyfish
+
+# Crocodilia
+alligator
+caiman
+crocodile
+gharial
+
+# Echinodermata -> Asterozoa
+starfish
+
+# Echinodermata -> Echinoidea
+urchin
+
+# Erinaceomorpha -> Erinaceidae
+hedgehog
+
+# Mammalia -> Carnivora -> Canidae
+coyote
+dingo
+dog
+fennec
+fox
+hound
+jackal
+tanuki
+wolf
+
+# Mammalia -> Carnivora -> Felidae
+bobcat
+caracal
+cat
+cougar
+jaguar
+leopard
+lion
+lynx
+manul
+ocelot
+panther
+puma
+serval
+smilodon
+tiger
+wildcat
+
+# Mammalia -> Carnivora -> Feliformia
+aardwolf
+binturong
+cheetah
+civet
+fossa
+hyena
+meerkat
+mongoose
+
+# Mammalia -> Carnivora -> Musteloidea
+badger
+coati
+ermine
+ferret
+marten
+mink
+otter
+polecat
+skunk
+stoat
+weasel
+wolverine
+
+# Mammalia -> Carnivora -> Pinnipedia
+seal
+walrus
+
+# Mammalia -> Carnivora -> Procyonidae
+racoon
+
+# Mammalia -> Carnivora -> Ursidae
+bear
+panda
+
+# Mammalia -> Chiroptera
+bat
+
+# Mammalia -> Cingulata
+armadillo
+
+# Mammalia -> Elephantidae
+elephant
+mammoth
+# not actually belongs here...
+mastodon
+
+# Mammalia -> Hyracoidea
+hyrax
+
+# Mammalia -> Marsupialia
+bandicoot
+bettong
+cuscus
+kangaroo
+koala
+numbat
+quokka
+quoll
+wallaby
+wombat
+
+# Mammalia -> Monotremata
+echidna
+platypus
+
+# Mammalia -> Perissodactyla
+tapir
+
+# Mammalia -> Pilosa
+anteater
+sloth
+
+# Mammalia -> Rodenta
+agouti
+beaver
+capybara
+chinchilla
+chipmunk
+degu
+dormouse
+gerbil
+gopher
+groundhog
+jackrabbit
+jerboa
+hamster
+hare
+lemming
+marmot
+mouse
+porcupine
+rabbit
+rat
+squirrel
+vole
+
+# Mammalia -> Primates
+ape
+baboon
+bonobo
+capuchin
+chimpanzee
+galago
+gibbon
+gorilla
+lemur
+lori
+macaque
+mandrill
+marmoset
+monkey
+orangutan
+tamarin
+tarsier
+
+# Mammalia -> Sirenia
+dugong
+manatee
+
+# Mammalia -> Soricomorpha
+shrew
+
+# Mammalia -> Tubulidentata
+aardwark
+
+# Mollusca -> Bivalvia
+clam
+cockle
+mussel
+oyster
+scallop
+shellfish
+
+# Mollusca -> Cephalopoda
+ammonite
+cuttlefish
+nautilus
+octopus
+squid
+
+# Mollusca -> Gastropoda
+limpet
+slug
+snail
+
+# Porifera
+sponge
+
+# Rhynchocephalia
+tuatara
+
+# Squamata
+agama
+chameleon
+dragon
+gecko
+gila
+iguana
+lizard
+pogona
+skink
+
+# Squamata -> Serpentes
+adder
+anaconda
+asp
+boa
+cobra
+copperhead
+mamba
+python
+rattlesnake
+sidewinder
+snake
+taipan
+viper
+
+# Testudines
+tortoise
+turtle
+
+# Dinosaurs
+dinosaur
+raptor

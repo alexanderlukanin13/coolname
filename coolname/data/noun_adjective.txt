@@ -1,0 +1,17 @@
+# ==========================================================
+# Words that can be used anywhere as adjectives or of-nouns.
+#
+# Example:
+#     <magic> black dog
+#     big <magic> dog
+#     big dog of <magic>
+#
+# If you want to contribute:
+# 1. Make sure word really fits anywhere.
+# 2. Keep lists sorted alphabetically.
+# ==========================================================
+
+fancy
+magic
+rainbow
+woodoo
