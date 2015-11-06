@@ -8,6 +8,9 @@ Random Name and Slug Generator
 .. image:: https://img.shields.io/pypi/v/coolname.svg
         :target: https://pypi.python.org/pypi/coolname
 
+.. image:: https://coveralls.io/repos/alexanderlukanin13/coolname/badge.svg?branch=master&service=github
+        :target: https://coveralls.io/github/alexanderlukanin13/coolname?branch=master
+
 
 Do you want some human-readable strings to identify things in user interface and URLs?
 
