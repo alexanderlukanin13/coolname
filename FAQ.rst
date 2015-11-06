@@ -20,27 +20,27 @@ We shouldn't use too local, or hard-to-pronounce, or easy-to-confuse animal name
 
 For example, we have rejected:
 
-- `possum` and `opossum` because they are easy to mix up both as words and as animals.
+- *possum* and *opossum* because they are easy to mix up both as words and as animals.
 
-- `wallaroo` because we already have `wallaby` and `kangaroo`.
+- *wallaroo* because we already have *wallaby* and *kangaroo*.
 
-- `coralsnake` and `cottonmouth` because they look like adjective-nouns,
+- *coralsnake* and *cottonmouth* because they look like adjective-nouns,
   not like "solid" nouns.
 
 But we have accepted:
 
-- `bee` and `honeybee`
+- *bee* and *honeybee*
 
-- `dog` and `hound`
+- *dog* and *hound*
 
-- `panther`, `puma` and `cougar`
+- *panther*, *puma* and *cougar*
 
 because they are distinct and easy to remember. Practicality beats purity!
 
 Why maximum 11 characters per word?
 -----------------------------------
 
-Default length of Django slug field is 50 characters. `adjective-adjective-noun-of-noun`
+Default length of Django slug field is 50 characters. *adjective-adjective-noun-of-noun*
 is exactly 50 characters if every word is 11 characters.
 
 Also, we don't want too sophisticated words with too many syllables.
