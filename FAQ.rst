@@ -8,10 +8,10 @@ Why animals?
 
 - Animals are culture-neutral.
 
-- ...but, there is a long tradition of nicknaming people after animals in almost every culture.
+- But, there is a long tradition of nicknaming people after animals in almost every culture.
 
 - Animals are active (well, most of them), so they are more suitable for a human nickname.
-    Plants or inanimate objects are too stationary.
+  Plants or inanimate objects are too stationary.
 
 Why some animals are not included?
 ----------------------------------
