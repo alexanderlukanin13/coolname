@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 
+import unittest
 from unittest import TestCase
 
 import six
@@ -104,3 +105,7 @@ class LoaderTest(TestCase):
                                    r"No JSON object could be decoded)"):
             _load_data('/data')
 
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(unittest.main())
