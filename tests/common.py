@@ -1,12 +1,13 @@
 import unittest
 import six
 
-if six.PY2:
-    import mock
-    from mock import patch
-else:
+
+try:
     from unittest import mock
     from unittest.mock import patch
+except ImportError:
+    import mock
+    from mock import patch
 
 
 class TestCase(unittest.TestCase):
