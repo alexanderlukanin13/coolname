@@ -1,20 +1,16 @@
 from io import StringIO
 import os
-import sys
 import tempfile
 
 import unittest
-from unittest import TestCase
 
 import six
 
-if six.PY2:
-    from mock import patch
-else:
-    from unittest.mock import patch
-
 from coolname import InitializationError
 from coolname.loader import _load_wordlist, _load_data
+
+from .common import patch, TestCase
+
 
 class LoaderTest(TestCase):
 
@@ -34,12 +30,12 @@ class LoaderTest(TestCase):
             'alpha',
             'augmentation',  # line exceeds 11 characters
         ])))
-        with six.assertRaisesRegex(self, InitializationError, r"Invalid syntax at wordlist 'words' line 2: u?'augmentation'"):
+        with self.assertRaisesRegex(InitializationError, r"Invalid syntax at wordlist 'words' line 2: u?'augmentation'"):
             _load_wordlist('words', s)
 
     def test_load_data_no_dir(self):
         path = os.path.join(tempfile.gettempdir(), 'does', 'not', 'exist')
-        with six.assertRaisesRegex(self, InitializationError, 'Directory not found: {}'.format(path)):
+        with self.assertRaisesRegex(InitializationError, 'Directory not found: {}'.format(path)):
             _load_data(path)
 
     @patch('json.load')
@@ -67,8 +63,8 @@ class LoaderTest(TestCase):
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt', 'two.txt'])
     def test_load_data_os_error(self, listdir_mock, isdir_mock, open_mock):
-        with six.assertRaisesRegex(self, InitializationError,
-                                   r'Failed to read /data/one.txt: BOOM!'):
+        with self.assertRaisesRegex(InitializationError,
+                                    r'Failed to read /data/one.txt: BOOM!'):
             _load_data('/data')
 
     @patch('codecs.open')
@@ -90,19 +86,19 @@ class LoaderTest(TestCase):
                 return StringIO(six.u('word'))
 
         open_mock.side_effect = open_then_fail()
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Failed to read config from "
-                                   "/data/config.json: BOOM!"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Failed to read config from "
+                                    "/data/config.json: BOOM!"):
             _load_data('/data')
 
     @patch('codecs.open', side_effect=lambda *x, **y: StringIO(six.u('word')))
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt', 'two.txt'])
     def test_load_data_invalid_json(self, *args):
-        with six.assertRaisesRegex(self, InitializationError,
-                                   r"Invalid config: Invalid JSON: "
-                                   r"(Expecting value: line 1 column 1 \(char 0\)|"
-                                   r"No JSON object could be decoded)"):
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Invalid JSON: "
+                                    r"(Expecting value: line 1 column 1 \(char 0\)|"
+                                    r"No JSON object could be decoded)"):
             _load_data('/data')
 
 

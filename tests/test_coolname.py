@@ -1,18 +1,14 @@
 from functools import partial
 from itertools import cycle
 import unittest
-from unittest import TestCase
 
 import six
-
-if six.PY2:
-    from mock import patch
-else:
-    from unittest.mock import patch
 
 import coolname
 from coolname import RandomNameGenerator, InitializationError
 from coolname.loader import load_config
+
+from .common import patch, TestCase
 
 
 class TestCoolname(TestCase):
@@ -44,8 +40,8 @@ class TestCoolname(TestCase):
     @patch('os.path.isdir', return_value=False)
     @patch('os.path.isfile', return_value=False)
     def test_create_from_file_not_found(self, *args):
-        with six.assertRaisesRegex(self, InitializationError,
-                                   r'File or directory not found: .*dummy'):
+        with self.assertRaisesRegex(InitializationError,
+                                    r'File or directory not found: .*dummy'):
             RandomNameGenerator(load_config('dummy'))
 
     @patch('os.path.isdir', return_value=False)
@@ -82,7 +78,7 @@ class TestCoolname(TestCase):
                 }
             },
             {'mywords': ['a', 'b']})
-        with six.assertRaisesRegex(self, InitializationError,
+        with self.assertRaisesRegex(InitializationError,
                                     r"^Conflict: list 'mywords' is defined both in config "
                                     "and in \*\.txt file. If it's a 'words' list, "
                                     "you should remove it from config\.$"):
@@ -143,37 +139,37 @@ class TestCoolname(TestCase):
 
 
     def test_configuration_error(self):
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Value at key 'all' is not a dict"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Value at key 'all' is not a dict"):
             RandomNameGenerator({'all': ['wrong']})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has no 'type'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has no 'type'"):
             RandomNameGenerator({'all': {'typ': 'wrong'}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has invalid 'type'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'type'"):
             RandomNameGenerator({'all': {'type': 'wrong'}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has no 'lists'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has no 'lists'"):
             RandomNameGenerator({'all': {'type': 'nested'}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has invalid 'lists'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'lists'"):
             RandomNameGenerator({'all': {'type': 'nested', 'lists': 'wrong'}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has no 'value'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has no 'value'"):
             RandomNameGenerator({'all': {'type': 'const'}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has invalid 'value'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'value'"):
             RandomNameGenerator({'all': {'type': 'const', 'value': 123}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has no 'words'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has no 'words'"):
             RandomNameGenerator({'all': {'type': 'words'}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Config at key 'all' has invalid 'words'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'words'"):
             RandomNameGenerator({'all': {'type': 'words', 'words': []}})
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Lists are referenced but not defined: one, two"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Lists are referenced but not defined: one, two"):
             RandomNameGenerator({'all': {'type': 'nested', 'lists': ['one', 'two']}})
-        with six.assertRaisesRegex(self, InitializationError,
+        with self.assertRaisesRegex(InitializationError,
                                    "Invalid config: Rule 'all' is recursive: \['all', 'one'\]"):
             RandomNameGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
@@ -193,8 +189,8 @@ class TestCoolname(TestCase):
         }
         for i in range(100):
             config['list{}'.format(i)] = {'type': 'nested', 'lists': ['list{}'.format(i+1)]}
-        with six.assertRaisesRegex(self, InitializationError,
-                                   "Invalid config: Rule 'all' is too deep"):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Rule 'all' is too deep"):
             RandomNameGenerator(config)
 
 

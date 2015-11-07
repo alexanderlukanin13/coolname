@@ -364,6 +364,3 @@ generate = _default.generate
 generate_slug = _default.generate_slug
 get_combinations_count = _default.get_combinations_count
 randomize = _default.randomize
-
-# Garbage collection
-del _create_default_generator

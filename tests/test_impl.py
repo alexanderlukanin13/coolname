@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import io
 import unittest
-from unittest import TestCase
 
 import six
 
 from coolname import RandomNameGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
-    _create_lists, _encode
+    _create_lists, _encode, _create_default_generator
+
+from .common import TestCase, patch
 
 
 class TestImplementation(TestCase):
@@ -101,7 +102,7 @@ class TestImplementation(TestCase):
 
     def test_create_lists(self):
         # For the sake of coverage
-        with six.assertRaisesRegex(self, InitializationError, r"Unknown list type: 'wrong'"):
+        with self.assertRaisesRegex(InitializationError, r"Unknown list type: 'wrong'"):
             config = {
                 'all': {'type': 'wrong'}
             }
@@ -114,6 +115,11 @@ class TestImplementation(TestCase):
         # _encode must return byte strings unchanged
         self.assertEqual(_encode(six.u('привет').encode('utf-8')),
                          six.u('привет').encode('utf-8'))
+
+    @patch('os.path.isdir', return_value=False)
+    def test_import_data_from_init_py(self, *args):
+        generator = _create_default_generator()
+        assert isinstance(generator.generate_slug(), six.text_type)
 
 
 if __name__ == '__main__':
