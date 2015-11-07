@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from functools import partial
 from itertools import cycle
 import unittest
 
 import six
+from six import u
 
 import coolname
 from coolname import RandomNameGenerator, InitializationError
@@ -114,6 +116,28 @@ class TestCoolname(TestCase):
         with patch('coolname.impl.randrange', return_value=0):
             self.assertEqual(generator.generate_slug(), 'small-green-apple')
             self.assertEqual(generator.generate_slug('justcolor'), 'green-apple')
+
+    def test_unicode_config(self):
+        generator = RandomNameGenerator({
+            u('all'): {
+                u('type'): u('cartesian'),
+                u('lists'): [u('прилагательное'), u('существительное')]
+            },
+            u('прилагательное'): {
+                u('type'): u('words'),
+                u('words'): [u('белый'), u('черный')]
+            },
+            u('существительное'): {
+                u('type'): u('words'),
+                u('words'): [u('круг'), u('квадрат')]
+            }
+        })
+        with patch('coolname.impl.randrange',
+                   side_effect=partial(next, cycle(iter(range(4))))):
+            self.assertEqual(generator.generate_slug(), u('белый-круг'))
+            self.assertEqual(generator.generate_slug(), u('белый-квадрат'))
+            self.assertEqual(generator.generate_slug(), u('черный-круг'))
+            self.assertEqual(generator.generate(), [u('черный'), u('квадрат')])
 
     def test_avoid_repeating(self):
         generator = RandomNameGenerator({
