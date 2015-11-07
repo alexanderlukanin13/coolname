@@ -1,0 +1,3 @@
+[report]
+include = coolname/*
+omit = coolname/data/__init__.py
