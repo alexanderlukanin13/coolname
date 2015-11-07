@@ -14,7 +14,10 @@ from .common import patch, TestCase
 class TestCoolname(TestCase):
 
     def test_slug(self):
-        # Basic test, to check that it doesn't crash
+        # Basic test, to check that it doesn't crash.
+        # Output of default generator is always unicode.
+        items = coolname.generate()
+        self.assertIsInstance(items[0], six.text_type)
         name = coolname.generate_slug()
         self.assertIsInstance(name, six.text_type)
         self.assertGreater(len(name), 10)

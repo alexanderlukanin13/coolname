@@ -119,6 +119,7 @@ class TestImplementation(TestCase):
     @patch('os.path.isdir', return_value=False)
     def test_import_data_from_init_py(self, *args):
         generator = _create_default_generator()
+        assert isinstance(generator.generate()[0], six.text_type)
         assert isinstance(generator.generate_slug(), six.text_type)
 
 

@@ -28,10 +28,31 @@ def compile_init_py():
         sys.path.remove(current_path)
     config_path = os.path.join(current_path, 'coolname', 'data')
     config = load_config(config_path)
+    # Eliminate u'' literals if setup.py is executed from Python 2
+    def _to_str(obj):
+        if isinstance(obj, dict):
+            return {str(x): _to_str(y) for x, y in obj.items()}
+        elif isinstance(obj, list):
+            return [str(x) for x in obj]
+        else:
+            return str(obj)
+    config = _to_str(config)
+    # Write to data/__init__.py to be used from .egg
     with codecs.open(os.path.join(config_path, '__init__.py'), 'w', encoding='utf-8') as file:
-        file.write('# -*- coding: utf-8 -*-\n')
-        file.write('# THIS FILE IS AUTO-GENERATED, DO NOT EDIT\n')
-        file.write('config = ' + repr(config) + '\n')
+        file.write(_INIT_TEMPLATE.format(config))
+
+
+_INIT_TEMPLATE = '''
+# THIS FILE IS AUTO-GENERATED, DO NOT EDIT
+config = {!r}
+# Python 2 compatibility - all words must be unicode
+try:
+    for listdef in config.values():
+        if listdef['type'] == 'words':
+            listdef['words'] = [unicode(x) for x in listdef['words']]
+except NameError:
+    pass
+'''.lstrip()
 
 
 def customize(cls):
