@@ -25,7 +25,7 @@ class TestCoolname(TestCase):
 
     def test_combinations(self):
         combinations_2 = 10**5
-        combinations_3 = 10**7
+        combinations_3 = 10**8
         combinations_4 = 10**10
         self.assertGreater(coolname.get_combinations_count(), combinations_4)
         self.assertGreater(coolname.get_combinations_count(2), combinations_2)
