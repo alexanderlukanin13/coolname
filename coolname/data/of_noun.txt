@@ -30,11 +30,14 @@ jest
 joy
 happiness
 holiness
+love
 merriment
+passion
 patience
 peace
 persistence
 pleasure
+pride
 recreation
 relaxation
 romance
@@ -59,8 +62,10 @@ variation
 # Social
 acceptance
 brotherhood
+criticism
 culture
 discourse
+discussion
 justice
 piety
 respect
@@ -92,6 +97,7 @@ prestige
 prosperity
 reputation
 reverence
+reward
 superiority
 triumph
 wealth
@@ -256,7 +262,10 @@ adventure
 atheism
 camouflage
 endeavor
+expression
+fantasy
 fertility
+imagination
 karma
 masquerade
 maturity
