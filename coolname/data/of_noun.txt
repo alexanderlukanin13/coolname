@@ -99,6 +99,8 @@ aptitude
 competence
 efficiency
 expertise
+leadership
+perception
 skill
 
 # Strength
@@ -210,9 +212,12 @@ feminism
 
 # Pleasurable things
 coffee
+cookies
 flowers
 fragrance
 honeydew
+music
+pizza
 
 # Weather
 blizzard
@@ -243,10 +248,12 @@ endeavor
 fertility
 karma
 masquerade
+maturity
 sorcery
 witchcraft
 wizardry
 wonder
+youth
 
 # Participles
 purring

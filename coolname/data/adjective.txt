@@ -22,6 +22,7 @@ boisterous
 bouncy
 brawny
 camouflaged
+caped
 chubby
 curvy
 elastic
@@ -49,7 +50,6 @@ masked
 meaty
 messy
 misty
-moldy
 nebulous
 noisy
 nondescript
@@ -64,6 +64,7 @@ shaggy
 shiny
 silent
 silky
+singing
 skinny
 smooth
 soft
@@ -107,6 +108,7 @@ friendly
 funny
 gorgeous
 graceful
+grinning
 handsome
 hilarious
 hot
@@ -119,6 +121,7 @@ merciful
 neat
 nifty
 notorious
+poetic
 pretty
 refined
 refreshing
@@ -151,6 +154,7 @@ bold
 brave
 cheerful
 chirpy
+cocky
 congenial
 courageous
 cryptic
@@ -176,6 +180,7 @@ evasive
 fair
 fanatic
 fearless
+fervent
 festive
 fierce
 fine
@@ -253,6 +258,7 @@ zippy
 # Intelligence & Abilities
 able
 adept
+analytic
 astute
 attentive
 brainy
@@ -313,6 +319,7 @@ slick
 slim
 sloppy
 smart
+stoic
 succinct
 talented
 thoughtful
@@ -409,6 +416,7 @@ important
 impressive
 incredible
 invaluable
+kickass
 majestic
 monumental
 perfect
