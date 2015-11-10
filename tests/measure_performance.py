@@ -13,8 +13,12 @@ from timeit import timeit
 
 
 if __name__ == '__main__':
-    argument_parser = argparse.ArgumentParser(description='Measure performance of coolname functions')
+    argument_parser = argparse.ArgumentParser(
+        description='Measure performance of coolname functions')
     argument_parser.add_argument('--dump', action='store_true', help='Dump whole tree')
+    argument_parser.add_argument('--all',
+                                 action='store_true',
+                                 help='Measure repeat probability')
     arguments = argument_parser.parse_args(sys.argv[1:])
 
     # Make sure coolname is importable
@@ -46,19 +50,28 @@ if __name__ == '__main__':
     print('generate() time:      {:.6f}'.format(timeit(generate, number=number) / number))
     print('generate_slug() time: {:.6f}'.format(timeit(generate_slug, number=number) / number))
 
+    # Total combinations count
+    print('Total combinations:   {:,}'.format(get_combinations_count()))
+    print('Combinations(4):      {:,}'.format(get_combinations_count(4)))
+    print('Combinations(3):      {:,}'.format(get_combinations_count(3)))
+    print('Combinations(2):      {:,}'.format(get_combinations_count(2)))
+
     # Check probability of repeat if we have used 0.1% of total namespace.
     # It should be around 0.0001.
-    combinations = get_combinations_count()
-    items = set({})
-    items_count = combinations // 10000
-    while len(items) < items_count:
-        items.add(generate_slug())
-    repeats = 0
-    loops = 100000
-    for i in range(loops):
-        if generate_slug() in items:
-            repeats += 1
-    print('Repeat probability:   {:.6f} (with {} names used)'.format(repeats / loops, len(items)))
+    if arguments.all:
+        combinations = get_combinations_count()
+        items = set({})
+        items_count = combinations // 10000
+        while len(items) < items_count:
+            items.add(generate_slug())
+        repeats = 0
+        loops = 100000
+        for i in range(loops):
+            if generate_slug() in items:
+                repeats += 1
+        print('Repeat probability:   {:.6f} (with {} names used)'.format(repeats / loops, len(items)))
+
+    # Dump tree
     if arguments.dump:
         print()
         import coolname.impl
