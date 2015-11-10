@@ -54,6 +54,7 @@ nirvana
 order
 perfection
 spirit
+variation
 
 # Social
 acceptance
@@ -62,6 +63,7 @@ culture
 discourse
 justice
 piety
+respect
 security
 support
 tolerance
@@ -103,6 +105,10 @@ leadership
 perception
 skill
 
+# Conversation
+argument
+debate
+
 # Strength
 action
 agility
@@ -132,6 +138,7 @@ penetration
 performance
 pluck
 potency
+protection
 prowess
 resistance
 serendipity
@@ -163,6 +170,7 @@ modernism
 novelty
 proficiency
 progress
+promotion
 realization
 refinement
 renovation
@@ -199,7 +207,9 @@ tact
 
 # Science & art
 calibration
+drama
 economy
+engineering
 examination
 philosophy
 poetry
@@ -208,6 +218,7 @@ science
 
 # Politics (and this is as far as we want to go)
 democracy
+election
 feminism
 
 # Pleasurable things
@@ -249,7 +260,9 @@ fertility
 karma
 masquerade
 maturity
+shopping
 sorcery
+union
 witchcraft
 wizardry
 wonder

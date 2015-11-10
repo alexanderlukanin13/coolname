@@ -18,4 +18,5 @@ ultra
 # Misc modifiers
 cyber
 mutant
+ninja
 space
