@@ -32,7 +32,7 @@
     "ano": {
         "comment": "adjective-noun-of-noun",
         "type": "cartesian",
-        "lists": ["adj_any", "subj", "of", "of_noun"]
+        "lists": ["adj_any", "subj", "of", "of_noun_any"]
     },
     "nuo": {
         "comment": "noun-of-adjective-noun",
@@ -42,7 +42,7 @@
     "aano": {
         "comment": "adjective-adjective-noun-of-noun",
         "type": "cartesian",
-        "lists": ["adj_far", "adj_near", "subj", "of", "of_noun"]
+        "lists": ["adj_far", "adj_near", "subj", "of", "of_noun_any"]
     },
     "anuo": {
         "comment": "adjective-noun-of-adjective-noun",
@@ -92,5 +92,9 @@
     "of": {
         "type": "const",
         "value": "of"
+    },
+    "of_noun_any": {
+        "type": "nested",
+        "lists": ["of_noun", "of_noun_no_mod"]
     }
 }
