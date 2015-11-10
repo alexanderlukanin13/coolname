@@ -164,6 +164,30 @@ class TestCoolname(TestCase):
             self.assertEqual(generator.generate_slug(), 'two-of-one')
             self.assertEqual(generator.generate_slug(), 'one-of-two')
 
+    def test_avoid_similar_words(self):
+        generator = RandomNameGenerator({
+            'all': {
+                'type': 'cartesian',
+                'lists': ['w1', 'w2'],
+            },
+            'w1': {
+                'type': 'words',
+                'words': ['brave', 'agile']
+            },
+            'w2': {
+                'type': 'words',
+                'words': ['bravery',  'brass', 'agility', 'age']
+            }
+        })
+        with patch('coolname.impl.randrange',
+                   side_effect=partial(next, cycle(iter(range(9))))):
+            self.assertEqual(generator.generate_slug(), 'brave-brass')
+            self.assertEqual(generator.generate_slug(), 'brave-agility')
+            self.assertEqual(generator.generate_slug(), 'brave-age')
+            self.assertEqual(generator.generate_slug(), 'agile-bravery')
+            self.assertEqual(generator.generate_slug(), 'agile-brass')
+            self.assertEqual(generator.generate_slug(), 'agile-age')
+            self.assertEqual(generator.generate_slug(), 'brave-brass')
 
     def test_configuration_error(self):
         with self.assertRaisesRegex(InitializationError,

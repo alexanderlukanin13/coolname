@@ -213,8 +213,9 @@ class RandomNameGenerator(object):
         lst = self._lists[pattern]
         while True:
             result = lst.random()
-            # Make sure there are no duplicates
-            if len(set(result)) == len(result):
+            # Make sure there are no duplicates or related words
+            # (with identical 4-letter prefix).
+            if len(set(x[:4] for x in result)) == len(result):
                 return result
 
     def generate_slug(self, pattern=None):
