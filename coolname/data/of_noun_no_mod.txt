@@ -5,13 +5,17 @@
 #     big dog of <emphasis>
 # -------------------------------------------------
 
-# Science & Art
+# Science
 chemistry
 education
+experiment
 mathematics
-painting
 psychology
 reading
+
+# Art
+cubism
+painting
 
 # Misc
 advertising

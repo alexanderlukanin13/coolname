@@ -103,13 +103,19 @@ triumph
 wealth
 
 # Intelligence and Abilities
+acumen
 aptitude
+art
+artistry
 competence
 efficiency
 expertise
+finesse
+genius
 leadership
 perception
 skill
+virtuosity
 
 # Conversation
 argument
@@ -148,8 +154,10 @@ protection
 prowess
 resistance
 serendipity
+speed
 stamina
 strength
+swiftness
 temperance
 tenacity
 valor
@@ -261,6 +269,7 @@ whirlwind
 adventure
 atheism
 camouflage
+destiny
 endeavor
 expression
 fantasy
