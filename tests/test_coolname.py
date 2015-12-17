@@ -245,6 +245,28 @@ class TestCoolname(TestCase):
             RandomNameGenerator(config)
 
 
+    @patch('coolname.impl.randrange', side_effect=partial(next, cycle(iter(range(8)))))
+    def test_configuration_error_cartesian_inside_cartesian(self, mock):
+        config = {
+            'all': {
+                'type': 'cartesian',
+                'lists': ['word_list', 'cart_list']
+            },
+            'word_list': {
+                'type': 'words',
+                'words': ['word1', 'word2'],
+            },
+            'cart_list': {
+                'type': 'cartesian',
+                'lists': ['word_list', 'word_list'],
+            },
+        }
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Cartesian list 'all' contains "
+                                    r"another Cartesian list 'cart_list'\. Nested Cartesian lists "
+                                    r"are not allowed\."):
+            RandomNameGenerator(config)
+
 if __name__ == '__main__':
     import sys
     sys.exit(unittest.main())

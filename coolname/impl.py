@@ -301,7 +301,7 @@ def _validate_config(config):
         raise ConfigurationError(str(ex))
 
 
-def _create_lists(config, results, current, stack):
+def _create_lists(config, results, current, stack, inside_cartesian=None):
     """
     An ugly recursive method to transform config dict
     into a tree of AbstractNestedList.
@@ -327,12 +327,18 @@ def _create_lists(config, results, current, stack):
             results[current] = WordList(listdef['words'])
         # 2. Simple list of lists
         elif list_type == _CONF.TYPE.NESTED:
-            results[current] = NestedList([_create_lists(config, results, x, stack)
+            results[current] = NestedList([_create_lists(config, results, x, stack,
+                                                         inside_cartesian=inside_cartesian)
                                            for x in listdef[_CONF.FIELD.LISTS]])
 
         # 3. Cartesian list of lists
         elif list_type == _CONF.TYPE.CARTESIAN:
-            results[current] = CartesianList([_create_lists(config, results, x, stack)
+            if inside_cartesian is not None:
+                raise ConfigurationError("Cartesian list {!r} contains another Cartesian list "
+                                         "{!r}. Nested Cartesian lists are not allowed."
+                                         .format(inside_cartesian, current))
+            results[current] = CartesianList([_create_lists(config, results, x, stack,
+                                                            inside_cartesian=current)
                                               for x in listdef[_CONF.FIELD.LISTS]])
         # 4. Scalar
         elif list_type == _CONF.TYPE.CONST:
