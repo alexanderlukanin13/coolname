@@ -15,6 +15,7 @@
 
 # Appearance, sound, smell...
 acrid
+ambrosial
 armored
 aromatic
 blazing
@@ -94,6 +95,7 @@ attractive
 beautiful
 calm
 charming
+cherubic
 classic
 classy
 cordial
@@ -398,6 +400,7 @@ urban
 astonishing
 authentic
 awesome
+delectable
 excellent
 exotic
 exuberant
