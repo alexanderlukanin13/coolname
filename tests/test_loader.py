@@ -1,3 +1,4 @@
+from functools import partial
 from io import StringIO
 import os
 import tempfile
@@ -28,9 +29,21 @@ class LoaderTest(TestCase):
     def test_invalid_wordlist(self):
         s = StringIO(six.u('\n'.join([
             'alpha',
+            'two words',  # invalid syntax
+        ])))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Invalid syntax "
+                                    r"at wordlist 'words' line 2: u?'two words'"):
+            _load_wordlist('words', s)
+
+    def test_word_too_long(self):
+        s = StringIO(six.u('\n'.join([
+            'alpha',
             'augmentation',  # line exceeds 11 characters
         ])))
-        with self.assertRaisesRegex(InitializationError, r"Invalid syntax at wordlist 'words' line 2: u?'augmentation'"):
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Word is too long "
+                                    r"at wordlist 'words' line 2: u?'augmentation'"):
             _load_wordlist('words', s)
 
     def test_load_data_no_dir(self):
@@ -99,6 +112,55 @@ class LoaderTest(TestCase):
                                     r"Invalid config: Invalid JSON: "
                                     r"(Expecting value: line 1 column 1 \(char 0\)|"
                                     r"No JSON object could be decoded)"):
+            _load_data('/data')
+
+    @patch('codecs.open')
+    @patch('os.path.isdir', return_value=True)
+    @patch('os.listdir', return_value=['one.txt'])
+    def test_invalid_options_in_txt(self, mock1, mock2, open_mock):
+        load_data = partial(_load_data, '/data')
+        # Invalid syntax
+        open_mock.return_value = StringIO(six.u('max_length=\n'))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Invalid assignment "
+                                    r"at wordlist u?'one' line 1: "
+                                    r"u?'max_length=' \(Invalid syntax\)"):
+            load_data()
+
+        # Unknown option
+        open_mock.return_value = StringIO(six.u('unknown_option=10\n'))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Invalid assignment "
+                                    r"at wordlist u?'one' line 1: "
+                                    r"u?'unknown_option=10' \(Unknown option\)"):
+            load_data()
+
+        # max_length is not int
+        open_mock.return_value = StringIO(six.u('max_length=string\n'))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Invalid assignment "
+                                    r"at wordlist u?'one' line 1: "
+                                    r"u?'max_length=string' \(invalid literal.*\)"):
+            load_data()
+
+        # max_length after some words are defined
+        open_mock.return_value = StringIO(six.u('something\nmax_length=9\n'))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Invalid assignment "
+                                    r"at wordlist u?'one' line 2: "
+                                    r"u?'max_length=9' \(options must be defined before words\)"):
+            load_data()
+
+
+    @patch('codecs.open')
+    @patch('os.path.isdir', return_value=True)
+    @patch('os.listdir', return_value=['one.txt'])
+    def test_max_length_in_txt(self, mock1, mock2, open_mock):
+        # Valid option max_length
+        open_mock.return_value = StringIO(six.u('max_length=5\nabcde\nabcdef\nabc\n'))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Word is too long "
+                                    r"at wordlist u?'one' line 3: u?'abcdef'"):
             _load_data('/data')
 
 

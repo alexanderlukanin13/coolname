@@ -82,9 +82,30 @@ def _load_config(config_file_path):
         raise ConfigurationError('Invalid JSON: {}'.format(ex))
 
 
-# Word must be in English, 1-11 letters, lowercase.
-# 11 letters limitation is to fit 4 words into Django slug (max_length=50)
-_WORD_REGEX = re.compile(r'^[a-z]{1,11}$')
+# Word must be in English, 1-N letters, lowercase.
+_WORD_REGEX = re.compile(r'^[a-z]+$')
+
+
+# Options are defined using simple notation: 'option = value'
+_OPTION_REGEX = re.compile(r'^([a-z_]+)\s*=\s*(\w+)$', re.UNICODE)
+_OPTIONS = [
+    ('max_length', int),
+]
+
+
+def _parse_option(line):
+    """
+    Parses option line.
+    Returns (name, value).
+    Raises ValueError on invalid syntax or unknown option.
+    """
+    match = _OPTION_REGEX.match(line)
+    if not match:
+        raise ValueError('Invalid syntax')
+    for name, type_ in _OPTIONS:
+        if name == match.group(1):
+            return name, type_(match.group(2))
+    raise ValueError('Unknown option')
 
 
 def _load_wordlist(name, stream):
@@ -93,12 +114,32 @@ def _load_wordlist(name, stream):
     Raises Exception if file is missing or invalid.
     """
     result = []
+    max_length = _CONF.MAX_WORD_LENGTH
     for i, line in enumerate(stream, start=1):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
+        # Is it an option line, e.g. 'max_length = 10'?
+        if '=' in line:
+            if result:
+                raise ConfigurationError('Invalid assignment at wordlist {!r} line {}: {!r} '
+                                         '(options must be defined before words)'
+                                         .format(name, i, line))
+            try:
+                option, option_value = _parse_option(line)
+            except ValueError as ex:
+                raise ConfigurationError('Invalid assignment at wordlist {!r} line {}: {!r} '
+                                         '({})'
+                                         .format(name, i, line, ex))
+            if option == 'max_length':
+                max_length = option_value
+            continue  # pragma: no cover
+        # Parse words
         if not _WORD_REGEX.match(line):
             raise ConfigurationError('Invalid syntax at wordlist {!r} line {}: {!r}'
+                                     .format(name, i, line))
+        if len(line) > max_length:
+            raise ConfigurationError('Word is too long at wordlist {!r} line {}: {!r}'
                                      .format(name, i, line))
         result.append(line)
     return result
