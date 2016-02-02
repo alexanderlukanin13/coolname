@@ -12,6 +12,8 @@
 #     black dog of <adjective> coffee
 # ==============================================
 
+max_length = 11
+
 absolute
 abstract
 algebraic

@@ -6,6 +6,8 @@
 # (typically by Class -> Order, but it may vary).
 # ========================================================
 
+max_length = 11
+
 # Annelida
 earthworm
 leech

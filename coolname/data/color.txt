@@ -2,6 +2,8 @@
 # List of pure colors and colors named after things.
 # ==================================================
 
+max_length = 11
+
 almond
 amaranth
 apricot

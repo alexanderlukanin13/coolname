@@ -5,6 +5,8 @@
 #     big dog of <emphasis>
 # -------------------------------------------------
 
+max_length = 11
+
 # Science
 chemistry
 education

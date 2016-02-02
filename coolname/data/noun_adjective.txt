@@ -11,6 +11,8 @@
 # 2. Keep lists sorted alphabetically.
 # ==========================================================
 
+max_length = 11
+
 fancy
 magic
 rainbow
