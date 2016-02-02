@@ -24,7 +24,22 @@ class LoaderTest(TestCase):
             'gamma',
         ])))
         wordlist = _load_wordlist('words', s)
-        self.assertEqual(wordlist, ['alpha', 'beta', 'gamma'])
+        self.assertEqual(wordlist, {
+            'type': 'words',
+            'words': ['alpha', 'beta', 'gamma']
+        })
+
+    def test_load_wordlist_max_length(self):
+        s = StringIO(six.u('\n'.join([
+            'max_length = 11',
+            'alpha',
+        ])))
+        wordlist = _load_wordlist('words', s)
+        self.assertEqual(wordlist, {
+            'type': 'words',
+            'max_length': 11,
+            'words': ['alpha']
+        })
 
     def test_invalid_wordlist(self):
         s = StringIO(six.u('\n'.join([
@@ -38,12 +53,13 @@ class LoaderTest(TestCase):
 
     def test_word_too_long(self):
         s = StringIO(six.u('\n'.join([
+            'max_length = 11',
             'alpha',
             'augmentation',  # line exceeds 11 characters
         ])))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Word is too long "
-                                    r"at wordlist 'words' line 2: u?'augmentation'"):
+                                    r"at wordlist 'words' line 3: u?'augmentation'"):
             _load_wordlist('words', s)
 
     def test_load_data_no_dir(self):

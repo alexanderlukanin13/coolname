@@ -226,6 +226,13 @@ class TestCoolname(TestCase):
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'nested', 'lists': ['all']}
             })
+        with self.assertRaisesRegex(InitializationError,
+                                   "Config at key u?'one' has invalid word u?'tiger' "
+                                   "\(longer than 4 characters\)"):
+            RandomNameGenerator({
+                'all': {'type': 'nested', 'lists': ['one']},
+                'one': {'type': 'words', 'max_length': 4, 'words': ['cat', 'lion', 'tiger']}
+            })
 
     def test_configuration_error_too_deep(self):
         config = {

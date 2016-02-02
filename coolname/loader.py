@@ -35,16 +35,13 @@ def load_config(path):
         wordlists = {}
     else:
         raise InitializationError('File or directory not found: {0}'.format(path))
-    for name, words in wordlists.items():
+    for name, wordlist in wordlists.items():
         if name in config:
             raise InitializationError("Conflict: list {!r} is defined both in config "
                                       "and in *.txt file. If it's a {!r} list, "
                                       "you should remove it from config."
                                       .format(name, _CONF.TYPE.WORDS))
-        config[name] = {
-            _CONF.FIELD.TYPE: _CONF.TYPE.WORDS,
-            _CONF.FIELD.WORDS: words
-        }
+        config[name] = wordlist
     return config
 
 
@@ -111,17 +108,19 @@ def _parse_option(line):
 def _load_wordlist(name, stream):
     """
     Loads list of words from file.
+
+    Returns "words" dictionary, the same as used in config.
     Raises Exception if file is missing or invalid.
     """
-    result = []
-    max_length = _CONF.MAX_WORD_LENGTH
+    words = []
+    max_length = None
     for i, line in enumerate(stream, start=1):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
         # Is it an option line, e.g. 'max_length = 10'?
         if '=' in line:
-            if result:
+            if words:
                 raise ConfigurationError('Invalid assignment at wordlist {!r} line {}: {!r} '
                                          '(options must be defined before words)'
                                          .format(name, i, line))
@@ -138,8 +137,14 @@ def _load_wordlist(name, stream):
         if not _WORD_REGEX.match(line):
             raise ConfigurationError('Invalid syntax at wordlist {!r} line {}: {!r}'
                                      .format(name, i, line))
-        if len(line) > max_length:
+        if max_length is not None and len(line) > max_length:
             raise ConfigurationError('Word is too long at wordlist {!r} line {}: {!r}'
                                      .format(name, i, line))
-        result.append(line)
+        words.append(line)
+    result = {
+        _CONF.FIELD.TYPE: _CONF.TYPE.WORDS,
+        _CONF.FIELD.WORDS: words
+    }
+    if max_length is not None:
+        result[_CONF.FIELD.MAX_LENGTH] = max_length
     return result

@@ -15,6 +15,4 @@ class _CONF:
         WORDS = 'words'
         VALUE = 'value'
         GENERATOR = 'generator'
-
-    # 11 letters limitation is to fit 4 words into Django slug (max_length=50)
-    MAX_WORD_LENGTH = 11
+        MAX_LENGTH = 'max_length'

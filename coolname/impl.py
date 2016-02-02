@@ -289,6 +289,17 @@ def _validate_config(config):
                 if not isinstance(words, list) or not words:
                     raise ValueError('Config at key {!r} has invalid {!r}'
                                      .format(key, _CONF.FIELD.WORDS))
+                # Validate word length
+                try:
+                    max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
+                except KeyError:
+                    max_length = None
+                if max_length is not None:
+                    for word in words:
+                        if len(word) > max_length:
+                            raise ValueError('Config at key {!r} has invalid word {!r} '
+                                             '(longer than {} characters)'
+                                             .format(key, word, max_length))
             else:
                 raise ValueError('Config at key {!r} has invalid {!r}'
                                  .format(key, _CONF.FIELD.TYPE))
