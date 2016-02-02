@@ -16,3 +16,4 @@ class _CONF:
         VALUE = 'value'
         GENERATOR = 'generator'
         MAX_LENGTH = 'max_length'
+        MAX_SLUG_LENGTH = 'max_slug_length'

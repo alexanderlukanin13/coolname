@@ -191,6 +191,20 @@ class RandomNameGenerator(object):
                     pattern = key
                 self._lists[pattern] = lists[key]
         self._lists[None] = self._lists[None].squash(True, {})
+        # Get max slug length
+        try:
+            self._max_slug_length = int(config['all'][_CONF.FIELD.MAX_SLUG_LENGTH])
+        except KeyError:
+            self._max_slug_length = None
+        except ValueError as ex:
+            raise ConfigurationError('Invalid {} value: {}'
+                                     .format(_CONF.FIELD.MAX_SLUG_LENGTH, ex))
+        # If there is max slug length, use slower version of generate() with check
+        # Also make sure that generate() does not go into long loop
+        if self._max_slug_length is not None:
+            self.generate = self._generate_m
+            if not config['all'].get('__nocheck'):
+                _check_max_slug_length(self._max_slug_length, self._lists[None])
         # Fire it up
         self.randomize()
         assert self.generate_slug()
@@ -216,6 +230,19 @@ class RandomNameGenerator(object):
             # Make sure there are no duplicates or related words
             # (with identical 4-letter prefix).
             if len(set(x[:4] for x in result)) == len(result):
+                return result
+
+    def _generate_m(self, pattern=None):
+        """
+        Slower version of generate(), with max_slug_length check.
+        """
+        lst = self._lists[pattern]
+        while True:
+            result = lst.random()
+            # In addition to duplicates check, also check slug length
+            n = len(result)
+            if (len(set(x[:4] for x in result)) == n and
+                    sum(len(x) for x in result) + n - 1 <= self._max_slug_length):
                 return result
 
     def generate_slug(self, pattern=None):
@@ -363,6 +390,31 @@ def _create_lists(config, results, current, stack, inside_cartesian=None):
         stack.pop()
 
 
+def _check_max_slug_length(max_slug_length, all_list):
+    """
+    Rough check for max_slug_length being to small.
+
+    Raises ConfigurationError if generate() would spend too much time in retry loop.
+    Issues a warning using warning.warn() if there is a risk of slowdown.
+    """
+    # Make sure max length is not too small (to avoid slowdown and infinite loops)
+    n = 100
+    m = 10
+    for i in range(0, n):
+        r = all_list.random()
+        if sum(len(x) for x in r) + len(r) - 1 <= max_slug_length:
+            break
+    if i >= n - 1:
+        raise ConfigurationError('Impossible to generate with {}={}'
+                                 .format(_CONF.FIELD.MAX_SLUG_LENGTH,
+                                         max_slug_length))
+    elif i >= m:
+        import warnings
+        warnings.warn('coolname.generate() can be slow because a significant fraction '
+                      'of combinations exceed {}={}'
+                      .format(_CONF.FIELD.MAX_SLUG_LENGTH, max_slug_length))
+
+
 def _create_default_generator():
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
     if os.path.isdir(data_dir):
@@ -370,6 +422,7 @@ def _create_default_generator():
         config = load_config(data_dir)
     else:
         from coolname.data import config
+    config['all']['__nocheck'] = True
     return RandomNameGenerator(config)
 
 

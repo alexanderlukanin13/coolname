@@ -226,12 +226,34 @@ class TestCoolname(TestCase):
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'nested', 'lists': ['all']}
             })
+
+    def test_max_length(self):
         with self.assertRaisesRegex(InitializationError,
                                    "Config at key u?'one' has invalid word u?'tiger' "
                                    "\(longer than 4 characters\)"):
             RandomNameGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'words', 'max_length': 4, 'words': ['cat', 'lion', 'tiger']}
+            })
+
+    def test_max_slug_length(self):
+        generator = RandomNameGenerator({
+            'all': {'type': 'cartesian', 'max_slug_length': 9, 'lists': ['one', 'two']},
+            'one': {'type': 'words', 'words': ['big',  'small']},
+            'two': {'type': 'words', 'words': ['cat',  'tiger']},
+        })
+        self.assertEqual(set(generator.generate_slug() for i in range(0, 100)),
+                         set(['big-cat', 'big-tiger', 'small-cat']))
+
+    def test_max_slug_length_too_small(self):
+        badlist = ['a'] + [hex(i) for i in range(0, 100)]
+        with self.assertRaisesRegex(InitializationError,
+                                    r'Invalid config: Impossible to generate '
+                                    r'with max_slug_length=3'):
+            RandomNameGenerator({
+                'all': {'type': 'cartesian', 'max_slug_length': 3, 'lists': ['one', 'two']},
+                'one': {'type': 'words', 'words': badlist},
+                'two': {'type': 'words', 'words': badlist},
             })
 
     def test_configuration_error_too_deep(self):
