@@ -18,18 +18,21 @@ max_length = 13
 # Appearance, sound, smell...
 acrid
 ambrosial
+amorphous
 armored
 aromatic
 blazing
 boisterous
 bouncy
 brawny
+bulky
 camouflaged
 caped
 chubby
 curvy
 elastic
 ethereal
+fat
 feathered
 flashy
 flat
@@ -39,6 +42,7 @@ fragrant
 furry
 fuzzy
 hairy
+heavy
 hissing
 horned
 icy
@@ -62,8 +66,10 @@ quiet
 quirky
 roaring
 ruddy
+rustling
 screeching
 shaggy
+shapeless
 shiny
 silent
 silky
@@ -300,6 +306,7 @@ knowing
 literate
 logical
 masterful
+mindful
 nonchalant
 observant
 omniscient
@@ -443,11 +450,16 @@ outstanding
 quaint
 unique
 
+# Time
+ancient
+antique
+prehistoric
+primitive
+
 # Misc
 abstract
 acoustic
 angelic
-ancient
 arcane
 augmented
 auspicious
@@ -521,9 +533,11 @@ vagabond
 vague
 vegan
 victorious
+vigilant
 voracious
 wakeful
 wandering
+watchful
 wild
 
 # Pseudo-colors
