@@ -11,6 +11,9 @@ from coolname import generate_slug
 
 
 def main(argv):
+    if sys.version_info[:2] < (3, 3):
+        sys.stderr.write('This script requires Python 3.3+\n')
+        return 1
     parser = argparse.ArgumentParser(description='Generate slug in stdout')
     parser.add_argument('--word', help='With particular substring')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
