@@ -2,7 +2,7 @@
 # Domestic animal breeds.
 # =======================
 
-max_length = 11
+max_length = 13
 
 # Cattle
 longhorn

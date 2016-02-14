@@ -2,7 +2,7 @@
 # Words that can be used only immediately before the main subject
 # ===============================================================
 
-max_length = 11
+max_length = 13
 
 # Metric prefixes & other size-related prefixes
 giga

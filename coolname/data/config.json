@@ -2,7 +2,8 @@
     "all": {
         "comment": "Entry point",
         "type": "nested",
-        "lists": ["2", "3", "4"]
+        "lists": ["2", "3", "4"],
+        "max_slug_length": 50
     },
     "2": {
         "comment": "Two words",

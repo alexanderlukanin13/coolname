@@ -5,7 +5,7 @@
 #     big dog of <emphasis>
 # -------------------------------------------------
 
-max_length = 11
+max_length = 13
 
 # Science
 chemistry

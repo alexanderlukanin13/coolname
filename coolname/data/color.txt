@@ -2,7 +2,7 @@
 # List of pure colors and colors named after things.
 # ==================================================
 
-max_length = 11
+max_length = 13
 
 almond
 amaranth

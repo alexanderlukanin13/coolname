@@ -2,7 +2,7 @@
 # Adjectives related to physical size
 # ===================================
 
-max_length = 11
+max_length = 13
 
 big
 colossal

@@ -13,7 +13,7 @@
 # 3. Keep lists sorted alphabetically.
 # ===================================================================================
 
-max_length = 11
+max_length = 13
 
 # Appearance, sound, smell...
 acrid
@@ -323,6 +323,7 @@ slick
 slim
 sloppy
 smart
+sophisticated
 stoic
 succinct
 talented

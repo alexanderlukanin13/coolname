@@ -7,7 +7,7 @@
 # 3. Keep lists sorted alphabetically.
 # ==============================================================================
 
-max_length = 11
+max_length = 13
 
 basilisk
 chupacabra

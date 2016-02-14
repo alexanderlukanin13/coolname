@@ -12,7 +12,7 @@
 #     black dog of <adjective> coffee
 # ==============================================
 
-max_length = 11
+max_length = 13
 
 absolute
 abstract
