@@ -236,6 +236,13 @@ class TestCoolname(TestCase):
                 'one': {'type': 'words', 'max_length': 4, 'words': ['cat', 'lion', 'tiger']}
             })
 
+    def test_max_slug_length_invalid(self):
+        with self.assertRaisesRegex(InitializationError,
+                                    r'Invalid config: Invalid max_slug_length value'):
+            RandomNameGenerator({
+                'all': {'type': 'words', 'max_slug_length': 'invalid', 'words': ['one', 'two']},
+            })
+
     def test_max_slug_length(self):
         generator = RandomNameGenerator({
             'all': {'type': 'cartesian', 'max_slug_length': 9, 'lists': ['one', 'two']},
@@ -255,6 +262,16 @@ class TestCoolname(TestCase):
                 'one': {'type': 'words', 'words': badlist},
                 'two': {'type': 'words', 'words': badlist},
             })
+
+    @patch('warnings.warn')
+    def test_max_slug_length_warning(self, warn_mock):
+        RandomNameGenerator({
+            'all': {'type': 'cartesian', 'max_slug_length': 3, 'lists': ['one', 'two']},
+            'one': {'type': 'words', 'words': ['a']*70 + ['bb']*30},
+            'two': {'type': 'words', 'words': ['c']*70 + ['dd']*30},
+        })
+        warn_mock.assert_called_with('coolname.generate() may be slow because a significant '
+                                     'fraction of combinations exceed max_slug_length=3')
 
     def test_configuration_error_too_deep(self):
         config = {

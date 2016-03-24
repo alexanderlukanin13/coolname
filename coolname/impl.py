@@ -399,18 +399,19 @@ def _check_max_slug_length(max_slug_length, all_list):
     """
     # Make sure max length is not too small (to avoid slowdown and infinite loops)
     n = 100
-    m = 10
+    warning_treshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
+    bad_count = 0
     for i in range(0, n):
         r = all_list.random()
-        if sum(len(x) for x in r) + len(r) - 1 <= max_slug_length:
-            break
-    if i >= n - 1:
+        if sum(len(x) for x in r) + len(r) - 1 > max_slug_length:
+            bad_count += 1
+    if bad_count >= n:
         raise ConfigurationError('Impossible to generate with {}={}'
                                  .format(_CONF.FIELD.MAX_SLUG_LENGTH,
                                          max_slug_length))
-    elif i >= m:
+    elif bad_count >= warning_treshold:
         import warnings
-        warnings.warn('coolname.generate() can be slow because a significant fraction '
+        warnings.warn('coolname.generate() may be slow because a significant fraction '
                       'of combinations exceed {}={}'
                       .format(_CONF.FIELD.MAX_SLUG_LENGTH, max_slug_length))
 
