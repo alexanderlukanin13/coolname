@@ -268,6 +268,7 @@ wind
 whirlwind
 
 # Misc
+abracadabra
 adventure
 atheism
 camouflage

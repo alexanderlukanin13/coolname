@@ -34,6 +34,7 @@ elastic
 ethereal
 fat
 feathered
+fiery
 flashy
 flat
 fluffy
@@ -176,6 +177,7 @@ defiant
 delicate
 delightful
 determined
+devout
 didactic
 diligent
 discreet
@@ -187,6 +189,7 @@ elated
 encouraging
 enigmatic
 evasive
+faithful
 fair
 fanatic
 fearless
@@ -258,6 +261,7 @@ truthful
 unselfish
 upbeat
 uppish
+valiant
 vehement
 vengeful
 vigorous
@@ -461,6 +465,7 @@ abstract
 acoustic
 angelic
 arcane
+archetypal
 augmented
 auspicious
 axiomatic
@@ -512,6 +517,7 @@ piquant
 pristine
 prophetic
 psychedelic
+quantum
 rare
 real
 secret
