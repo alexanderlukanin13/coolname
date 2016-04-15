@@ -11,6 +11,7 @@ max_length = 13
 # Annelida
 earthworm
 leech
+worm
 
 # Arthropoda -> Arachnomorpha
 scorpion
@@ -18,6 +19,7 @@ spider
 tarantula
 
 # Arthropoda -> Crustacea
+barnacle
 crab
 crayfish
 lobster
@@ -187,6 +189,7 @@ dove
 pigeon
 
 # Aves -> Coraciiformes
+kingfisher
 tody
 
 # Aves -> Cuculiformes
@@ -241,6 +244,8 @@ finch
 lyrebird
 magpie
 myna
+nightingale
+oriole
 oxpecker
 raven
 robin
@@ -276,6 +281,7 @@ spoonbill
 # Aves -> Psittaciformes
 ara
 cockatoo
+kakapo
 lorikeet
 macaw
 parakeet
@@ -310,6 +316,7 @@ salamander
 toad
 
 # Chordata -> Actinopterygii
+angelfish
 barracuda
 carp
 catfish
@@ -413,7 +420,7 @@ seal
 walrus
 
 # Mammalia -> Carnivora -> Procyonidae
-racoon
+raccoon
 
 # Mammalia -> Carnivora -> Ursidae
 bear
@@ -430,6 +437,9 @@ elephant
 mammoth
 # not actually belongs here...
 mastodon
+
+# Mammalia -> Eutheria
+mole
 
 # Mammalia -> Hyracoidea
 hyrax
@@ -499,6 +509,7 @@ monkey
 orangutan
 tamarin
 tarsier
+uakari
 
 # Mammalia -> Sirenia
 dugong

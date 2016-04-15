@@ -9,16 +9,20 @@ longhorn
 
 # Dogs
 akita
+beagle
 bloodhound
 bulldog
 chihuahua
 collie
+corgi
 dalmatian
 doberman
 husky
+labradoodle
 labrador
 mastiff
 malamute
+mongrel
 poodle
 rottweiler
 spaniel
