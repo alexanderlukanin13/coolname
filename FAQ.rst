@@ -37,13 +37,14 @@ But we have accepted:
 
 because they are distinct and easy to remember. Practicality beats purity!
 
-Why maximum 11 characters per word?
------------------------------------
+What is the maximum length?
+---------------------------
 
-Default length of Django slug field is 50 characters. *adjective-adjective-noun-of-noun*
-is exactly 50 characters if every word is 11 characters.
+For default generator, hard limit is 13 characters, to allow certain words like *sophisticated*.
 
-Also, we don't want too sophisticated words with too many syllables.
+Most words are 11 characters or less, and contain 4 syllables or less.
+
+Maximum slug length is 50 characters, which is consistent with Django.
 
 How do you select adjectives?
 -----------------------------
