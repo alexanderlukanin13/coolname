@@ -14,17 +14,18 @@ def main(argv):
     if sys.version_info[:2] < (3, 3):
         sys.stderr.write('This script requires Python 3.3+\n')
         return 1
-    parser = argparse.ArgumentParser(description='Generate slug in stdout')
-    parser.add_argument('--word', help='With particular substring')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
+    parser = argparse.ArgumentParser(description='Generate slug to stdout')
+    parser.add_argument('length', default=None, nargs='?', type=int, help='Number of words')
+    parser.add_argument('-w', '--word', help='With particular substring')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output (with timing)')
     args = parser.parse_args(argv)
-    generate_slug()  # for more precise timing
+    generate_slug(args.length)  # for more precise timing
     if args.word:
         slug = None
         max_slugs = 100000
         for i in range(0, max_slugs):
             start_time = time.perf_counter()
-            s = generate_slug()
+            s = generate_slug(args.length)
             elapsed_time = time.perf_counter() - start_time
             if args.word in s:
                 slug = s
@@ -34,7 +35,7 @@ def main(argv):
             return 1
     else:
         start_time = time.perf_counter()
-        slug = generate_slug()
+        slug = generate_slug(args.length)
         elapsed_time = time.perf_counter() - start_time
     print(slug)
     if args.verbose:
