@@ -238,6 +238,7 @@ election
 feminism
 
 # Pleasurable things
+champagne
 coffee
 cookies
 flowers
@@ -246,7 +247,8 @@ honeydew
 music
 pizza
 
-# Weather
+# Weather & sky
+aurora
 blizzard
 current
 dew
@@ -281,6 +283,7 @@ imagination
 karma
 masquerade
 maturity
+radiance
 shopping
 sorcery
 unity

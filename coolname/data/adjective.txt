@@ -42,6 +42,7 @@ foamy
 fragrant
 furry
 fuzzy
+glaring
 hairy
 heavy
 hissing
@@ -65,6 +66,7 @@ organic
 purring
 quiet
 quirky
+radiant
 roaring
 ruddy
 rustling
@@ -496,6 +498,7 @@ hysterical
 illegal
 imported
 impossible
+inescapable
 juicy
 liberal
 ludicrous

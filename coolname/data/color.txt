@@ -63,6 +63,7 @@ purple
 raspberry
 red
 rose
+russet
 saffron
 sage
 scarlet
@@ -70,6 +71,7 @@ sepia
 silver
 tan
 tangerine
+taupe
 teal
 tomato
 turquoise
@@ -86,22 +88,33 @@ wine
 wisteria
 yellow
 
-# Stone or metal
+# Stone, metal, etc.
+amber
 amethyst
 aquamarine
+asparagus
 brass
 bronze
 cobalt
 coral
+cornflower
 diamond
 emerald
 golden
 granite
+ivory
 jade
 jasper
+lemon
+lime
 malachite
+maroon
+myrtle
 nickel
+olive
+olivine
 onyx
+orchid
 pearl
 platinum
 quartz
@@ -109,4 +122,6 @@ ruby
 sandy
 sapphire
 steel
+thistle
 topaz
+xanthic
