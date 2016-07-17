@@ -21,6 +21,7 @@ ambrosial
 amorphous
 armored
 aromatic
+bald
 blazing
 boisterous
 bouncy
@@ -209,6 +210,7 @@ greedy
 grumpy
 happy
 honest
+hopeful
 hospitable
 impetuous
 independent
@@ -229,6 +231,7 @@ optimistic
 orthodox
 outgoing
 outrageous
+overjoyed
 perky
 placid
 polite
@@ -292,6 +295,7 @@ crafty
 crazy
 cunning
 daffy
+devious
 discerning
 efficient
 expert
@@ -379,6 +383,7 @@ strong
 sturdy
 tireless
 tough
+unyielding
 
 # Money & Power
 rich
@@ -431,6 +436,7 @@ glorious
 groovy
 honored
 illustrious
+imposing
 important
 impressive
 incredible
@@ -439,6 +445,7 @@ kickass
 majestic
 monumental
 perfect
+phenomenal
 pompous
 precious
 premium
@@ -504,6 +511,7 @@ liberal
 ludicrous
 lyrical
 magnetic
+manipulative
 mature
 military
 macho
