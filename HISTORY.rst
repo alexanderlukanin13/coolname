@@ -3,6 +3,14 @@
 History
 -------
 
+0.2.0 (2016-09-28)
+------------------
+
+* More flexible configuration: ``max_length`` and ``max_slug_length`` constraints.
+  See `documentation <http://coolname.readthedocs.io/en/latest/customization.html#length-limits>`_.
+
+* Total number of combinations increased from 43 to 51 billions.
+
 0.1.1 (2015-12-17)
 ------------------
 
