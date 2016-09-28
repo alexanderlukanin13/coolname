@@ -6,7 +6,8 @@ Configuration rules
 ===================
 
 Configuration is a simple flat dictionary of rules:
-::
+
+.. code-block:: python
 
     {
         '<rule_id>': {
@@ -26,7 +27,8 @@ There are four types of configuration rules.
 
   A ground-level building block. Chooses a random word from a list,
   with equal probability.
-  ::
+
+  .. code-block:: python
 
       # This will produce random color
       'color': {
@@ -50,7 +52,8 @@ There are four types of configuration rules.
 
   Chooses a random word from any of the child lists.
   Probability is proportional to child list length.
-  ::
+
+  .. code-block:: python
 
       # This will produce random adjective: color or taste
       'adjective': {
@@ -67,7 +70,8 @@ There are four types of configuration rules.
 * Constant.
 
   It's just a word. Useful for prepositions.
-  ::
+
+  .. code-block:: python
 
       'of': {
           'type': 'const',
@@ -78,7 +82,8 @@ There are four types of configuration rules.
 
   This element works like a slot machine, and produces a list of length N
   by choosing one random word from N child lists.
-  ::
+
+    .. code-block:: python
 
       # This will produce a random list of 4 words,
       # for example: ['my', 'banana', 'is', 'sweet']
@@ -116,30 +121,63 @@ Let's try the config defined above:
 .. _Cartesian: https://en.wikipedia.org/wiki/Cartesian_product
 
 Length limits
--------------
+=============
 
 There are two limits:
 
-* ``max_length`` (of a single word in a ``words`` rule)
+* ``max_length``
 
-    This constraint is static: you can't create :class:`RandomNameGenerator` instance
+    This constraint is hard: you can't create :class:`RandomNameGenerator` instance
     if some word in some rule exceeds that rule's limit.
 
-    Different rules can have different limits.
+    For example, this will fail:
 
-* ``max_slug_length`` (of ``generate_slug()`` result)
+        .. code-block:: json
 
-    This constraint is dynamic: if result is too long, it is silently discarded
+            {
+                "type": "words",
+                "words": ["cat", "tiger", "jaguar"],
+                "max_length": 5
+            }
+
+    Different word lists can have different limits.
+    If you don't specify it, there is no limit.
+
+* ``max_slug_length``
+
+    This constraint is soft: if result is too long, it is silently discarded
     and generator rolls the dice again.
-    This allows you to have larger-than-average words which
-    still fits nicely with smaller words from other lists, not exceeding the limit.
+    This allows you to have longer-than-average words which
+    still fit nicely with shorter words from other lists.
 
-    Of course, it's better to keep the fraction of "bad" combinations low,
+    Of course, it's better to keep the fraction of "too long" combinations low,
     as it affects the performance. In fact, :class:`RandomNameGenerator` performs
     a sanity test upon an initialization: if probability of getting "too long" combination
-    is too big, it will raise an exception.
+    is unacceptable, it will raise an exception.
 
-Both of these limits are optional. Default configuration uses ``"max_slug_length": 50``,
+    For example, this will produce 7 possible combinations,
+    and 2 combinations (green-square and green-circle) will never appear
+    because they exceed the max slug length:
+
+    .. code-block:: json
+
+        {
+            "adjective": {
+                "type": "words",
+                "words": ["red", "blue", "green"]
+            },
+            "noun": {
+                "type": "words",
+                "words": ["line", "square", "circle"]
+            },
+            "all": {
+                "type": "cartesian",
+                "lists": ["adjective", "noun"],
+                "max_slug_length": 11
+            }
+        }
+
+Both of these limits are optional. Default configuration uses ``"max_slug_length": 50``
 according to Django slug length.
 
 Configuration files
@@ -163,7 +201,9 @@ you can specify rules in JSON file, and encapsulate long word lists into separat
 
 For our example, we would need three files in a directory:
 
-**my_config/config.json** ::
+**my_config/config.json**
+
+.. code-block:: json
 
     {
         "all": {
@@ -213,7 +253,9 @@ You can also specify options like this: ::
 
     max_length = 13
 
-Which is equivalent to adding the same option in config dictionary: ::
+Which is equivalent to adding the same option in config dictionary:
+
+.. code-block:: json
 
     {
         "type": "words",
@@ -222,4 +264,9 @@ Which is equivalent to adding the same option in config dictionary: ::
     }
 
 Options must be specified **before** words.
+
+Unicode support
+===============
+
+Unicode is fully supported. Just use UTF-8 for the configuration files.
 
