@@ -86,7 +86,7 @@ test_requirements = [
 
 setup(
     name='coolname',
-    version='0.1.1',
+    version='0.2.0',
     description="Random name and slug generator",
     long_description=readme + '\n\n' + history,
     author="Alexander Lukanin",
