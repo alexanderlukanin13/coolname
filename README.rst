@@ -12,7 +12,7 @@ Random Name and Slug Generator
         :target: https://coveralls.io/github/alexanderlukanin13/coolname?branch=master
 
 
-Do you want random human-readable strings to identify things in user interface and URLs?
+Do you want random human-readable strings to identify things?
 
     >>> from coolname import generate_slug
     >>> generate_slug()
@@ -23,7 +23,7 @@ Do you want random human-readable strings to identify things in user interface a
     'soft-cuddly-shrew-of-expertise'
 
 Features
---------
+========
 
 * Generate slugs, ready to use, Django-compatible.
 
@@ -71,7 +71,7 @@ Features
   such as ``brave``. And subject is always some animal, bird, fish, or insect - you can't be more neutral than
   Mother Nature.
 
-* Easy customization. Create your own rules!
+* `Easy customization <http://coolname.readthedocs.io/en/latest/customization.html>`_. Create your own rules!
 
     >>> from coolname import RandomNameGenerator
     >>> generator = RandomNameGenerator({
@@ -91,16 +91,11 @@ Features
     >>> generator.generate_slug()
     'james-brown'
 
-Alternatives
-------------
+Installation
+============
 
-For random human names, addresses and more, check out
-`Faker <https://pypi.python.org/pypi/fake-factory/>`_
-(or `Gimei <https://pypi.python.org/pypi/gimei/>`_ if you want Japanese data).
+::
 
-Customization
--------------
+    pip install coolname
 
-You can create custom config to generate word sequences of any kind:
-
-http://coolname.readthedocs.io/en/latest/customization.html
+``coolname`` is written in pure Python and has no dependencies. It works on any modern Python version.

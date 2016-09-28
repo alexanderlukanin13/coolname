@@ -23,88 +23,90 @@ when you call ``generate()`` or ``generate_slug()`` without arguments.
 
 There are four types of configuration rules.
 
-* Word list.
+Words list
+----------
 
-  A ground-level building block. Chooses a random word from a list,
-  with equal probability.
+A ground-level building block. Chooses a random word from a list,
+with equal probability.
 
-  .. code-block:: python
+.. code-block:: python
 
-      # This will produce random color
-      'color': {
-          'type': 'words',
-          'words': ['red', 'green', 'yellow']
-      },
-      # This will produce random taste
-      'taste': {
-          'type': 'words',
-          'words': ['sweet', 'sour']
-      },
-      # This will produce random fruit
-      'fruit': {
-          'type': 'words',
-          'words': ['apple', 'banana']
-      },
+    # This will produce random color
+    'color': {
+        'type': 'words',
+        'words': ['red', 'green', 'yellow']
+    },
+    # This will produce random taste
+    'taste': {
+        'type': 'words',
+        'words': ['sweet', 'sour']
+    },
+    # This will produce random fruit
+    'fruit': {
+        'type': 'words',
+        'words': ['apple', 'banana']
+    },
 
-  Length of word list is a number of words.
+Nested list
+-----------
 
-* Nested list.
+Chooses a random word from any of the child lists.
+Probability is proportional to child list length.
 
-  Chooses a random word from any of the child lists.
-  Probability is proportional to child list length.
+.. code-block:: python
 
-  .. code-block:: python
+    # This will produce random adjective: color or taste
+    'adjective': {
+        'type': 'nested',
+        'lists': ['color', 'taste']
+    },
 
-      # This will produce random adjective: color or taste
-      'adjective': {
-          'type': 'nested',
-          'lists': ['color', 'taste']
-      },
+Child lists can be of any type.
 
-  Child lists can be of any type.
+Number of child lists is not limited.
 
-  Number of child lists is not limited.
+Length of nested list is the sum of lengths of all child lists.
 
-  Length of nested list is combined length of all child lists.
+Constant
+--------
 
-* Constant.
+It's just a word. Useful for prepositions.
 
-  It's just a word. Useful for prepositions.
+.. code-block:: python
 
-  .. code-block:: python
+    'of': {
+        'type': 'const',
+        'value': 'of'
+    },
 
-      'of': {
-          'type': 'const',
-          'value': 'of'
-      },
+Cartesian list
+---------------
 
-* Cartesian_ list.
+Cartesian_ list works like a slot machine, and produces a list of length N
+by choosing one random word from every child list.
 
-  This element works like a slot machine, and produces a list of length N
-  by choosing one random word from N child lists.
+.. code-block:: python
 
-    .. code-block:: python
+    # This will produce a random list of 4 words,
+    # for example: ['my', 'banana', 'is', 'sweet']
+    'all': {
+        'type': 'cartesian',
+        'lists': ['my', 'fruit', 'is', 'adjective']
+    },
+    # Additional const definitions
+    'is': {
+        'type': 'const',
+        'value': 'is'
+    },
+    'my': {
+        'type': 'const',
+        'value': 'my'
+    },
 
-      # This will produce a random list of 4 words,
-      # for example: ['my', 'banana', 'is', 'sweet']
-      'all': {
-          'type': 'cartesian',
-          'lists': ['my', 'fruit', 'is', 'adjective']
-      },
-      # Additional const definitions
-      'is': {
-          'type': 'const',
-          'value': 'is'
-      },
-      'my': {
-          'type': 'const',
-          'value': 'my'
-      },
+*NOTE: You can have many nested lists, but you should never
+put one Cartesian list inside another.*
 
-  *NOTE: You can have many nested lists, but you should never
-  put one Cartesian list inside another.*
-
-  Length of Cartesian list is a product of lengths of child lists.
+Length of Cartesian list is the product of lengths of child lists.
 
 Let's try the config defined above:
 ::
@@ -263,10 +265,10 @@ Which is equivalent to adding the same option in config dictionary:
         "max_length": 13
     }
 
-Options must be specified **before** words.
+Options should be placed in the beginning of the text file, before the first word.
 
 Unicode support
 ===============
 
-Unicode is fully supported. Just use UTF-8 for the configuration files.
-
+Default implementation uses English, but you can create configuration in any language -
+just save the config files in UTF-8 encoding.
