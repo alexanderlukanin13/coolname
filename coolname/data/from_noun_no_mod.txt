@@ -1,0 +1,34 @@
+# ------------------------------------------------------------
+# Nouns that can be used after the "from" without an adjective
+# ------------------------------------------------------------
+
+# Planets & moons
+venus
+mars
+jupiter
+ganymede
+saturn
+uranus
+neptune
+pluto
+
+# Stars
+betelgeuse
+sirius
+vega
+
+# Fictional places
+arcadia
+asgard
+atlantis
+avalon
+camelot
+eldorado
+heaven
+hell
+hyperborea
+lemuria
+nibiru
+shambhala
+tartarus
+valhalla

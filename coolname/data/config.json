@@ -13,12 +13,12 @@
     "3": {
         "comment": "Three words",
         "type": "nested",
-        "lists": ["aan", "ano", "nuo"]
+        "lists": ["aan", "ano", "anl", "nuo"]
     },
     "4": {
         "comment": "Four words",
         "type": "nested",
-        "lists": ["aano", "anuo"]
+        "lists": ["aano", "aanl", "anuo"]
     },
     "an": {
         "comment": "adjective-noun",
@@ -35,6 +35,11 @@
         "type": "cartesian",
         "lists": ["adj_any", "subj", "of", "of_noun_any"]
     },
+    "anl": {
+        "comment": "adjective-noun-from-location",
+        "type": "cartesian",
+        "lists": ["adj_any", "subj", "from", "from_noun_no_mod"]
+    },
     "nuo": {
         "comment": "noun-of-adjective-noun",
         "type": "cartesian",
@@ -44,6 +49,11 @@
         "comment": "adjective-adjective-noun-of-noun",
         "type": "cartesian",
         "lists": ["adj_far", "adj_near", "subj", "of", "of_noun_any"]
+    },
+    "aanl": {
+        "comment": "adjective-adjective-noun-from-location",
+        "type": "cartesian",
+        "lists": ["adj_far", "adj_near", "subj", "from", "from_noun_no_mod"]
     },
     "anuo": {
         "comment": "adjective-noun-of-adjective-noun",
@@ -97,5 +107,9 @@
     "of_noun_any": {
         "type": "nested",
         "lists": ["of_noun", "of_noun_no_mod"]
+    },
+    "from": {
+        "type": "const",
+        "value": "from"
     }
 }
