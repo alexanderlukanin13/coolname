@@ -89,10 +89,12 @@ wisteria
 yellow
 
 # Stone, metal, etc.
+agate
 amber
 amethyst
 aquamarine
 asparagus
+beryl
 brass
 bronze
 cobalt
@@ -100,6 +102,7 @@ coral
 cornflower
 diamond
 emerald
+garnet
 golden
 granite
 ivory
@@ -114,8 +117,10 @@ nickel
 olive
 olivine
 onyx
+opal
 orchid
 pearl
+peridot
 platinum
 quartz
 ruby
@@ -124,4 +129,7 @@ sapphire
 steel
 thistle
 topaz
+tourmaline
+tungsten
 xanthic
+zircon
