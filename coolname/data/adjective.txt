@@ -102,7 +102,7 @@ wooden
 adorable
 affable
 amazing
-amicable
+amiable
 attractive
 beautiful
 calm
@@ -110,6 +110,7 @@ charming
 cherubic
 classic
 classy
+convivial
 cordial
 cuddly
 curly
@@ -122,6 +123,7 @@ friendly
 funny
 gorgeous
 graceful
+gregarious
 grinning
 handsome
 hilarious
@@ -141,6 +143,7 @@ refined
 refreshing
 sexy
 smiling
+sociable
 spiffy
 stylish
 sweet
@@ -191,6 +194,7 @@ eccentric
 elated
 encouraging
 enigmatic
+enthusiastic
 evasive
 faithful
 fair
@@ -218,6 +222,7 @@ industrious
 innocent
 intrepid
 jolly
+jovial
 just
 lively
 loose
@@ -232,6 +237,7 @@ orthodox
 outgoing
 outrageous
 overjoyed
+passionate
 perky
 placid
 polite
@@ -349,16 +355,20 @@ tricky
 unbiased
 uptight
 versatile
+versed
 visionary
 wise
 witty
 
 # Strength & Agility
 accelerated
+active
 agile
 athletic
 dashing
+deft
 dexterous
+energetic
 fast
 frisky
 hasty
@@ -418,6 +428,7 @@ terrestrial
 urban
 
 # Awesome
+accomplished
 astonishing
 authentic
 awesome
@@ -443,6 +454,8 @@ incredible
 invaluable
 kickass
 majestic
+magnificent
+marvellous
 monumental
 perfect
 phenomenal
@@ -453,6 +466,7 @@ private
 remarkable
 spectacular
 splendid
+successful
 wonderful
 wondrous
 
