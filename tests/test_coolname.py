@@ -2,6 +2,7 @@
 from functools import partial
 from itertools import cycle
 import unittest
+import warnings
 
 import six
 from six import u
@@ -244,11 +245,15 @@ class TestCoolname(TestCase):
             })
 
     def test_max_slug_length(self):
-        generator = RandomNameGenerator({
-            'all': {'type': 'cartesian', 'max_slug_length': 9, 'lists': ['one', 'two']},
-            'one': {'type': 'words', 'words': ['big',  'small']},
-            'two': {'type': 'words', 'words': ['cat',  'tiger']},
-        })
+        with warnings.catch_warnings(record=True) as w:
+            generator = RandomNameGenerator({
+                'all': {'type': 'cartesian', 'max_slug_length': 9, 'lists': ['one', 'two']},
+                'one': {'type': 'words', 'words': ['big',  'small']},
+                'two': {'type': 'words', 'words': ['cat',  'tiger']},
+            })
+            if len(w) > 0:
+                assert len(w) == 1
+                assert str(w[0].message) == 'coolname.generate() may be slow because a significant fraction of combinations exceed max_slug_length=9'
         self.assertEqual(set(generator.generate_slug() for i in range(0, 100)),
                          set(['big-cat', 'big-tiger', 'small-cat']))
 
