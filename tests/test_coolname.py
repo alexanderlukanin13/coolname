@@ -180,7 +180,7 @@ class TestCoolname(TestCase):
             }
         })
         with patch('coolname.impl.randrange',
-                   side_effect=partial(next, cycle(iter(range(9))))):
+                   side_effect=partial(next, cycle(iter(range(8))))):
             self.assertEqual(generator.generate_slug(), 'brave-brass')
             self.assertEqual(generator.generate_slug(), 'brave-agility')
             self.assertEqual(generator.generate_slug(), 'brave-age')
