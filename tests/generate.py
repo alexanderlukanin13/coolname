@@ -21,13 +21,14 @@ def main(argv):
     args = parser.parse_args(argv)
     generate_slug(args.length)  # for more precise timing
     if args.word:
+        words = args.word.split(',')
         slug = None
         max_slugs = 100000
         for i in range(0, max_slugs):
             start_time = time.perf_counter()
             s = generate_slug(args.length)
             elapsed_time = time.perf_counter() - start_time
-            if args.word in s:
+            if any(x in s for x in words):
                 slug = s
                 break
         if slug is None:

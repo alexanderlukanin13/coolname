@@ -6,6 +6,7 @@ class _CONF:
         NESTED = 'nested'
         CARTESIAN = 'cartesian'
         WORDS = 'words'
+        PHRASES = 'phrases'
         CONST = 'const'
 
     class FIELD:
@@ -13,6 +14,8 @@ class _CONF:
         TYPE = 'type'
         LISTS = 'lists'
         WORDS = 'words'
+        PHRASES = 'phrases'
+        NUMBER_OF_WORDS = 'number_of_words'
         VALUE = 'value'
         GENERATOR = 'generator'
         MAX_LENGTH = 'max_length'

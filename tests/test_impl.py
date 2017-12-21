@@ -6,12 +6,21 @@ import six
 
 from coolname import RandomNameGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
-    _create_lists, _encode, _create_default_generator
+    PhraseList,\
+    _create_lists, _to_bytes, _create_default_generator
 
 from .common import TestCase, patch
 
 
 class TestImplementation(TestCase):
+
+    def test_phrase_list(self):
+        phrase_list = PhraseList([('black', 'cat'), ('white', 'dog')])
+        assert len(phrase_list) == 2
+        assert phrase_list.multiword
+        phrase_list[0] == ('black', 'cat')
+        phrase_list[1] == ('white', 'dog')
+        assert str(phrase_list) == "PhraseList([('black', 'cat'), ('white', 'dog')], len=2)"
 
     def test_nested_list(self):
         # Note that lists are internally sorted
@@ -55,6 +64,47 @@ class TestImplementation(TestCase):
         self.assertEqual(cart_list[23], [3, 5, 9])
         self.assertEqual(cart_list[24], [10, 12])
         self.assertEqual(cart_list[27], [11, 13])
+
+    def test_phrase_list_squash_optimization(self):
+        """PhraseLists should be squashed just like WordLists."""
+        config = {
+            'all': {
+                'type': 'cartesian',
+                'lists': ['nested1', 'nested2']
+            },
+            'nested1': {
+                'type': 'nested',
+                'lists': ['phrases1', 'phrases2']
+            },
+            'nested2': {
+                'type': 'nested',
+                'lists': ['phrases1', 'phrases2']
+            },
+            'phrases1': {
+                'type': 'phrases',
+                'phrases': [['alpha', 'one'], ['beta', 'two']]
+            },
+            'phrases2': {
+                'type': 'phrases',
+                'phrases': [['gamma', 'three'], ['delta', 'four'], ['epsilon']]
+            }
+        }
+        generator = RandomNameGenerator(config)
+        # Make sure NestedLists are squashed and transformed into PhraseLists
+        all_list = generator._lists[None]
+        assert isinstance(all_list._lists[0], PhraseList)
+        assert isinstance(all_list._lists[1], PhraseList)
+        assert len(all_list._lists[0]) == 5
+        assert all_list._lists[0] == all_list._lists[1]
+        tuples = [
+            ('alpha', 'one'),
+            ('beta', 'two'),
+            ('gamma', 'three'),
+            ('delta', 'four'),
+            ('epsilon', )
+        ]
+        assert all_list._lists[0] == sorted(tuples)
+        assert 3 <= len(generator.generate()) <= 4
 
     def test_scalar(self):
         self.assertTrue(Scalar(10).random(), 10)
@@ -110,10 +160,10 @@ class TestImplementation(TestCase):
 
     def test_encode(self):
         # _encode must encode unicode strings
-        self.assertEqual(_encode(six.u('привет')),
+        self.assertEqual(_to_bytes(six.u('привет')),
                          six.u('привет').encode('utf-8'))
         # _encode must return byte strings unchanged
-        self.assertEqual(_encode(six.u('привет').encode('utf-8')),
+        self.assertEqual(_to_bytes(six.u('привет').encode('utf-8')),
                          six.u('привет').encode('utf-8'))
 
     @patch('os.path.isdir', return_value=False)

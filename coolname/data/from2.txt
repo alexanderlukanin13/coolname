@@ -1,0 +1,7 @@
+# ====================================
+# Two-word phrases to use after "from"
+# ====================================
+
+another dimension
+another planet
+foreign country

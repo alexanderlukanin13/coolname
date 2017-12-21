@@ -17,7 +17,6 @@ def compile_init_py():
     import codecs
     import os
     import sys
-    print(sys.argv[1])
     current_path = os.path.dirname(__file__)
     current_path_appended = False
     if current_path not in sys.path:
@@ -33,7 +32,9 @@ def compile_init_py():
         if isinstance(obj, dict):
             return {str(x): _to_str(y) for x, y in obj.items()}
         elif isinstance(obj, list):
-            return [str(x) for x in obj]
+            return [_to_str(x) for x in obj]
+        elif isinstance(obj, tuple):
+            return tuple(str(x) for x in obj)
         else:
             return str(obj)
     config = _to_str(config)

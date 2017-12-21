@@ -6,19 +6,19 @@
         "max_slug_length": 50
     },
     "2": {
-        "comment": "Two words",
+        "comment": "Two words (may also contain prepositions)",
         "type": "nested",
         "lists": ["an"]
     },
     "3": {
-        "comment": "Three words",
+        "comment": "Three words (may also contain prepositions)",
         "type": "nested",
-        "lists": ["aan", "ano", "anl", "nuo"]
+        "lists": ["aan", "ano", "anl", "nuo", "as2", "s2o", "s2l", "sl2"]
     },
     "4": {
-        "comment": "Four words",
+        "comment": "Four words (may also contain prepositions)",
         "type": "nested",
-        "lists": ["aano", "aanl", "anuo"]
+        "lists": ["aano", "aanl", "anuo", "as2o", "s2uo", "as2l", "asl2"]
     },
     "an": {
         "comment": "adjective-noun",
@@ -45,6 +45,26 @@
         "type": "cartesian",
         "lists": ["subj", "of", "of_modifier", "of_noun"]
     },
+    "as2": {
+        "comment": "adjective-2word-subject",
+        "type": "cartesian",
+        "lists": ["adj_far", "subj2"]
+    },
+    "s2o": {
+        "comment": "2word-subject-of-noun",
+        "type": "cartesian",
+        "lists": ["subj2", "of", "of_noun_any"]
+    },
+    "s2l": {
+        "comment": "2word-subject-from-location",
+        "type": "cartesian",
+        "lists": ["subj2", "from", "from_noun_no_mod"]
+    },
+    "sl2": {
+        "comment": "subject-from-some-location",
+        "type": "cartesian",
+        "lists": ["subj", "from", "from2"]
+    },
     "aano": {
         "comment": "adjective-adjective-noun-of-noun",
         "type": "cartesian",
@@ -59,6 +79,26 @@
         "comment": "adjective-noun-of-adjective-noun",
         "type": "cartesian",
         "lists": ["adj_any", "subj", "of", "of_modifier", "of_noun"]
+    },
+    "as2o": {
+        "comment": "adjective-2word-subject-of-noun",
+        "type": "cartesian",
+        "lists": ["adj_far", "subj2", "of", "of_noun_any"]
+    },
+    "s2uo": {
+        "comment": "adjective-2word-subject-of-adjective-noun",
+        "type": "cartesian",
+        "lists": ["subj2", "of", "of_modifier", "of_noun"]
+    },
+    "as2l": {
+        "comment": "adjective-2word-subject-from-location",
+        "type": "cartesian",
+        "lists": ["adj_far", "subj2", "from", "from_noun_no_mod"]
+    },
+    "asl2": {
+        "comment": "adjective-subject-from-some-location",
+        "type": "cartesian",
+        "lists": ["adj_any", "subj", "from", "from2"]
     },
     "adj_far": {
         "comment": "First adjective (with more following)",

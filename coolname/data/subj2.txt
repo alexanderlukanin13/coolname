@@ -1,0 +1,30 @@
+# =============================================================================
+# Two-word animals
+# NOTE: don't include phrases that can be generated via regular adjective-noun,
+# such as "golden eagle".
+# =============================================================================
+
+number_of_words = 2
+max_length = 22
+
+# Birds
+hyacinth macaw
+northern cardinal
+red cardinal
+
+# Insects
+fire ant
+
+# Mammals
+bottlenose dolphin
+grizzly bear
+honey badger
+killer whale
+mountain lion
+sperm whale
+
+# Reptiles
+gila monster
+freshwater crocodile
+saltwater crocodile
+snapping turtle

@@ -17,8 +17,11 @@ class AbstractNestedList(object):
 
     def __init__(self, lists):
         super(AbstractNestedList, self).__init__()
-        self._lists = [WordList(x) if isinstance(x, list) else x
+        self._lists = [WordList(x) if x.__class__ is list else x
                        for x in lists]
+        # If this is set to True in a subclass,
+        # then subclass yields sequences instead of single words.
+        self.multiword = any(x.multiword for x in self._lists)
 
     def __len__(self):
         return self._length
@@ -52,14 +55,18 @@ except NameError:
     _unicode = str
 
 
-def _encode(value):
+# Convert value to bytes, for hashing
+# (used to calculate WordList or PhraseList hash)
+def _to_bytes(value):
     if isinstance(value, _unicode):
         return value.encode('utf-8')
+    elif isinstance(value, tuple):
+        return str(value).encode('utf-8')
     else:
         return value
 
 
-class WordList(list, AbstractNestedList):
+class _BasicList(list, AbstractNestedList):
 
     def __init__(self, sequence=None):
         list.__init__(self, sequence)
@@ -81,11 +88,23 @@ class WordList(list, AbstractNestedList):
         if self.__hash is not None:
             return self.__hash
         md5 = hashlib.md5()
-        md5.update(_encode(str(len(self))))
+        md5.update(_to_bytes(str(len(self))))
         for x in self:
-            md5.update(_encode(x))
+            md5.update(_to_bytes(x))
         self.__hash = md5.digest()
         return self.__hash
+
+
+class WordList(_BasicList):
+    """List of single words."""
+
+
+class PhraseList(_BasicList):
+    """List of phrases (sequences of one or more words)."""
+
+    def __init__(self, sequence=None):
+        super(PhraseList, self).__init__(tuple(x) for x in sequence)
+        self.multiword = True
 
 
 class NestedList(AbstractNestedList):
@@ -110,17 +129,19 @@ class NestedList(AbstractNestedList):
         # Cache is used to avoid data duplication.
         # If we have 4 branches which finally point to the same list of nouns,
         # why not using the same WordList instance for all 4 branches?
+        # This optimization is also applied to PhraseLists, just in case.
         result = super(NestedList, self).squash(hard, cache)
         if result is self and hard:
-            if all(isinstance(x, WordList) for x in self._lists):
-                # Creating combined wordlist and then checking cache
-                # is a little wasteful, but it has no long-term consequences.
-                # And it's simple!
-                result = WordList(sorted(set(itertools.chain.from_iterable(self._lists))))
-                if result._hash in cache:
-                    result = cache.get(result._hash)
-                else:
-                    cache[result._hash] = result
+            for cls in (WordList, PhraseList):
+                if all(isinstance(x, cls) for x in self._lists):
+                    # Creating combined WordList/PhraseList and then checking cache
+                    # is a little wasteful, but it has no long-term consequences.
+                    # And it's simple!
+                    result = cls(sorted(set(itertools.chain.from_iterable(self._lists))))
+                    if result._hash in cache:
+                        result = cache.get(result._hash)
+                    else:
+                        cache[result._hash] = result
         return result
 
 
@@ -131,15 +152,25 @@ class CartesianList(AbstractNestedList):
         self._length = 1
         for x in lists:
             self._length *= len(x)
+        # Let's say list lengths are 5, 7, 11, 13.
+        # divs = [7*11*13, 11*13, 13, 1]
+        divs = [1]
+        prod = 1
+        for x in reversed(lists[1:]):
+            prod *= len(x)
+            divs.append(prod)
+        self._list_divs = tuple(zip(self._lists, reversed(divs)))
+        self.multiword = True
 
     def __getitem__(self, i):
-        # Retrieve item from appropriate list
         result = []
-        for sublist in reversed(self._lists):
-            length = len(sublist)
-            result.append(sublist[i % length])
-            i = i // length
-        result.reverse()
+        for sublist, n in self._list_divs:
+            x = sublist[i // n]
+            if sublist.multiword:
+                result.extend(x)
+            else:
+                result.append(x)
+            i %= n
         return result
 
 
@@ -327,6 +358,40 @@ def _validate_config(config):
                             raise ValueError('Config at key {!r} has invalid word {!r} '
                                              '(longer than {} characters)'
                                              .format(key, word, max_length))
+            # Phrases (sequences of one or more words)
+            elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.PHRASES:
+                try:
+                    phrases = listdef[_CONF.FIELD.PHRASES]
+                except KeyError:
+                    raise ValueError('Config at key {!r} has no {!r}'
+                                     .format(key, _CONF.FIELD.PHRASES))
+                if not isinstance(phrases, list) or not phrases:
+                    raise ValueError('Config at key {!r} has invalid {!r}'
+                                     .format(key, _CONF.FIELD.PHRASES))
+                # Validate multi-word
+                try:
+                    nwords = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])
+                except KeyError:
+                    nwords = None
+                if not all(isinstance(phrase, (tuple, list)) for phrase in phrases):
+                    raise ValueError('Config at key {!r} has invalid {!r}: '
+                                     'must be all tuple/list'
+                                     .format(key, _CONF.FIELD.PHRASES))
+                if nwords and not all(len(phrase) == nwords for phrase in phrases):
+                    raise ValueError('Config at key {!r} has invalid {!r}: '
+                                     'all phrases must have {} words'
+                                     .format(key, _CONF.FIELD.PHRASES, nwords))
+                # Validate max length
+                try:
+                    max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
+                except KeyError:
+                    max_length = None
+                if max_length is not None:
+                    for phrase in phrases:
+                        if sum(len(word) for word in phrase) > max_length:
+                            raise ValueError('Config at key {!r} has invalid phrase {!r} '
+                                             '(longer than {} characters)'
+                                             .format(key, ' '.join(phrase), max_length))
             else:
                 raise ValueError('Config at key {!r} has invalid {!r}'
                                  .format(key, _CONF.FIELD.TYPE))
@@ -363,6 +428,9 @@ def _create_lists(config, results, current, stack, inside_cartesian=None):
         # 1. List of words
         if list_type == _CONF.TYPE.WORDS:
             results[current] = WordList(listdef['words'])
+        # List of phrases
+        elif list_type == _CONF.TYPE.PHRASES:
+            results[current] = PhraseList(listdef['phrases'])
         # 2. Simple list of lists
         elif list_type == _CONF.TYPE.NESTED:
             results[current] = NestedList([_create_lists(config, results, x, stack,

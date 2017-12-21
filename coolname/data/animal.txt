@@ -552,7 +552,6 @@ agama
 chameleon
 dragon
 gecko
-gila
 iguana
 lizard
 pogona

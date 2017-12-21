@@ -21,7 +21,7 @@ def load_config(path):
     Loads configuration from a path.
 
     Path can be a json file, or a directory containing config.json
-    and zero or more *.txt files with word lists.
+    and zero or more *.txt files with word lists or phrase lists.
 
     Returns config dict.
 
@@ -81,12 +81,14 @@ def _load_config(config_file_path):
 
 # Word must be in English, 1-N letters, lowercase.
 _WORD_REGEX = re.compile(r'^[a-z]+$')
+_PHRASE_REGEX = re.compile(r'^\w+(?: \w+)*$')
 
 
 # Options are defined using simple notation: 'option = value'
 _OPTION_REGEX = re.compile(r'^([a-z_]+)\s*=\s*(\w+)$', re.UNICODE)
 _OPTIONS = [
-    ('max_length', int),
+    (_CONF.FIELD.MAX_LENGTH, int),
+    (_CONF.FIELD.NUMBER_OF_WORDS, int)
 ]
 
 
@@ -107,44 +109,74 @@ def _parse_option(line):
 
 def _load_wordlist(name, stream):
     """
-    Loads list of words from file.
+    Loads list of words or phrases from file.
 
-    Returns "words" dictionary, the same as used in config.
+    Returns "words" or "phrases" dictionary, the same as used in config.
     Raises Exception if file is missing or invalid.
     """
-    words = []
+    items = []
     max_length = None
+    multiword = False
+    multiword_start = None
+    number_of_words = None
     for i, line in enumerate(stream, start=1):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
         # Is it an option line, e.g. 'max_length = 10'?
         if '=' in line:
-            if words:
-                raise ConfigurationError('Invalid assignment at wordlist {!r} line {}: {!r} '
+            if items:
+                raise ConfigurationError('Invalid assignment at list {!r} line {}: {!r} '
                                          '(options must be defined before words)'
                                          .format(name, i, line))
             try:
                 option, option_value = _parse_option(line)
             except ValueError as ex:
-                raise ConfigurationError('Invalid assignment at wordlist {!r} line {}: {!r} '
+                raise ConfigurationError('Invalid assignment at list {!r} line {}: {!r} '
                                          '({})'
                                          .format(name, i, line, ex))
-            if option == 'max_length':
+            if option == _CONF.FIELD.MAX_LENGTH:
                 max_length = option_value
+            elif option == _CONF.FIELD.NUMBER_OF_WORDS:
+                number_of_words = option_value
             continue  # pragma: no cover
         # Parse words
-        if not _WORD_REGEX.match(line):
-            raise ConfigurationError('Invalid syntax at wordlist {!r} line {}: {!r}'
+        if not multiword and _WORD_REGEX.match(line):
+            if max_length is not None and len(line) > max_length:
+                raise ConfigurationError('Word is too long at list {!r} line {}: {!r}'
+                                         .format(name, i, line))
+            items.append(line)
+        elif _PHRASE_REGEX.match(line):
+            if not multiword:
+                multiword = True
+                multiword_start = len(items)
+            phrase = tuple(line.split(' '))
+            if number_of_words is not None and len(phrase) != number_of_words:
+                raise ConfigurationError('Phrase has {} word(s) (while number_of_words={}) '
+                                         'at list {!r} line {}: {!r}'
+                                         .format(len(phrase), number_of_words, name, i, line))
+            if max_length is not None and sum(len(x) for x in phrase) > max_length:
+                raise ConfigurationError('Phrase is too long at list {!r} line {}: {!r}'
+                                         .format(name, i, line))
+            items.append(phrase)
+        else:
+            raise ConfigurationError('Invalid syntax at list {!r} line {}: {!r}'
                                      .format(name, i, line))
-        if max_length is not None and len(line) > max_length:
-            raise ConfigurationError('Word is too long at wordlist {!r} line {}: {!r}'
-                                     .format(name, i, line))
-        words.append(line)
-    result = {
-        _CONF.FIELD.TYPE: _CONF.TYPE.WORDS,
-        _CONF.FIELD.WORDS: words
-    }
+    if multiword:
+        # If in phrase mode, convert everything to tuples
+        for i in range(0, multiword_start):
+            items[i] = (items[i], )
+        result = {
+            _CONF.FIELD.TYPE: _CONF.TYPE.PHRASES,
+            _CONF.FIELD.PHRASES: items
+        }
+        if number_of_words is not None:
+            result[_CONF.FIELD.NUMBER_OF_WORDS] = number_of_words
+    else:
+        result = {
+            _CONF.FIELD.TYPE: _CONF.TYPE.WORDS,
+            _CONF.FIELD.WORDS: items
+        }
     if max_length is not None:
         result[_CONF.FIELD.MAX_LENGTH] = max_length
     return result

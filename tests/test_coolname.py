@@ -228,6 +228,47 @@ class TestCoolname(TestCase):
                 'one': {'type': 'nested', 'lists': ['all']}
             })
 
+    def test_configuration_error_phrases(self):
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has no 'phrases'"):
+            RandomNameGenerator({'all': {'type': 'phrases', 'words': []}})
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'phrases'"):
+            RandomNameGenerator({'all': {'type': 'phrases', 'phrases': []}})
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'phrases': must be all tuple/list"):
+            RandomNameGenerator({'all': {'type': 'phrases', 'phrases': ['str not allowed']}})
+        # Number of words
+        RandomNameGenerator({
+            'all': {
+                'type': 'phrases',
+                'number_of_words': 2,
+                'phrases': [['one', 'two'], ['three', 'four']]}
+        })
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid 'phrases': all phrases must have 2 words"):
+            RandomNameGenerator({
+                'all': {
+                    'type': 'phrases',
+                    'number_of_words': 2,
+                    'phrases': [['one', 'two'], ['three', 'four'], ['five']]}
+            })
+        # Max length
+        RandomNameGenerator({
+            'all': {
+                'type': 'phrases',
+                'max_length': 10,
+                'phrases': [['black', 'goose'], ['white', 'hare']]}
+        })
+        with self.assertRaisesRegex(InitializationError,
+                                    "Invalid config: Config at key 'all' has invalid phrase 'white rabbit' \(longer than 10 characters\)"):
+            RandomNameGenerator({
+                'all': {
+                    'type': 'phrases',
+                    'max_length': 10,
+                    'phrases': [['black', 'goose'], ['white', 'rabbit']]}
+            })
+
     def test_max_length(self):
         with self.assertRaisesRegex(InitializationError,
                                    "Config at key u?'one' has invalid word u?'tiger' "

@@ -44,11 +44,11 @@ class LoaderTest(TestCase):
     def test_invalid_wordlist(self):
         s = StringIO(six.u('\n'.join([
             'alpha',
-            'two words',  # invalid syntax
+            'invalid?syntax',
         ])))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid syntax "
-                                    r"at wordlist 'words' line 2: u?'two words'"):
+                                    r"at list 'words' line 2: u?'invalid\?syntax'"):
             _load_wordlist('words', s)
 
     def test_word_too_long(self):
@@ -59,13 +59,46 @@ class LoaderTest(TestCase):
         ])))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Word is too long "
-                                    r"at wordlist 'words' line 3: u?'augmentation'"):
+                                    r"at list 'words' line 3: u?'augmentation'"):
             _load_wordlist('words', s)
 
     def test_load_data_no_dir(self):
         path = os.path.join(tempfile.gettempdir(), 'does', 'not', 'exist')
         with self.assertRaisesRegex(InitializationError, 'Directory not found: {}'.format(path)):
             _load_data(path)
+
+    def test_load_phrases(self):
+        s = StringIO(six.u('\n'.join([
+            'one',
+            'two',
+            'three',
+            'four five',
+            'six',
+            'seven eight'
+        ])))
+        wordlist = _load_wordlist('phrases', s)
+        self.assertEqual(wordlist, {
+            'type': 'phrases',
+            'phrases': [
+                ('one', ),
+                ('two', ),
+                ('three', ),
+                ('four', 'five'),
+                ('six',),
+                ('seven', 'eight')
+            ]
+        })
+
+    def test_phrase_too_long(self):
+        s = StringIO(six.u('\n'.join([
+            'max_length = 9',
+            'alpha beta',
+            'gamma delta',  # 10 characters
+        ])))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Phrase is too long "
+                                    r"at list 'words' line 3: u?'gamma delta'"):
+            _load_wordlist('words', s)
 
     @patch('json.load')
     @patch('coolname.loader._load_wordlist')
@@ -139,7 +172,7 @@ class LoaderTest(TestCase):
         open_mock.return_value = StringIO(six.u('max_length=\n'))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
-                                    r"at wordlist u?'one' line 1: "
+                                    r"at list u?'one' line 1: "
                                     r"u?'max_length=' \(Invalid syntax\)"):
             load_data()
 
@@ -147,7 +180,7 @@ class LoaderTest(TestCase):
         open_mock.return_value = StringIO(six.u('unknown_option=10\n'))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
-                                    r"at wordlist u?'one' line 1: "
+                                    r"at list u?'one' line 1: "
                                     r"u?'unknown_option=10' \(Unknown option\)"):
             load_data()
 
@@ -155,7 +188,7 @@ class LoaderTest(TestCase):
         open_mock.return_value = StringIO(six.u('max_length=string\n'))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
-                                    r"at wordlist u?'one' line 1: "
+                                    r"at list u?'one' line 1: "
                                     r"u?'max_length=string' \(invalid literal.*\)"):
             load_data()
 
@@ -163,7 +196,7 @@ class LoaderTest(TestCase):
         open_mock.return_value = StringIO(six.u('something\nmax_length=9\n'))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
-                                    r"at wordlist u?'one' line 2: "
+                                    r"at list u?'one' line 2: "
                                     r"u?'max_length=9' \(options must be defined before words\)"):
             load_data()
 
@@ -176,7 +209,17 @@ class LoaderTest(TestCase):
         open_mock.return_value = StringIO(six.u('max_length=5\nabcde\nabcdef\nabc\n'))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Word is too long "
-                                    r"at wordlist u?'one' line 3: u?'abcdef'"):
+                                    r"at list u?'one' line 3: u?'abcdef'"):
+            _load_data('/data')
+
+    @patch('codecs.open')
+    @patch('os.path.isdir', return_value=True)
+    @patch('os.listdir', return_value=['one.txt'])
+    def test_number_of_words_in_txt(self, mock1, mock2, open_mock):
+        open_mock.return_value = StringIO(six.u('number_of_words=2\none two\nathree four\nfive\nsix\n'))
+        with self.assertRaisesRegex(InitializationError,
+                                    r"Invalid config: Phrase has 1 word\(s\) \(while number_of_words=2\) "
+                                    r"at list u?'one' line 4: u?'five'"):
             _load_data('/data')
 
 
