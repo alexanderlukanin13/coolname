@@ -2,6 +2,27 @@
 # Two-word phrases to use after "from"
 # ====================================
 
+max_length = 24
+number_of_words = 2
+
+# Small places
+fancy cafe
+prestigious college
+prestigious university
+
+# Big places
+big city
+foreign country
+small town
+wild west
+
+# Weird places
+ancient ruins
 another dimension
 another planet
-foreign country
+flying circus
+secret laboratory
+the government
+the future
+the past
+the stars
