@@ -275,7 +275,6 @@ class RandomNameGenerator(object):
             if not config['all'].get('__nocheck'):
                 _check_max_slug_length(self._max_slug_length, self._lists[None])
         # Fire it up
-        self.randomize()
         assert self.generate_slug()
 
     def randomize(self, seed=None):
