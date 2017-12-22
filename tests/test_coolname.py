@@ -301,7 +301,7 @@ class TestCoolname(TestCase):
                          set(['big-cat', 'big-tiger', 'small-cat']))
 
     def test_max_slug_length_too_small(self):
-        badlist = ['a'] + [hex(i) for i in range(0, 100)]
+        badlist = [str(i) for i in range(10, 100)]
         with self.assertRaisesRegex(InitializationError,
                                     r'Invalid config: Impossible to generate '
                                     r'with max_slug_length=3'):
