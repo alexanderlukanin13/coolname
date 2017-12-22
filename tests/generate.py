@@ -17,14 +17,14 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Generate slug to stdout')
     parser.add_argument('length', default=None, nargs='?', type=int, help='Number of words')
     parser.add_argument('-w', '--word', help='With particular substring')
+    parser.add_argument('-a', '--attempts', type=int, default=100000, help='Number of attempts before giving up')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output (with timing)')
     args = parser.parse_args(argv)
     generate_slug(args.length)  # for more precise timing
     if args.word:
         words = args.word.split(',')
         slug = None
-        max_slugs = 100000
-        for i in range(0, max_slugs):
+        for i in range(0, args.attempts):
             start_time = time.perf_counter()
             s = generate_slug(args.length)
             elapsed_time = time.perf_counter() - start_time
