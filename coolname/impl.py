@@ -405,17 +405,17 @@ def _validate_config(config):
                                      .format(key, _CONF.FIELD.PHRASES))
                 # Validate multi-word
                 try:
-                    nwords = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])
+                    number_of_words = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])
                 except KeyError:
-                    nwords = None
+                    number_of_words = None
                 if not all(isinstance(phrase, (tuple, list)) for phrase in phrases):
                     raise ValueError('Config at key {!r} has invalid {!r}: '
                                      'must be all tuple/list'
                                      .format(key, _CONF.FIELD.PHRASES))
-                if nwords and not all(len(phrase) == nwords for phrase in phrases):
+                if number_of_words and not all(len(phrase) == number_of_words for phrase in phrases):
                     raise ValueError('Config at key {!r} has invalid {!r}: '
                                      'all phrases must have {} words'
-                                     .format(key, _CONF.FIELD.PHRASES, nwords))
+                                     .format(key, _CONF.FIELD.PHRASES, number_of_words))
                 # Validate max length
                 try:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
