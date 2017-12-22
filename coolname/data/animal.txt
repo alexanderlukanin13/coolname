@@ -78,6 +78,7 @@ impala
 kudu
 markhor
 mouflon
+muskox
 nyala
 sheep
 wildebeest
@@ -138,6 +139,7 @@ peccary
 # Aves -> Accipitriformes
 buzzard
 eagle
+goshawk
 harrier
 hawk
 vulture
@@ -237,6 +239,7 @@ turaco
 hoatzin
 
 # Aves -> Passeriformes
+bullfinch
 crow
 jackdaw
 jaybird
@@ -245,14 +248,17 @@ lyrebird
 magpie
 myna
 nightingale
+nuthatch
 oriole
 oxpecker
 raven
 robin
 rook
+skylark
 sparrow
 starling
 swallow
+waxbill
 wren
 
 # Aves -> Pelecaniformes
@@ -379,6 +385,7 @@ caracal
 cat
 cougar
 jaguar
+jaguarundi
 leopard
 lion
 lynx
@@ -421,6 +428,7 @@ walrus
 
 # Mammalia -> Carnivora -> Procyonidae
 raccoon
+ringtail
 
 # Mammalia -> Carnivora -> Ursidae
 bear
@@ -485,6 +493,7 @@ hare
 lemming
 marmot
 mouse
+muskrat
 porcupine
 rabbit
 rat
@@ -579,3 +588,6 @@ turtle
 # Dinosaurs
 dinosaur
 raptor
+
+# Not quite animals
+mushroom

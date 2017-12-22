@@ -130,6 +130,7 @@ hilarious
 hot
 interesting
 kind
+laughing
 lovely
 meek
 mellow
@@ -493,6 +494,7 @@ augmented
 auspicious
 axiomatic
 beneficial
+bipedal
 bizarre
 complex
 dancing
@@ -517,6 +519,7 @@ hungry
 hypnotic
 hysterical
 illegal
+imperial
 imported
 impossible
 inescapable

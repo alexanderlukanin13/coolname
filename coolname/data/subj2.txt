@@ -8,23 +8,73 @@ number_of_words = 2
 max_length = 22
 
 # Birds
+atlantic puffin
+bank swallow
+barn owl
+barn swallow
+barred owl
+chimney swift
+cliff swallow
+emperor goose
+harlequin duck
+himalayan snowcock
 hyacinth macaw
+mangrove cuckoo
+mute swan
 northern cardinal
+peregrine falcon
+prairie falcon
 red cardinal
+snow goose
+snowy owl
+trumpeter swan
+tufted puffin
+whooper swan
+whooping crane
 
 # Insects
 fire ant
 
 # Mammals
+alpine chipmunk
+beaked whale
 bottlenose dolphin
+clouded leopard
+eared seal
+elephant seal
+feral cat
+feral dog
+feral donkey
+feral goat
+feral horse
+feral pig
+fur seal
 grizzly bear
+harbor porpoise
 honey badger
+humpback whale
 killer whale
+mountain deer
+mountain goat
 mountain lion
+olympic marmot
+pampas deer
+pine marten
+polynesian rat
+rhesus macaque
+river dolphin
+sea lion
+sea otter
+snow leopard
 sperm whale
+spinner dolphin
+vampire bat
 
 # Reptiles
 gila monster
 freshwater crocodile
 saltwater crocodile
 snapping turtle
+
+# Fictional
+walking mushroom
