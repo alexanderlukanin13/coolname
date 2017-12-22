@@ -238,7 +238,7 @@ class TestCoolname(TestCase):
         generator = RandomNameGenerator({'all': {'type': 'phrases', 'phrases': ['str is allowed']}})
         assert generator.generate_slug() == 'str-is-allowed'
         with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid 'phrases': must be all str/tuple/list"):
+                                    "Invalid config: Config at key 'all' has invalid 'phrases': must be all string/tuple/list"):
             RandomNameGenerator({'all': {'type': 'phrases', 'phrases': [[['too many square brackets']]]}})
         # Number of words
         RandomNameGenerator({
@@ -389,8 +389,8 @@ class TestCoolname(TestCase):
         }
         generator = RandomNameGenerator(config)
         generator.randomize(0)
-        values = set(generator.generate_slug() for i in range(10))
-        assert values == set(['a-one', 'a-two', 'a-three-four', 'a-five-six'])
+        values = set(generator.generate_slug() for i in range(28))
+        self.assertEqual(values, set(['a-one', 'a-two', 'a-three-four', 'a-five-six']))
 
 
 if __name__ == '__main__':

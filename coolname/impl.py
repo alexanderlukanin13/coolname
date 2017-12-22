@@ -55,8 +55,10 @@ class AbstractNestedList(object):
 # Poor man's `six`
 try:
     _unicode = unicode
+    _str_types = (str, _unicode)
 except NameError:
     _unicode = str
+    _str_types = str
 
 
 # Convert value to bytes, for hashing
@@ -337,8 +339,8 @@ def _is_str(value):
 
 # Translate phrases defined as strings to tuples
 def _split_phrase(x):
-    if isinstance(x, str):
-        return re.split(r'\s+', x.strip())
+    if isinstance(x, _str_types):
+        return re.split(_unicode(r'\s+'), x.strip())
     else:
         return x
 
@@ -423,9 +425,9 @@ def _validate_config(config):
                     max_length = None
                 for phrase in phrases:
                     phrase = _split_phrase(phrase)  # str -> sequence, if necessary
-                    if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
+                    if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, _str_types) for x in phrase):
                         raise ValueError('Config at key {!r} has invalid {!r}: '
-                                         'must be all str/tuple/list'
+                                         'must be all string/tuple/list'
                                          .format(key, _CONF.FIELD.PHRASES))
                     if number_of_words is not None and len(phrase) != number_of_words:
                         raise ValueError('Config at key {!r} has invalid phrase {!r} '
