@@ -240,7 +240,7 @@ class RandomNameGenerator(object):
         self.randomize()
         assert self.generate_slug()
 
-    def randomize(self):
+    def randomize(self, seed=None):
         """
         Re-seeds random number generator.
 
@@ -249,7 +249,7 @@ class RandomNameGenerator(object):
 
         NOTE: re-seeding has global effect.
         """
-        random.seed()
+        random.seed(seed)
 
     def generate(self, pattern=None):
         """
