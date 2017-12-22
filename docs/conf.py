@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'coolname'
-copyright = '2016, Alexander Lukanin'
+copyright = '2018, Alexander Lukanin'
 author = 'Alexander Lukanin'
 
 # The version info for the project you're documenting, acts as replacement for

@@ -3,6 +3,15 @@
 History
 -------
 
+1.0.0 (2017-12-22)
+------------------
+
+* `Phrase lists`_
+
+.. _Phrase lists: https://coolname.readthedocs.io/en/latest/customization.html#phrases-list
+
+* Total number of combinations = 60 billions.
+
 0.2.0 (2016-09-28)
 ------------------
 
