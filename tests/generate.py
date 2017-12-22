@@ -32,7 +32,7 @@ def main(argv):
                 slug = s
                 break
         if slug is None:
-            print('Failed to generate in {} attempts'.format(max_slugs))
+            print('Failed to generate in {} attempts'.format(args.attempts))
             return 1
     else:
         start_time = time.perf_counter()
