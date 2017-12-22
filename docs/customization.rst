@@ -5,14 +5,14 @@ Customization
 Configuration rules
 ===================
 
-Configuration is a simple flat dictionary of rules:
+Configuration is a flat dictionary of rules:
 
 .. code-block:: python
 
     {
         '<rule_id>': {
             'comment': 'Some info about this rule. Not mandatory.',
-            'type': '<nested|cartesian|words|const>',
+            'type': '<nested|cartesian|words|phrases|const>',
             # additional fields, depending on type
         },
         ...
@@ -21,7 +21,7 @@ Configuration is a simple flat dictionary of rules:
 ``<rule_id>`` is the identifier of rule. Root rule must be named ``'all'`` - that's what you use
 when you call ``generate()`` or ``generate_slug()`` without arguments.
 
-There are four types of configuration rules.
+There are five types of configuration rules.
 
 Words list
 ----------
@@ -47,10 +47,26 @@ with equal probability.
         'words': ['apple', 'banana']
     },
 
+
+Phrases list
+------------
+
+Same as words list, but each element is one or more words.
+
+.. code-block:: python
+
+    # This will produce random color
+    'color': {
+        'type': 'phrases',
+        'words': ['red', 'green', 'navy blue', ['royal', 'purple']]
+    }
+
+Phrase can be written as a string (words are separated by space) or as a list of words.
+
 Nested list
 -----------
 
-Chooses a random word from any of the child lists.
+Chooses a random word (or phrase) from any of the child lists.
 Probability is proportional to child list length.
 
 .. code-block:: python
@@ -83,7 +99,7 @@ Cartesian list
 ---------------
 
 Cartesian_ list works like a slot machine, and produces a list of length N
-by choosing one random word from every child list.
+by choosing one random word (or phrase) from every child list.
 
 .. code-block:: python
 
@@ -125,12 +141,15 @@ Let's try the config defined above:
 Length limits
 =============
 
+Number of characters
+--------------------
+
 There are two limits:
 
 * ``max_length``
 
     This constraint is hard: you can't create :class:`RandomNameGenerator` instance
-    if some word in some rule exceeds that rule's limit.
+    if some word (or phrase) in some rule exceeds that rule's limit.
 
     For example, this will fail:
 
@@ -142,15 +161,25 @@ There are two limits:
                 "max_length": 5
             }
 
-    Different word lists can have different limits.
+    Different word lists and phrase lists can have different limits.
     If you don't specify it, there is no limit.
+
+    *NOTE: When max_length is applied to phrase lists, spaces are not counted. So this will work:*
+
+        .. code-block:: json
+
+            {
+                "type": "phrases",
+                "phrases": ["big cat"],
+                "max_length": 6
+            }
 
 * ``max_slug_length``
 
     This constraint is soft: if result is too long, it is silently discarded
     and generator rolls the dice again.
-    This allows you to have longer-than-average words which
-    still fit nicely with shorter words from other lists.
+    This allows you to have longer-than-average words (and phrases) which
+    still fit nicely with shorter words (and phrases) from other lists.
 
     Of course, it's better to keep the fraction of "too long" combinations low,
     as it affects the performance. In fact, :class:`RandomNameGenerator` performs
@@ -181,6 +210,29 @@ There are two limits:
 
 Both of these limits are optional. Default configuration uses ``"max_slug_length": 50``
 according to Django slug length.
+
+Number of words
+---------------
+
+Use ``number_of_words`` parameter to enforce particular number of words in a phrase for a given list.
+
+This constraint is hard: you can't create :class:`RandomNameGenerator` instance
+if some phrase in a given list has a wrong number of words.
+
+For example, this will fail because the last item has 3 words:
+
+.. code-block:: json
+
+    {
+        "type": "phrases",
+        "phrases": [
+            "washing machine",
+            "microwave oven",
+            "vacuum cleaner",
+            "large hadron collider"
+        ],
+        "number_of_words": 2
+    }
 
 Configuration files
 ===================
@@ -239,17 +291,17 @@ That's all! Now loaded config contains all the same rules and we can create a ge
 >>> g.generate_slug()
 'hidden-tiger'
 
-Text files format
------------------
+Text file format for words
+---------------------------
 
 Basic format is simple: ::
 
     # comment
-    word
-    word  # inline comment
+    one
+    two  # inline comment
 
     # blank lines are OK
-    word
+    three
 
 You can also specify options like this: ::
 
@@ -261,11 +313,36 @@ Which is equivalent to adding the same option in config dictionary:
 
     {
         "type": "words",
-        "words": [...],
+        "words": ["one", "two", "three"],
         "max_length": 13
     }
 
 Options should be placed in the beginning of the text file, before the first word.
+
+Text file format for phrases
+-----------------------------
+
+For phrases, format is the same as for words. If any line in a file has more than one word,
+the whole file is automagically transformed to a ``"phrases"`` list instead of ``"words"``.
+
+For example, this file: ::
+
+    one
+    two
+
+    # Here is the phrase
+    three four
+
+is translated to the following rule:
+
+.. code-block:: json
+
+    {
+        "type": "phrases",
+        "phrases": [
+            ["one"], ["two"], ["three", "four"]
+        ]
+    }
 
 Unicode support
 ===============
