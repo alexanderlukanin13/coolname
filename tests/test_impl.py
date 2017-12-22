@@ -6,7 +6,7 @@ import six
 
 from coolname import RandomNameGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
-    PhraseList,\
+    WordList, PhraseList, WordAsPhraseWrapper,\
     _create_lists, _to_bytes, _create_default_generator
 
 from .common import TestCase, patch
@@ -171,6 +171,21 @@ class TestImplementation(TestCase):
         generator = _create_default_generator()
         assert isinstance(generator.generate()[0], six.text_type)
         assert isinstance(generator.generate_slug(), six.text_type)
+
+
+    def test_WordAsPhraseWrapper(self):
+        wrapper = WordAsPhraseWrapper(WordList(['one', 'two']))
+        assert len(wrapper) == 2
+        assert wrapper[0] == ('one', )
+        assert wrapper[1] == ('two', )
+        assert str(wrapper) == "WordAsPhraseWrapper(WordList(['one', 'two'], len=2))"
+        assert repr(wrapper) == str(wrapper)
+
+
+    def test_NestLest_str_repr(self):
+        nested_list = NestedList([WordList(['one', 'two'])])
+        assert str(nested_list) == "NestedList(1, len=2)"
+        assert repr(nested_list) == str(nested_list)
 
 
 if __name__ == '__main__':

@@ -29,6 +29,9 @@ class AbstractNestedList(object):
     def __str__(self):
         return '{}({}, len={})'.format(self.__class__.__name__, len(self._lists), len(self))
 
+    def __repr__(self):
+        return self.__str__()
+
     def random(self):
         return self[randrange(len(self))]
 
@@ -80,6 +83,9 @@ class _BasicList(list, AbstractNestedList):
             ls[3] = '...'
         return '{}([{}], len={})'.format(self.__class__.__name__, ', '.join(ls), len(self))
 
+    def __repr__(self):
+        return self.__str__()
+
     def squash(self, hard, cache):
         return self
 
@@ -107,9 +113,38 @@ class PhraseList(_BasicList):
         self.multiword = True
 
 
+class WordAsPhraseWrapper(object):
+
+    multiword = True
+
+    def __init__(self, wordlist):
+        self._list = wordlist
+        self._length = len(wordlist)
+
+    def __len__(self):
+        return self._length
+
+    def __getitem__(self, i):
+        return (self._list[i], )
+
+    def squash(self, hard, cache):
+        return self
+
+    def __str__(self):
+        return '{}({})'.format(self.__class__.__name__, str(self._list))
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, repr(self._list))
+
+
 class NestedList(AbstractNestedList):
 
     def __init__(self, lists):
+        # If user mixes WordList and PhraseList in the same NestedList,
+        # we need to make sure that __getitem__ always returns tuple.
+        # For that, we wrap WordList instances.
+        if any(isinstance(x, WordList) for x in lists) and any(x.multiword for x in lists):
+            lists = [WordAsPhraseWrapper(x) if isinstance(x, WordList) else x for x in lists]
         super(NestedList, self).__init__(lists)
         # Fattest lists first (to reduce average __getitem__ time)
         self._lists.sort(key=lambda x: -len(x))

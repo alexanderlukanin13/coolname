@@ -359,6 +359,38 @@ class TestCoolname(TestCase):
                                     r"are not allowed\."):
             RandomNameGenerator(config)
 
+    def test_mix_phrases_and_words_in_nested_list(self):
+        config = {
+            'all': {
+                'type': 'cartesian',
+                'lists': ['a', 'nested']
+            },
+            'a': {
+                'type': 'const',
+                'value': 'a'
+            },
+            'nested': {
+                'type': 'nested',
+                'lists': ['words', 'phrases']
+            },
+            'words': {
+                'type': 'words',
+                'words': ['one', 'two']
+            },
+            'phrases': {
+                'type': 'phrases',
+                'phrases': [
+                    #'three four',
+                    ['five', 'six']
+                ]
+            }
+        }
+        generator = RandomNameGenerator(config)
+        generator.randomize(0)
+        values = set(generator.generate_slug() for i in range(10))
+        assert values == set(['a-one', 'a-two', 'a-five-six'])
+
+
 if __name__ == '__main__':
     import sys
     sys.exit(unittest.main())
