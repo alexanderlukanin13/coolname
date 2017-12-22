@@ -8,6 +8,7 @@ import itertools
 import os
 import random
 from random import randrange
+import re
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
@@ -109,7 +110,7 @@ class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
 
     def __init__(self, sequence=None):
-        super(PhraseList, self).__init__(tuple(x) for x in sequence)
+        super(PhraseList, self).__init__(tuple(_split_phrase(x)) for x in sequence)
         self.multiword = True
 
 
@@ -334,6 +335,14 @@ def _is_str(value):
     return value.__class__.__name__ in ('str', 'unicode')
 
 
+# Translate phrases defined as strings to tuples
+def _split_phrase(x):
+    if isinstance(x, str):
+        return re.split(r'\s+', x.strip())
+    else:
+        return x
+
+
 def _validate_config(config):
     """
     A big and ugly method for config validation.
@@ -403,30 +412,30 @@ def _validate_config(config):
                 if not isinstance(phrases, list) or not phrases:
                     raise ValueError('Config at key {!r} has invalid {!r}'
                                      .format(key, _CONF.FIELD.PHRASES))
-                # Validate multi-word
+                # Validate multi-word and max length
                 try:
                     number_of_words = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])
                 except KeyError:
                     number_of_words = None
-                if not all(isinstance(phrase, (tuple, list)) for phrase in phrases):
-                    raise ValueError('Config at key {!r} has invalid {!r}: '
-                                     'must be all tuple/list'
-                                     .format(key, _CONF.FIELD.PHRASES))
-                if number_of_words and not all(len(phrase) == number_of_words for phrase in phrases):
-                    raise ValueError('Config at key {!r} has invalid {!r}: '
-                                     'all phrases must have {} words'
-                                     .format(key, _CONF.FIELD.PHRASES, number_of_words))
-                # Validate max length
                 try:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
                 except KeyError:
                     max_length = None
-                if max_length is not None:
-                    for phrase in phrases:
-                        if sum(len(word) for word in phrase) > max_length:
-                            raise ValueError('Config at key {!r} has invalid phrase {!r} '
-                                             '(longer than {} characters)'
-                                             .format(key, ' '.join(phrase), max_length))
+                for phrase in phrases:
+                    phrase = _split_phrase(phrase)  # str -> sequence, if necessary
+                    if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
+                        raise ValueError('Config at key {!r} has invalid {!r}: '
+                                         'must be all str/tuple/list'
+                                         .format(key, _CONF.FIELD.PHRASES))
+                    if number_of_words is not None and len(phrase) != number_of_words:
+                        raise ValueError('Config at key {!r} has invalid phrase {!r} '
+                                         '({} word(s) but {}={})'
+                                         .format(key, ' '.join(phrase),
+                                                 len(phrase), _CONF.FIELD.NUMBER_OF_WORDS, number_of_words))
+                    if max_length is not None and sum(len(word) for word in phrase) > max_length:
+                        raise ValueError('Config at key {!r} has invalid phrase {!r} '
+                                         '(longer than {} characters)'
+                                         .format(key, ' '.join(phrase), max_length))
             else:
                 raise ValueError('Config at key {!r} has invalid {!r}'
                                  .format(key, _CONF.FIELD.TYPE))

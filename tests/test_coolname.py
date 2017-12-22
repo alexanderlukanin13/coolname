@@ -235,9 +235,11 @@ class TestCoolname(TestCase):
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'phrases'"):
             RandomNameGenerator({'all': {'type': 'phrases', 'phrases': []}})
+        generator = RandomNameGenerator({'all': {'type': 'phrases', 'phrases': ['str is allowed']}})
+        assert generator.generate_slug() == 'str-is-allowed'
         with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid 'phrases': must be all tuple/list"):
-            RandomNameGenerator({'all': {'type': 'phrases', 'phrases': ['str not allowed']}})
+                                    "Invalid config: Config at key 'all' has invalid 'phrases': must be all str/tuple/list"):
+            RandomNameGenerator({'all': {'type': 'phrases', 'phrases': [[['too many square brackets']]]}})
         # Number of words
         RandomNameGenerator({
             'all': {
@@ -246,7 +248,7 @@ class TestCoolname(TestCase):
                 'phrases': [['one', 'two'], ['three', 'four']]}
         })
         with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid 'phrases': all phrases must have 2 words"):
+                                    "Invalid config: Config at key 'all' has invalid phrase 'five' \(1 word\(s\) but number_of_words=2\)"):
             RandomNameGenerator({
                 'all': {
                     'type': 'phrases',
@@ -380,15 +382,15 @@ class TestCoolname(TestCase):
             'phrases': {
                 'type': 'phrases',
                 'phrases': [
-                    #'three four',
-                    ['five', 'six']
+                    'three four',    # Can be space-separated string
+                    ['five', 'six']  # or a list/tuple
                 ]
             }
         }
         generator = RandomNameGenerator(config)
         generator.randomize(0)
         values = set(generator.generate_slug() for i in range(10))
-        assert values == set(['a-one', 'a-two', 'a-five-six'])
+        assert values == set(['a-one', 'a-two', 'a-three-four', 'a-five-six'])
 
 
 if __name__ == '__main__':
