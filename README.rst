@@ -11,8 +11,9 @@ Random Name and Slug Generator
 .. image:: https://coveralls.io/repos/alexanderlukanin13/coolname/badge.svg?branch=master&service=github
         :target: https://coveralls.io/github/alexanderlukanin13/coolname?branch=master
 
+Do you want random human-readable strings?
 
-Do you want random human-readable strings to identify things?
+.. code-block:: python
 
     >>> from coolname import generate_slug
     >>> generate_slug()
@@ -27,30 +28,37 @@ Features
 
 * Generate slugs, ready to use, Django-compatible.
 
-    >>> from coolname import generate_slug
-    >>> generate_slug()
-    'qualified-agama-of-absolute-kindness'
+    .. code-block:: python
+
+        >>> from coolname import generate_slug
+        >>> generate_slug()
+        'qualified-agama-of-absolute-kindness'
 
 * Generate names as sequences and do whatever you want with them.
 
-    >>> from coolname import generate
-    >>> generate()
-    ['beneficial', 'bronze', 'bee', 'of', 'glee']
-    >>> ' '.join(generate())
-    'limber transparent toad of luck'
-    >>> ''.join(x.capitalize() for x in generate())
-    'CalmRefreshingTerrierOfAttraction'
+    .. code-block:: python
+
+        >>> from coolname import generate
+        >>> generate()
+        ['beneficial', 'bronze', 'bee', 'of', 'glee']
+        >>> ' '.join(generate())
+        'limber transparent toad of luck'
+        >>> ''.join(x.capitalize() for x in generate())
+        'CalmRefreshingTerrierOfAttraction'
 
 * Generate names of specific length: 2, 3 or 4 words.
 
-    >>> generate_slug(2)
-    'mottled-crab'
-    >>> generate_slug(3)
-    'fantastic-acoustic-whale'
-    >>> generate_slug(4)
-    'military-diamond-tuatara-of-endeavor'
+    .. code-block:: python
 
-    *Note: without argument, it returns a random length, but probability of 4-word name is much higher.*
+        >>> generate_slug(2)
+        'mottled-crab'
+        >>> generate_slug(3)
+        'fantastic-acoustic-whale'
+        >>> generate_slug(4)
+        'military-diamond-tuatara-of-endeavor'
+
+    *Note: without argument, it returns a random length, but probability of 4‑word name is much higher.*
+    *Prepositions and articles (of, from, the) are not counted as words.*
 
 * Over 10\ :sup:`10`\  random names.
 
@@ -62,9 +70,11 @@ Features
     2     10\ :sup:`5`\  ``prudent-armadillo``
     ===== ============== =======================================
 
-    >>> from coolname import get_combinations_count
-    >>> get_combinations_count(4)
-    51560093424
+    .. code-block:: python
+
+        >>> from coolname import get_combinations_count
+        >>> get_combinations_count(4)
+        60610181372
 
 * Hand-picked vocabulary. ``sexy`` and ``demonic`` are about the most "offensive" words here -
   but there is only a pinch of them, for spice. Most words are either neutral, such as ``red``, or positive,
@@ -73,29 +83,31 @@ Features
 
 * `Easy customization <http://coolname.readthedocs.io/en/latest/customization.html>`_. Create your own rules!
 
-    >>> from coolname import RandomNameGenerator
-    >>> generator = RandomNameGenerator({
-    ...   'all': {
-    ...     'type': 'cartesian',
-    ...     'lists': ['first_name', 'last_name']
-    ...   },
-    ...   'first_name': {
-    ...     'type': 'words',
-    ...     'words': ['james', 'john']
-    ...   },
-    ...   'last_name': {
-    ...     'type': 'words',
-    ...     'words': ['smith', 'brown']
-    ...   }
-    ... })
-    >>> generator.generate_slug()
-    'james-brown'
+    .. code-block:: python
+
+        >>> from coolname import RandomNameGenerator
+        >>> generator = RandomNameGenerator({
+        ...   'all': {
+        ...     'type': 'cartesian',
+        ...     'lists': ['first_name', 'last_name']
+        ...   },
+        ...   'first_name': {
+        ...     'type': 'words',
+        ...     'words': ['james', 'john']
+        ...   },
+        ...   'last_name': {
+        ...     'type': 'words',
+        ...     'words': ['smith', 'brown']
+        ...   }
+        ... })
+        >>> generator.generate_slug()
+        'james-brown'
 
 Installation
 ============
 
-::
+.. code-block:: bash
 
     pip install coolname
 
-``coolname`` is written in pure Python and has no dependencies. It works on any modern Python version.
+:mod:`coolname` is written in pure Python and has no dependencies. It works on any modern Python version, including PyPy.

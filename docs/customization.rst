@@ -1,6 +1,6 @@
-=============
-Customization
-=============
+=================
+Custom generators
+=================
 
 Configuration rules
 ===================
@@ -127,8 +127,8 @@ Length of Cartesian list is the product of lengths of child lists.
 Let's try the config defined above:
 ::
 
-    >>> from coolname import RandomNameGenerator
-    >>> generator = RandomNameGenerator(config)
+    >>> from coolname import RandomGenerator
+    >>> generator = RandomGenerator(config)
     >>> for i in range(3):
     ...     print(generator.generate_slug())
     ...
@@ -148,7 +148,7 @@ There are two limits:
 
 * ``max_length``
 
-    This constraint is hard: you can't create :class:`RandomNameGenerator` instance
+    This constraint is hard: you can't create :class:`RandomGenerator` instance
     if some word (or phrase) in some rule exceeds that rule's limit.
 
     For example, this will fail:
@@ -182,7 +182,7 @@ There are two limits:
     still fit nicely with shorter words (and phrases) from other lists.
 
     Of course, it's better to keep the fraction of "too long" combinations low,
-    as it affects the performance. In fact, :class:`RandomNameGenerator` performs
+    as it affects the performance. In fact, :class:`RandomGenerator` performs
     a sanity test upon an initialization: if probability of getting "too long" combination
     is unacceptable, it will raise an exception.
 
@@ -216,7 +216,7 @@ Number of words
 
 Use ``number_of_words`` parameter to enforce particular number of words in a phrase for a given list.
 
-This constraint is hard: you can't create :class:`RandomNameGenerator` instance
+This constraint is hard: you can't create :class:`RandomGenerator` instance
 if some phrase in a given list has a wrong number of words.
 
 For example, this will fail because the last item has 3 words:
@@ -241,11 +241,11 @@ Another small example: a pair of (adjective, noun) generated as follows: ::
 
     (crouching|hidden) (tiger|dragon)
 
-Of course, you can just feed config dict into :class:`RandomNameGenerator` constructor:
+Of course, you can just feed config dict into :class:`RandomGenerator` constructor:
 
->>> from coolname import RandomNameGenerator
+>>> from coolname import RandomGenerator
 >>> config = {'all': {'type': 'cartesian', 'lists': ['adjective', 'noun']}, 'adjective': {'type':'words', 'words':['crouching','hidden']}, 'noun': {'type': 'words', 'words': ['tiger', 'dragon']}}
->>> g = RandomNameGenerator(config)
+>>> g = RandomGenerator(config)
 >>> g.generate_slug()
 'hidden-dragon'
 
@@ -287,7 +287,7 @@ That's all! Now loaded config contains all the same rules and we can create a ge
 
 >>> config
 {'adjective': {'words': ['crouching', 'hidden'], 'type': 'words'}, 'noun': {'words': ['dragon', 'tiger'], 'type': 'words'}, 'all': {'lists': ['adjective', 'noun'], 'type': 'cartesian'}}
->>> g = RandomNameGenerator(config)
+>>> g = RandomGenerator(config)
 >>> g.generate_slug()
 'hidden-tiger'
 

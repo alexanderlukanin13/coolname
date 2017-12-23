@@ -1,14 +1,22 @@
 .. :changelog:
 
-History
--------
+Release history
+===============
 
-1.0.0 (2017-12-22)
+1.0.0 (2017-12-23)
 ------------------
 
-* `Phrase lists`_
+* `Phrase lists <https://coolname.readthedocs.io/en/latest/customization.html#phrases-list>`_
+  give you even more freedom when creating custom generators.
 
-.. _Phrase lists: https://coolname.readthedocs.io/en/latest/customization.html#phrases-list
+* **Breaking changes:**
+
+    - Renamed :class:`RandomNameGenerator` to :class:`RandomGenerator`.
+
+    - :func:`randomize` was removed, because it was just an alias to :func:`random.seed`.
+
+* You can seed or even replace the underlying :class:`random.Random` instance, see
+  `documentation <https://coolname.readthedocs.io/en/latest/randomization.html>`_.
 
 * Total number of combinations = 60 billions.
 
