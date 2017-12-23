@@ -16,7 +16,7 @@ Release history
     - :func:`randomize` was removed, because it was just an alias to :func:`random.seed`.
 
 * You can seed or even replace the underlying :class:`random.Random` instance, see
-  `documentation <https://coolname.readthedocs.io/en/latest/randomization.html>`_.
+  `Randomization <https://coolname.readthedocs.io/en/latest/randomization.html>`_.
 
 * Total number of combinations = 60 billions.
 

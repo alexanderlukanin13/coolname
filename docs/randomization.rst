@@ -1,5 +1,7 @@
 .. _randomization:
 
+.. py:currentmodule:: coolname
+
 =============
 Randomization
 =============
@@ -7,17 +9,17 @@ Randomization
 Re-seeding
 ----------
 
-As a source of randomness :mod:`coolname` uses standard :mod:`random` module,
-specifically :func:`random.randrange` function.
+As a source of randomness :mod:`coolname` uses standard :py:mod:`random` module,
+specifically :py:func:`random.randrange` function.
 
-To re-seed the default generator, simply call :func:`random.seed`:
+To re-seed the default generator, simply call :py:func:`random.seed`:
 
 .. code-block:: python
 
     import os, random
     random.seed(os.urandom(128))
 
-:mod:`coolname` itself never calls :func:`random.seed`.
+:mod:`coolname` itself never calls :py:func:`random.seed`.
 
 Replacing the random number generator
 -------------------------------------
@@ -90,7 +92,7 @@ The overall number of combinations is 2 × 3 × (5 + 6) = 66.
 You can imagine a space of possible combinations as a virtual N-dimensional array.
 In this example, it's 3-dimensional, with sides equal to 2, 3 and 11.
 
-When user calls :meth:`generator.generate` (or :func:`generate_slug`),
+When user calls :meth:`RandomGenerator.generate_slug`,
 a random integer is generated via ``randrange(66)``.
 Then, the integer is used to pick an element from 3-dimensional array.
 

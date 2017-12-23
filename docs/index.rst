@@ -10,6 +10,7 @@
    Introduction <self>
    customization
    randomization
+   classes-and-functions
    thread-safe
    history
 

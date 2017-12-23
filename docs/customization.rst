@@ -2,6 +2,8 @@
 Custom generators
 =================
 
+.. py:currentmodule:: coolname
+
 Configuration rules
 ===================
 
@@ -19,7 +21,7 @@ Configuration is a flat dictionary of rules:
     }
 
 ``<rule_id>`` is the identifier of rule. Root rule must be named ``'all'`` - that's what you use
-when you call ``generate()`` or ``generate_slug()`` without arguments.
+when you call :func:`generate` or :func:`generate_slug` without arguments.
 
 There are five types of configuration rules.
 
@@ -119,13 +121,11 @@ by choosing one random word (or phrase) from every child list.
         'value': 'my'
     },
 
-*NOTE: You can have many nested lists, but you should never
-put one Cartesian list inside another.*
-
 Length of Cartesian list is the product of lengths of child lists.
 
 Let's try the config defined above:
-::
+
+.. code-block:: python
 
     >>> from coolname import RandomGenerator
     >>> generator = RandomGenerator(config)
@@ -135,6 +135,9 @@ Let's try the config defined above:
     my-banana-is-sweet
     my-apple-is-green
     my-apple-is-sour
+
+.. warning::
+    You can have many nested lists, but you should never put a Cartesian list inside another Cartesian list.
 
 .. _Cartesian: https://en.wikipedia.org/wiki/Cartesian_product
 
@@ -156,22 +159,26 @@ There are two limits:
         .. code-block:: json
 
             {
-                "type": "words",
-                "words": ["cat", "tiger", "jaguar"],
-                "max_length": 5
+                "all": {
+                    "type": "words",
+                    "words": ["cat", "tiger", "jaguar"],
+                    "max_length": 5
+                }
             }
 
     Different word lists and phrase lists can have different limits.
     If you don't specify it, there is no limit.
 
-    *NOTE: When max_length is applied to phrase lists, spaces are not counted. So this will work:*
+    *Note: when max_length is applied to phrase lists, spaces are not counted. So this will work:*
 
         .. code-block:: json
 
             {
-                "type": "phrases",
-                "phrases": ["big cat"],
-                "max_length": 6
+                "all": {
+                    "type": "phrases",
+                    "phrases": ["big cat"],
+                    "max_length": 6
+                }
             }
 
 * ``max_slug_length``
@@ -183,7 +190,7 @@ There are two limits:
 
     Of course, it's better to keep the fraction of "too long" combinations low,
     as it affects the performance. In fact, :class:`RandomGenerator` performs
-    a sanity test upon an initialization: if probability of getting "too long" combination
+    a sanity test upon initialization: if probability of getting "too long" combination
     is unacceptable, it will raise an exception.
 
     For example, this will produce 7 possible combinations,
@@ -208,7 +215,7 @@ There are two limits:
             }
         }
 
-Both of these limits are optional. Default configuration uses ``"max_slug_length": 50``
+Both of these limits are optional. Default configuration uses ``max_slug_length = 50``
 according to Django slug length.
 
 Number of words
@@ -222,16 +229,19 @@ if some phrase in a given list has a wrong number of words.
 For example, this will fail because the last item has 3 words:
 
 .. code-block:: json
+    :emphasize-lines: 8,10
 
     {
-        "type": "phrases",
-        "phrases": [
-            "washing machine",
-            "microwave oven",
-            "vacuum cleaner",
-            "large hadron collider"
-        ],
-        "number_of_words": 2
+        "all": {
+            "type": "phrases",
+            "phrases": [
+                "washing machine",
+                "microwave oven",
+                "vacuum cleaner",
+                "large hadron collider"
+            ],
+            "number_of_words": 2
+        }
     }
 
 Configuration files
@@ -243,13 +253,15 @@ Another small example: a pair of (adjective, noun) generated as follows: ::
 
 Of course, you can just feed config dict into :class:`RandomGenerator` constructor:
 
->>> from coolname import RandomGenerator
->>> config = {'all': {'type': 'cartesian', 'lists': ['adjective', 'noun']}, 'adjective': {'type':'words', 'words':['crouching','hidden']}, 'noun': {'type': 'words', 'words': ['tiger', 'dragon']}}
->>> g = RandomGenerator(config)
->>> g.generate_slug()
-'hidden-dragon'
+.. code-block:: python
 
-but it becomes inconvenient as number of words grows. So, ``coolname`` can also use a mixed files format:
+    >>> from coolname import RandomGenerator
+    >>> config = {'all': {'type': 'cartesian', 'lists': ['adjective', 'noun']}, 'adjective': {'type':'words', 'words':['crouching','hidden']}, 'noun': {'type': 'words', 'words': ['tiger', 'dragon']}}
+    >>> g = RandomGenerator(config)
+    >>> g.generate_slug()
+    'hidden-dragon'
+
+but it becomes inconvenient as number of words grows. So, :mod:`coolname` can also use a mixed files format:
 you can specify rules in JSON file, and encapsulate long word lists into separate plain txt files
 (one file per one ``"words"`` rule).
 
@@ -280,16 +292,20 @@ For our example, we would need three files in a directory:
 
 Use auxiliary function to load config from a directory:
 
->>> from coolname.loader import load_config
->>> config = load_config('./my_config')
+.. code-block:: python
 
-That's all! Now loaded config contains all the same rules and we can create a generator object:
+    >>> from coolname.loader import load_config
+    >>> config = load_config('./my_config')
 
->>> config
-{'adjective': {'words': ['crouching', 'hidden'], 'type': 'words'}, 'noun': {'words': ['dragon', 'tiger'], 'type': 'words'}, 'all': {'lists': ['adjective', 'noun'], 'type': 'cartesian'}}
->>> g = RandomGenerator(config)
->>> g.generate_slug()
-'hidden-tiger'
+That's all! Now loaded config contains all the same rules and we can create :class:`RandomGenerator` object:
+
+.. code-block:: python
+
+    >>> config
+    {'adjective': {'words': ['crouching', 'hidden'], 'type': 'words'}, 'noun': {'words': ['dragon', 'tiger'], 'type': 'words'}, 'all': {'lists': ['adjective', 'noun'], 'type': 'cartesian'}}
+    >>> g = RandomGenerator(config)
+    >>> g.generate_slug()
+    'hidden-tiger'
 
 Text file format for words
 ---------------------------
@@ -309,12 +325,13 @@ You can also specify options like this: ::
 
 Which is equivalent to adding the same option in config dictionary:
 
-.. code-block:: json
+.. code-block:: python
+    :emphasize-lines: 4
 
     {
-        "type": "words",
-        "words": ["one", "two", "three"],
-        "max_length": 13
+        'type': 'words',
+        'words': ['one', 'two', 'three'],
+        'max_length': 13
     }
 
 Options should be placed in the beginning of the text file, before the first word.
