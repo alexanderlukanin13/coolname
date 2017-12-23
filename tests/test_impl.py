@@ -4,7 +4,7 @@ import unittest
 
 import six
 
-from coolname import RandomNameGenerator, InitializationError
+from coolname import RandomGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
     WordList, PhraseList, WordAsPhraseWrapper,\
     _create_lists, _to_bytes, _create_default_generator
@@ -89,7 +89,7 @@ class TestImplementation(TestCase):
                 'phrases': [['gamma', 'three'], ['delta', 'four'], ['epsilon']]
             }
         }
-        generator = RandomNameGenerator(config)
+        generator = RandomGenerator(config)
         # Make sure NestedLists are squashed and transformed into PhraseLists
         all_list = generator._lists[None]
         assert isinstance(all_list._lists[0], PhraseList)
@@ -144,7 +144,7 @@ class TestImplementation(TestCase):
                 'words': ['one', 'two', 'three']
             }
         }
-        generator = RandomNameGenerator(config)
+        generator = RandomGenerator(config)
         stream = io.StringIO()
         generator._dump(stream)
         self.assertEqual(stream.getvalue(),

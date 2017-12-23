@@ -231,7 +231,7 @@ class Scalar(AbstractNestedList):
         return self.value
 
 
-class RandomNameGenerator(object):
+class RandomGenerator(object):
     """
     This class provides random name generation interface.
 
@@ -537,7 +537,7 @@ def _create_default_generator():
     else:
         from coolname.data import config
     config['all']['__nocheck'] = True
-    return RandomNameGenerator(config)
+    return RandomGenerator(config)
 
 
 # Default generator is a global object

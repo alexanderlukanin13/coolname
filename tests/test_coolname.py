@@ -8,7 +8,7 @@ import six
 from six import u
 
 import coolname
-from coolname import RandomNameGenerator, InitializationError
+from coolname import RandomGenerator, InitializationError
 from coolname.loader import load_config
 
 from .common import patch, TestCase
@@ -48,7 +48,7 @@ class TestCoolname(TestCase):
     def test_create_from_file_not_found(self, *args):
         with self.assertRaisesRegex(InitializationError,
                                     r'File or directory not found: .*dummy'):
-            RandomNameGenerator(load_config('dummy'))
+            RandomGenerator(load_config('dummy'))
 
     @patch('os.path.isdir', return_value=False)
     @patch('os.path.isfile', return_value=True)
@@ -64,7 +64,7 @@ class TestCoolname(TestCase):
                 'words': [str(x) for x in range(0, 10)]
             }
         }
-        generator = RandomNameGenerator(load_config('dummy'))
+        generator = RandomGenerator(load_config('dummy'))
         with patch('coolname.impl.randrange', return_value=35):
             self.assertEqual(generator.generate_slug(), '3-5')
 
@@ -88,10 +88,10 @@ class TestCoolname(TestCase):
                                     r"^Conflict: list 'mywords' is defined both in config "
                                     "and in \*\.txt file. If it's a 'words' list, "
                                     "you should remove it from config\.$"):
-            RandomNameGenerator(load_config('dummy'))
+            RandomGenerator(load_config('dummy'))
 
     def test_generate_by_pattern(self):
-        generator = RandomNameGenerator({
+        generator = RandomGenerator({
             'all': {
                 'type': 'cartesian',
                 'lists': ['size', 'color', 'fruit'],
@@ -119,7 +119,7 @@ class TestCoolname(TestCase):
             self.assertEqual(generator.generate_slug('justcolor'), 'green-apple')
 
     def test_unicode_config(self):
-        generator = RandomNameGenerator({
+        generator = RandomGenerator({
             u('all'): {
                 u('type'): u('cartesian'),
                 u('lists'): [u('прилагательное'), u('существительное')]
@@ -141,7 +141,7 @@ class TestCoolname(TestCase):
             self.assertEqual(generator.generate(), [u('черный'), u('квадрат')])
 
     def test_avoid_repeating(self):
-        generator = RandomNameGenerator({
+        generator = RandomGenerator({
             'all': {
                 'type': 'cartesian',
                 'lists': ['adjective', 'of', 'noun'],
@@ -166,7 +166,7 @@ class TestCoolname(TestCase):
             self.assertEqual(generator.generate_slug(), 'one-of-two')
 
     def test_avoid_similar_words(self):
-        generator = RandomNameGenerator({
+        generator = RandomGenerator({
             'all': {
                 'type': 'cartesian',
                 'lists': ['w1', 'w2'],
@@ -193,37 +193,37 @@ class TestCoolname(TestCase):
     def test_configuration_error(self):
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Value at key 'all' is not a dict"):
-            RandomNameGenerator({'all': ['wrong']})
+            RandomGenerator({'all': ['wrong']})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has no 'type'"):
-            RandomNameGenerator({'all': {'typ': 'wrong'}})
+            RandomGenerator({'all': {'typ': 'wrong'}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'type'"):
-            RandomNameGenerator({'all': {'type': 'wrong'}})
+            RandomGenerator({'all': {'type': 'wrong'}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has no 'lists'"):
-            RandomNameGenerator({'all': {'type': 'nested'}})
+            RandomGenerator({'all': {'type': 'nested'}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'lists'"):
-            RandomNameGenerator({'all': {'type': 'nested', 'lists': 'wrong'}})
+            RandomGenerator({'all': {'type': 'nested', 'lists': 'wrong'}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has no 'value'"):
-            RandomNameGenerator({'all': {'type': 'const'}})
+            RandomGenerator({'all': {'type': 'const'}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'value'"):
-            RandomNameGenerator({'all': {'type': 'const', 'value': 123}})
+            RandomGenerator({'all': {'type': 'const', 'value': 123}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has no 'words'"):
-            RandomNameGenerator({'all': {'type': 'words'}})
+            RandomGenerator({'all': {'type': 'words'}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'words'"):
-            RandomNameGenerator({'all': {'type': 'words', 'words': []}})
+            RandomGenerator({'all': {'type': 'words', 'words': []}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Lists are referenced but not defined: one, two"):
-            RandomNameGenerator({'all': {'type': 'nested', 'lists': ['one', 'two']}})
+            RandomGenerator({'all': {'type': 'nested', 'lists': ['one', 'two']}})
         with self.assertRaisesRegex(InitializationError,
                                    "Invalid config: Rule 'all' is recursive: \['all', 'one'\]"):
-            RandomNameGenerator({
+            RandomGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'nested', 'lists': ['all']}
             })
@@ -231,17 +231,17 @@ class TestCoolname(TestCase):
     def test_configuration_error_phrases(self):
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has no 'phrases'"):
-            RandomNameGenerator({'all': {'type': 'phrases', 'words': []}})
+            RandomGenerator({'all': {'type': 'phrases', 'words': []}})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'phrases'"):
-            RandomNameGenerator({'all': {'type': 'phrases', 'phrases': []}})
-        generator = RandomNameGenerator({'all': {'type': 'phrases', 'phrases': ['str is allowed']}})
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': []}})
+        generator = RandomGenerator({'all': {'type': 'phrases', 'phrases': ['str is allowed']}})
         assert generator.generate_slug() == 'str-is-allowed'
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid 'phrases': must be all string/tuple/list"):
-            RandomNameGenerator({'all': {'type': 'phrases', 'phrases': [[['too many square brackets']]]}})
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': [[['too many square brackets']]]}})
         # Number of words
-        RandomNameGenerator({
+        RandomGenerator({
             'all': {
                 'type': 'phrases',
                 'number_of_words': 2,
@@ -249,14 +249,14 @@ class TestCoolname(TestCase):
         })
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid phrase 'five' \(1 word\(s\) but number_of_words=2\)"):
-            RandomNameGenerator({
+            RandomGenerator({
                 'all': {
                     'type': 'phrases',
                     'number_of_words': 2,
                     'phrases': [['one', 'two'], ['three', 'four'], ['five']]}
             })
         # Max length
-        RandomNameGenerator({
+        RandomGenerator({
             'all': {
                 'type': 'phrases',
                 'max_length': 10,
@@ -264,7 +264,7 @@ class TestCoolname(TestCase):
         })
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has invalid phrase 'white rabbit' \(longer than 10 characters\)"):
-            RandomNameGenerator({
+            RandomGenerator({
                 'all': {
                     'type': 'phrases',
                     'max_length': 10,
@@ -275,7 +275,7 @@ class TestCoolname(TestCase):
         with self.assertRaisesRegex(InitializationError,
                                    "Config at key u?'one' has invalid word u?'tiger' "
                                    "\(longer than 4 characters\)"):
-            RandomNameGenerator({
+            RandomGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'words', 'max_length': 4, 'words': ['cat', 'lion', 'tiger']}
             })
@@ -283,13 +283,13 @@ class TestCoolname(TestCase):
     def test_max_slug_length_invalid(self):
         with self.assertRaisesRegex(InitializationError,
                                     r'Invalid config: Invalid max_slug_length value'):
-            RandomNameGenerator({
+            RandomGenerator({
                 'all': {'type': 'words', 'max_slug_length': 'invalid', 'words': ['one', 'two']},
             })
 
     def test_max_slug_length(self):
         with warnings.catch_warnings(record=True) as w:
-            generator = RandomNameGenerator({
+            generator = RandomGenerator({
                 'all': {'type': 'cartesian', 'max_slug_length': 9, 'lists': ['one', 'two']},
                 'one': {'type': 'words', 'words': ['big',  'small']},
                 'two': {'type': 'words', 'words': ['cat',  'tiger']},
@@ -305,7 +305,7 @@ class TestCoolname(TestCase):
         with self.assertRaisesRegex(InitializationError,
                                     r'Invalid config: Impossible to generate '
                                     r'with max_slug_length=3'):
-            RandomNameGenerator({
+            RandomGenerator({
                 'all': {'type': 'cartesian', 'max_slug_length': 3, 'lists': ['one', 'two']},
                 'one': {'type': 'words', 'words': badlist},
                 'two': {'type': 'words', 'words': badlist},
@@ -313,7 +313,7 @@ class TestCoolname(TestCase):
 
     @patch('warnings.warn')
     def test_max_slug_length_warning(self, warn_mock):
-        RandomNameGenerator({
+        RandomGenerator({
             'all': {'type': 'cartesian', 'max_slug_length': 3, 'lists': ['one', 'two']},
             'one': {'type': 'words', 'words': ['a']*70 + ['bb']*30},
             'two': {'type': 'words', 'words': ['c']*70 + ['dd']*30},
@@ -336,7 +336,7 @@ class TestCoolname(TestCase):
             config['list{}'.format(i)] = {'type': 'nested', 'lists': ['list{}'.format(i+1)]}
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Rule 'all' is too deep"):
-            RandomNameGenerator(config)
+            RandomGenerator(config)
 
 
     @patch('coolname.impl.randrange', side_effect=partial(next, cycle(iter(range(8)))))
@@ -359,7 +359,7 @@ class TestCoolname(TestCase):
                                     r"Invalid config: Cartesian list 'all' contains "
                                     r"another Cartesian list 'cart_list'\. Nested Cartesian lists "
                                     r"are not allowed\."):
-            RandomNameGenerator(config)
+            RandomGenerator(config)
 
     def test_mix_phrases_and_words_in_nested_list(self):
         config = {
@@ -387,7 +387,7 @@ class TestCoolname(TestCase):
                 ]
             }
         }
-        generator = RandomNameGenerator(config)
+        generator = RandomGenerator(config)
         generator.randomize(0)
         values = set(generator.generate_slug() for i in range(28))
         self.assertEqual(values, set(['a-one', 'a-two', 'a-three-four', 'a-five-six']))

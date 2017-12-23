@@ -85,8 +85,8 @@ Features
 
     .. code-block:: python
 
-        >>> from coolname import RandomNameGenerator
-        >>> generator = RandomNameGenerator({
+        >>> from coolname import RandomGenerator
+        >>> generator = RandomGenerator({
         ...   'all': {
         ...     'type': 'cartesian',
         ...     'lists': ['first_name', 'last_name']

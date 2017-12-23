@@ -3,7 +3,7 @@ This module provides `load_config` function,
 which loads configuration from file or directory.
 
 You will need this only if you are creating
-custom instance of RandomNameGenerator.
+custom instance of RandomGenerator.
 """
 
 
