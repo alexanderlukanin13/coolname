@@ -55,7 +55,7 @@ class AbstractNestedList(object):
 # Poor man's `six`
 try:
     _unicode = unicode
-    _str_types = (str, _unicode)
+    _str_types = (str, _unicode)  # pragma: nocover
 except NameError:
     _unicode = str
     _str_types = str
