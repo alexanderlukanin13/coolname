@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from functools import partial
 from itertools import cycle
+import random
 import unittest
 import warnings
 
@@ -11,7 +12,7 @@ import coolname
 from coolname import RandomGenerator, InitializationError
 from coolname.loader import load_config
 
-from .common import patch, TestCase
+from .common import patch, TestCase, FakeRandom
 
 
 class TestCoolname(TestCase):
@@ -65,7 +66,7 @@ class TestCoolname(TestCase):
             }
         }
         generator = RandomGenerator(load_config('dummy'))
-        with patch('coolname.impl.randrange', return_value=35):
+        with patch.object(generator, '_randrange', return_value=35):
             self.assertEqual(generator.generate_slug(), '3-5')
 
     @patch('os.path.isdir', return_value=True)
@@ -114,7 +115,7 @@ class TestCoolname(TestCase):
                 'words': ['apple', 'banana']
             },
         })
-        with patch('coolname.impl.randrange', return_value=0):
+        with patch.object(generator, '_randrange', return_value=0):
             self.assertEqual(generator.generate_slug(), 'small-green-apple')
             self.assertEqual(generator.generate_slug('justcolor'), 'green-apple')
 
@@ -133,7 +134,7 @@ class TestCoolname(TestCase):
                 u('words'): [u('круг'), u('квадрат')]
             }
         })
-        with patch('coolname.impl.randrange',
+        with patch.object(generator, '_randrange',
                    side_effect=partial(next, cycle(iter(range(4))))):
             self.assertEqual(generator.generate_slug(), u('белый-круг'))
             self.assertEqual(generator.generate_slug(), u('белый-квадрат'))
@@ -159,14 +160,14 @@ class TestCoolname(TestCase):
                 'words': ['one', 'two']
             }
         })
-        with patch('coolname.impl.randrange',
+        with patch.object(generator, '_randrange',
                    side_effect=partial(next, cycle(iter([0, 1, 2, 3])))):
             self.assertEqual(generator.generate_slug(), 'one-of-two')
             self.assertEqual(generator.generate_slug(), 'two-of-one')
             self.assertEqual(generator.generate_slug(), 'one-of-two')
 
     def test_avoid_similar_words(self):
-        generator = RandomGenerator({
+        config = {
             'all': {
                 'type': 'cartesian',
                 'lists': ['w1', 'w2'],
@@ -179,9 +180,17 @@ class TestCoolname(TestCase):
                 'type': 'words',
                 'words': ['bravery',  'brass', 'agility', 'age']
             }
-        })
-        with patch('coolname.impl.randrange',
-                   side_effect=partial(next, cycle(iter(range(8))))):
+        }
+        generator = RandomGenerator(config)
+        with patch.object(generator, '_randrange',
+                          side_effect=partial(next, cycle(iter(range(8))))):
+            self.assertEqual(generator.generate_slug(), 'brave-bravery')  # This sucks
+
+        # Now enable unique prefix
+        config['all']['ensure_unique_prefix'] = 4
+        generator = RandomGenerator(config)
+        with patch.object(generator, '_randrange',
+                          side_effect=partial(next, cycle(iter(range(8))))):
             self.assertEqual(generator.generate_slug(), 'brave-brass')
             self.assertEqual(generator.generate_slug(), 'brave-agility')
             self.assertEqual(generator.generate_slug(), 'brave-age')
@@ -388,9 +397,37 @@ class TestCoolname(TestCase):
             }
         }
         generator = RandomGenerator(config)
-        generator.randomize(0)
+        random.seed(0)
         values = set(generator.generate_slug() for i in range(28))
         self.assertEqual(values, set(['a-one', 'a-two', 'a-three-four', 'a-five-six']))
+
+    def test_random(self):
+        # 1. Re-seed default generator
+        random.seed('default generator seed')
+        assert coolname.generate_slug() == 'polite-scrupulous-cobra-of-aptitude'
+
+        # 2. Replace default generator
+        rand = random.Random()
+        rand.seed('new Random')
+        coolname.replace_random(rand)
+        assert coolname.generate_slug() == 'snobbish-steel-teal-of-persistence'
+
+        # 3. Custom generator with custom Random
+        config = {
+            'all': {
+                'type': 'cartesian',
+                'lists': ['digits', 'digits']
+            },
+            'digits': {
+                'type': 'words',
+                'words': list(str(x) for x in range(10))
+            }
+        }
+        generator = RandomGenerator(config)
+        generator.random.seed(12)
+        assert generator.generate_slug() == '6-0'  # this is random
+        generator.random = FakeRandom(33)
+        generator.generate_slug() == '3-3'
 
 
 if __name__ == '__main__':

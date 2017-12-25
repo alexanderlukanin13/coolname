@@ -25,16 +25,13 @@ class AbstractNestedList(object):
         self.multiword = any(x.multiword for x in self._lists)
 
     def __len__(self):
-        return self._length
+        return self.length
 
     def __str__(self):
         return '{}({}, len={})'.format(self.__class__.__name__, len(self._lists), len(self))
 
     def __repr__(self):
         return self.__str__()
-
-    def random(self):
-        return self[randrange(len(self))]
 
     def squash(self, hard, cache):
         if len(self._lists) == 1:
@@ -77,7 +74,7 @@ class _BasicList(list, AbstractNestedList):
     def __init__(self, sequence=None):
         list.__init__(self, sequence)
         AbstractNestedList.__init__(self, [])
-        self._length = len(self)
+        self.length = len(self)
         self.__hash = None
 
     def __str__(self):
@@ -122,10 +119,10 @@ class WordAsPhraseWrapper(object):
 
     def __init__(self, wordlist):
         self._list = wordlist
-        self._length = len(wordlist)
+        self.length = len(wordlist)
 
     def __len__(self):
-        return self._length
+        return self.length
 
     def __getitem__(self, i):
         return (self._list[i], )
@@ -151,7 +148,7 @@ class NestedList(AbstractNestedList):
         super(NestedList, self).__init__(lists)
         # Fattest lists first (to reduce average __getitem__ time)
         self._lists.sort(key=lambda x: -len(x))
-        self._length = sum(len(x) for x in lists)
+        self.length = sum(len(x) for x in lists)
 
     def __getitem__(self, i):
         # Retrieve item from appropriate list
@@ -187,9 +184,9 @@ class CartesianList(AbstractNestedList):
 
     def __init__(self, lists):
         super(CartesianList, self).__init__(lists)
-        self._length = 1
+        self.length = 1
         for x in lists:
-            self._length *= len(x)
+            self.length *= len(x)
         # Let's say list lengths are 5, 7, 11, 13.
         # divs = [7*11*13, 11*13, 13, 1]
         divs = [1]
@@ -217,12 +214,10 @@ class Scalar(AbstractNestedList):
     def __init__(self, value):
         super(Scalar, self).__init__([])
         self.value = value
+        self.length = 1
 
     def __getitem__(self, i):
         return self.value
-
-    def __len__(self):
-        return 1
 
     def __str__(self):
         return '{}(value={!r})'.format(self.__class__.__name__, self.value)
@@ -241,7 +236,8 @@ class RandomGenerator(object):
     `generate_slug` and other exported functions.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, rand=None):
+        self.random = rand  # sets _random and _randrange
         config = dict(config)
         _validate_config(config)
         lists = {}
@@ -260,6 +256,16 @@ class RandomGenerator(object):
                     pattern = key
                 self._lists[pattern] = lists[key]
         self._lists[None] = self._lists[None].squash(True, {})
+        # Should we avoid duplicating prefixes?
+        try:
+            self._check_prefix = int(config['all'][_CONF.FIELD.ENSURE_UNIQUE_PREFIX])
+            if self._check_prefix <= 0:
+                raise ValueError('must be a positive integer')
+        except KeyError:
+            self._check_prefix = None
+        except ValueError as ex:
+            raise ConfigurationError('Invalid {} value: {}'
+                                     .format(_CONF.FIELD.ENSURE_UNIQUE_PREFIX, ex))
         # Get max slug length
         try:
             self._max_slug_length = int(config['all'][_CONF.FIELD.MAX_SLUG_LENGTH])
@@ -277,16 +283,17 @@ class RandomGenerator(object):
         # Fire it up
         assert self.generate_slug()
 
-    def randomize(self, seed=None):
-        """
-        Re-seeds random number generator.
+    @property
+    def random(self):
+        return self._random
 
-        Call this method if you are getting too many already known values
-        in a sequence (say, more than 10).
-
-        NOTE: re-seeding has global effect.
-        """
-        random.seed(seed)
+    @random.setter
+    def random(self, rand):
+        if rand:
+            self._random = rand
+        else:
+            self._random = random
+        self._randrange = self._random.randrange
 
     def generate(self, pattern=None):
         """
@@ -294,11 +301,12 @@ class RandomGenerator(object):
         """
         lst = self._lists[pattern]
         while True:
-            result = lst.random()
+            result = lst[self._randrange(lst.length)]
             # Make sure there are no duplicates or related words
             # (with identical 4-letter prefix).
-            if len(set(x[:4] for x in result)) == len(result):
-                return result
+            if self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != len(result):
+                continue
+            return result
 
     def _generate_m(self, pattern=None):
         """
@@ -306,12 +314,14 @@ class RandomGenerator(object):
         """
         lst = self._lists[pattern]
         while True:
-            result = lst.random()
+            result = lst[self._randrange(lst.length)]
             # In addition to duplicates check, also check slug length
             n = len(result)
-            if (len(set(x[:4] for x in result)) == n and
-                    sum(len(x) for x in result) + n - 1 <= self._max_slug_length):
-                return result
+            if (self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != len(result) or
+                sum(len(x) for x in result) + n - 1 > self._max_slug_length):
+                print(result)  # TODO
+                continue
+            return result
 
     def generate_slug(self, pattern=None):
         """
@@ -515,7 +525,7 @@ def _check_max_slug_length(max_slug_length, all_list):
     warning_treshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
     bad_count = 0
     for i in range(0, n):
-        r = all_list.random()
+        r = all_list[randrange(all_list.length)]
         if sum(len(x) for x in r) + len(r) - 1 > max_slug_length:
             bad_count += 1
     if bad_count >= n:
@@ -548,4 +558,8 @@ _default = _create_default_generator()
 generate = _default.generate
 generate_slug = _default.generate_slug
 get_combinations_count = _default.get_combinations_count
-randomize = _default.randomize
+
+
+def replace_random(rand):
+    """Replaces random number generator for the default RandomGenerator instance."""
+    _default.random = rand
