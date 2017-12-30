@@ -2,14 +2,7 @@
 Random Name and Slug Generator
 ==============================
 
-.. image:: https://img.shields.io/travis/alexanderlukanin13/coolname.svg
-        :target: https://travis-ci.org/alexanderlukanin13/coolname
-
-.. image:: https://img.shields.io/pypi/v/coolname.svg
-        :target: https://pypi.python.org/pypi/coolname
-
-.. image:: https://coveralls.io/repos/alexanderlukanin13/coolname/badge.svg?branch=master&service=github
-        :target: https://coveralls.io/github/alexanderlukanin13/coolname?branch=master
+|pypi| |build| |coverage| |docs|
 
 Do you want random human-readable strings?
 
@@ -111,3 +104,20 @@ Installation
     pip install coolname
 
 :mod:`coolname` is written in pure Python and has no dependencies. It works on any modern Python version, including PyPy.
+
+
+.. |pypi| image:: https://img.shields.io/pypi/v/coolname.svg
+    :target: https://pypi.python.org/pypi/coolname
+    :alt: pypi
+
+.. |build| image:: https://img.shields.io/travis/alexanderlukanin13/coolname.svg
+    :target: https://travis-ci.org/alexanderlukanin13/coolname
+    :alt: build status
+
+.. |coverage| image:: https://coveralls.io/repos/alexanderlukanin13/coolname/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/alexanderlukanin13/coolname?branch=master
+    :alt: coverage
+
+.. |docs| image:: https://img.shields.io/readthedocs/coolname.svg
+    :target: http://coolname.readthedocs.io/en/latest/
+    :alt: documentation
