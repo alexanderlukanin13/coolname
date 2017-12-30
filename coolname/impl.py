@@ -256,11 +256,22 @@ class RandomGenerator(object):
                     pattern = key
                 self._lists[pattern] = lists[key]
         self._lists[None] = self._lists[None].squash(True, {})
+        # Should we avoid duplicates?
+        try:
+            ensure_unique = config['all'][_CONF.FIELD.ENSURE_UNIQUE]
+            if not isinstance(ensure_unique, bool):
+                raise ValueError('expected boolean, got {!r}'.format(ensure_unique))
+            self._ensure_unique = ensure_unique
+        except KeyError:
+            self._ensure_unique = False
+        except ValueError as ex:
+            raise ConfigurationError('Invalid {} value: {}'
+                                     .format(_CONF.FIELD.ENSURE_UNIQUE, ex))
         # Should we avoid duplicating prefixes?
         try:
             self._check_prefix = int(config['all'][_CONF.FIELD.ENSURE_UNIQUE_PREFIX])
             if self._check_prefix <= 0:
-                raise ValueError('must be a positive integer')
+                raise ValueError('expected a positive integer, got {!r}'.format(self._check_prefix))
         except KeyError:
             self._check_prefix = None
         except ValueError as ex:
@@ -274,12 +285,11 @@ class RandomGenerator(object):
         except ValueError as ex:
             raise ConfigurationError('Invalid {} value: {}'
                                      .format(_CONF.FIELD.MAX_SLUG_LENGTH, ex))
-        # If there is max slug length, use slower version of generate() with check
-        # Also make sure that generate() does not go into long loop
-        if self._max_slug_length is not None:
-            self.generate = self._generate_m
-            if not config['all'].get('__nocheck'):
-                _check_max_slug_length(self._max_slug_length, self._lists[None])
+        # Make sure that generate() does not go into long loop.
+        # Default generator is a special case, we don't need check.
+        if (not config['all'].get('__nocheck') and
+                self._ensure_unique or self._check_prefix or self._max_slug_length):
+            self._check_not_hanging()
         # Fire it up
         assert self.generate_slug()
 
@@ -302,24 +312,13 @@ class RandomGenerator(object):
         lst = self._lists[pattern]
         while True:
             result = lst[self._randrange(lst.length)]
-            # Make sure there are no duplicates or related words
-            # (with identical 4-letter prefix).
-            if self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != len(result):
-                continue
-            return result
-
-    def _generate_m(self, pattern=None):
-        """
-        Slower version of generate(), with max_slug_length check.
-        """
-        lst = self._lists[pattern]
-        while True:
-            result = lst[self._randrange(lst.length)]
-            # In addition to duplicates check, also check slug length
+            # 1. Check that there are no duplicates
+            # 2. Check that there are no duplicate prefixes
+            # 3. Check max slug length
             n = len(result)
-            if (self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != len(result) or
-                sum(len(x) for x in result) + n - 1 > self._max_slug_length):
-                print(result)  # TODO
+            if (self._ensure_unique and len(set(result)) != n or
+                    self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != n or
+                    self._max_slug_length and sum(len(x) for x in result) + n - 1 > self._max_slug_length):
                 continue
             return result
 
@@ -340,6 +339,35 @@ class RandomGenerator(object):
     def _dump(self, stream, pattern=None, object_ids=False):
         """Dumps current tree into a text stream."""
         return self._lists[pattern]._dump(stream, '', object_ids=object_ids)
+
+    def _check_not_hanging(self):
+        """
+        Rough check that generate() will not hang or be very slow.
+
+        Raises ConfigurationError if generate() spends too much time in retry loop.
+        Issues a warning.warn() if there is a risk of slowdown.
+        """
+        all_list = self._lists[None]
+        max_slug_length = self._max_slug_length
+        if not max_slug_length:
+            return
+        # Make sure max length is not too small (to avoid slowdown and infinite loops)
+        n = 100
+        warning_treshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
+        bad_count = 0
+        for i in range(0, n):
+            r = all_list[randrange(all_list.length)]
+            if sum(len(x) for x in r) + len(r) - 1 > max_slug_length:
+                bad_count += 1
+        if bad_count >= n:
+            raise ConfigurationError('Impossible to generate with {}={}'
+                                     .format(_CONF.FIELD.MAX_SLUG_LENGTH,
+                                             max_slug_length))
+        elif bad_count >= warning_treshold:
+            import warnings
+            warnings.warn('coolname.generate() may be slow because a significant fraction '
+                          'of combinations exceed {}={}'
+                          .format(_CONF.FIELD.MAX_SLUG_LENGTH, max_slug_length))
 
 
 def _is_str(value):
@@ -511,32 +539,6 @@ def _create_lists(config, results, current, stack, inside_cartesian=None):
         return results[current]
     finally:
         stack.pop()
-
-
-def _check_max_slug_length(max_slug_length, all_list):
-    """
-    Rough check for max_slug_length being to small.
-
-    Raises ConfigurationError if generate() would spend too much time in retry loop.
-    Issues a warning using warning.warn() if there is a risk of slowdown.
-    """
-    # Make sure max length is not too small (to avoid slowdown and infinite loops)
-    n = 100
-    warning_treshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
-    bad_count = 0
-    for i in range(0, n):
-        r = all_list[randrange(all_list.length)]
-        if sum(len(x) for x in r) + len(r) - 1 > max_slug_length:
-            bad_count += 1
-    if bad_count >= n:
-        raise ConfigurationError('Impossible to generate with {}={}'
-                                 .format(_CONF.FIELD.MAX_SLUG_LENGTH,
-                                         max_slug_length))
-    elif bad_count >= warning_treshold:
-        import warnings
-        warnings.warn('coolname.generate() may be slow because a significant fraction '
-                      'of combinations exceed {}={}'
-                      .format(_CONF.FIELD.MAX_SLUG_LENGTH, max_slug_length))
 
 
 def _create_default_generator():

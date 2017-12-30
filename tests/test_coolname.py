@@ -10,6 +10,7 @@ from six import u
 
 import coolname
 from coolname import RandomGenerator, InitializationError
+from coolname.exceptions import ConfigurationError
 from coolname.loader import load_config
 
 from .common import patch, TestCase, FakeRandom
@@ -141,8 +142,9 @@ class TestCoolname(TestCase):
             self.assertEqual(generator.generate_slug(), u('черный-круг'))
             self.assertEqual(generator.generate(), [u('черный'), u('квадрат')])
 
-    def test_avoid_repeating(self):
-        generator = RandomGenerator({
+    def test_ensure_unique(self):
+        # Test without ensure_unique - should yield repeats
+        config = {
             'all': {
                 'type': 'cartesian',
                 'lists': ['adjective', 'of', 'noun'],
@@ -159,14 +161,30 @@ class TestCoolname(TestCase):
                 'type': 'words',
                 'words': ['one', 'two']
             }
-        })
+        }
+        generator = RandomGenerator(config)
         with patch.object(generator, '_randrange',
-                   side_effect=partial(next, cycle(iter([0, 1, 2, 3])))):
+                          side_effect=partial(next, cycle(iter([0, 1, 2, 3])))):
+            self.assertEqual(generator.generate_slug(), 'one-of-one')
+            self.assertEqual(generator.generate_slug(), 'one-of-two')
+            self.assertEqual(generator.generate_slug(), 'two-of-one')
+            self.assertEqual(generator.generate_slug(), 'two-of-two')
+            self.assertEqual(generator.generate_slug(), 'one-of-one')
+        # Invalid ensure_unique
+        config['all']['ensure_unique'] = 'qwe'
+        with self.assertRaisesRegex(ConfigurationError, "Invalid config: Invalid ensure_unique value: expected boolean, got 'qwe'"):
+            RandomGenerator(config)
+        # Test with ensure_unique
+        config['all']['ensure_unique'] = True
+        generator = RandomGenerator(config)
+        with patch.object(generator, '_randrange',
+                          side_effect=partial(next, cycle(iter([0, 1, 2, 3])))):
             self.assertEqual(generator.generate_slug(), 'one-of-two')
             self.assertEqual(generator.generate_slug(), 'two-of-one')
             self.assertEqual(generator.generate_slug(), 'one-of-two')
+            self.assertEqual(generator.generate_slug(), 'two-of-one')
 
-    def test_avoid_similar_words(self):
+    def test_ensure_unique_prefix(self):
         config = {
             'all': {
                 'type': 'cartesian',
@@ -185,6 +203,11 @@ class TestCoolname(TestCase):
         with patch.object(generator, '_randrange',
                           side_effect=partial(next, cycle(iter(range(8))))):
             self.assertEqual(generator.generate_slug(), 'brave-bravery')  # This sucks
+
+        # ensure_unique_prefix = 0 is not allowed
+        config['all']['ensure_unique_prefix'] = 0
+        with self.assertRaisesRegex(ConfigurationError, 'Invalid config: Invalid ensure_unique_prefix value: expected a positive integer, got 0'):
+            RandomGenerator(config)
 
         # Now enable unique prefix
         config['all']['ensure_unique_prefix'] = 4
@@ -404,13 +427,13 @@ class TestCoolname(TestCase):
     def test_random(self):
         # 1. Re-seed default generator
         random.seed('default generator seed')
-        assert coolname.generate_slug() == 'polite-scrupulous-cobra-of-aptitude'
+        self.assertEqual(coolname.generate_slug(), 'polite-scrupulous-cobra-of-aptitude')
 
         # 2. Replace default generator
         rand = random.Random()
         rand.seed('new Random')
         coolname.replace_random(rand)
-        assert coolname.generate_slug() == 'snobbish-steel-teal-of-persistence'
+        self.assertEqual(coolname.generate_slug(), 'snobbish-steel-teal-of-persistence')
 
         # 3. Custom generator with custom Random
         config = {
@@ -425,7 +448,7 @@ class TestCoolname(TestCase):
         }
         generator = RandomGenerator(config)
         generator.random.seed(12)
-        assert generator.generate_slug() == '6-0'  # this is random
+        self.assertEqual(generator.generate_slug(), '6-0')  # this is random
         generator.random = FakeRandom(33)
         generator.generate_slug() == '3-3'
 

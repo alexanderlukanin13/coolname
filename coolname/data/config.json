@@ -3,6 +3,7 @@
         "comment": "Entry point",
         "type": "nested",
         "lists": ["2", "3", "4"],
+        "ensure_unique": true,
         "ensure_unique_prefix": 4,
         "max_slug_length": 50
     },
