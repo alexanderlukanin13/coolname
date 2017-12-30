@@ -198,6 +198,19 @@ class TestCoolname(TestCase):
         with self.assertRaisesRegex(ConfigurationError, r'Invalid config: Impossible to generate with ensure_unique'):
             RandomGenerator(config)
 
+    def test_ensure_unique_error_on_list(self):
+        config = {
+            'all': {'type': 'cartesian', 'lists': ['one', 'two']},
+            'bad': {'type': 'cartesian', 'generator': True, 'lists': ['one', 'one']},
+            'one': {'type': 'words', 'words': ['one', 'one']},
+            'two': {'type': 'words', 'words': ['two', 'two']}
+        }
+        RandomGenerator(config)  # this is fine
+        config['all']['ensure_unique'] = True
+        with self.assertRaisesRegex(ConfigurationError, r'Invalid config: Impossible to generate with ensure_unique'):
+            RandomGenerator(config)
+
+
     def test_ensure_unique_prefix(self):
         config = {
             'all': {
