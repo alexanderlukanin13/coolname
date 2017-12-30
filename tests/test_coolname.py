@@ -176,13 +176,27 @@ class TestCoolname(TestCase):
             RandomGenerator(config)
         # Test with ensure_unique
         config['all']['ensure_unique'] = True
-        generator = RandomGenerator(config)
+        with warnings.catch_warnings(record=True) as w:
+            generator = RandomGenerator(config)
+            if len(w) > 0:
+                assert len(w) == 1
+                assert str(w[0].message) == 'coolname.generate() may be slow because a significant fraction of combinations contain repeating words and ensure_unique is set'
         with patch.object(generator, '_randrange',
                           side_effect=partial(next, cycle(iter([0, 1, 2, 3])))):
             self.assertEqual(generator.generate_slug(), 'one-of-two')
             self.assertEqual(generator.generate_slug(), 'two-of-one')
             self.assertEqual(generator.generate_slug(), 'one-of-two')
             self.assertEqual(generator.generate_slug(), 'two-of-one')
+
+    def test_ensure_unique_error(self):
+        config = {
+            'all': {'type': 'cartesian', 'lists': ['one', 'one']},
+            'one': {'type': 'words', 'words': ['one', 'one']}
+        }
+        RandomGenerator(config)  # this is fine
+        config['all']['ensure_unique'] = True
+        with self.assertRaisesRegex(ConfigurationError, r'Invalid config: Impossible to generate with ensure_unique'):
+            RandomGenerator(config)
 
     def test_ensure_unique_prefix(self):
         config = {

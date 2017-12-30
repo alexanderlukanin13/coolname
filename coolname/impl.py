@@ -347,27 +347,47 @@ class RandomGenerator(object):
         Raises ConfigurationError if generate() spends too much time in retry loop.
         Issues a warning.warn() if there is a risk of slowdown.
         """
-        all_list = self._lists[None]
-        max_slug_length = self._max_slug_length
-        if not max_slug_length:
-            return
-        # Make sure max length is not too small (to avoid slowdown and infinite loops)
+        # (field_name, predicate, warning_msg, exception_msg)
+        # predicate(g) is a function that returns True if generated combination g must be rejected,
+        # see checks in generate()
+        checks = []
+        # ensure_unique can lead to infinite loops for some tiny erroneous configs
+        if self._ensure_unique:
+            checks.append((
+                _CONF.FIELD.ENSURE_UNIQUE,
+                self._ensure_unique,
+                lambda g: len(set(g)) != len(g),
+                '{generate} may be slow because a significant fraction of combinations contain repeating words and {field_name} is set',  # noqa
+                'Impossible to generate with {field_name}'
+            ))
+        #
+        # max_slug_length can easily slow down or block generation if set too small
+        if self._max_slug_length:
+            checks.append((
+                _CONF.FIELD.MAX_SLUG_LENGTH,
+                self._max_slug_length,
+                lambda g: sum(len(x) for x in g) + len(g) - 1 > self._max_slug_length,
+                '{generate} may be slow because a significant fraction of combinations exceed {field_name}={field_value}',  # noqa
+                'Impossible to generate with {field_name}={field_value}'
+            ))
+        # Perform the relevant checks for all generators, starting from 'all'
         n = 100
         warning_treshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
-        bad_count = 0
-        for i in range(0, n):
-            r = all_list[randrange(all_list.length)]
-            if sum(len(x) for x in r) + len(r) - 1 > max_slug_length:
-                bad_count += 1
-        if bad_count >= n:
-            raise ConfigurationError('Impossible to generate with {}={}'
-                                     .format(_CONF.FIELD.MAX_SLUG_LENGTH,
-                                             max_slug_length))
-        elif bad_count >= warning_treshold:
-            import warnings
-            warnings.warn('coolname.generate() may be slow because a significant fraction '
-                          'of combinations exceed {}={}'
-                          .format(_CONF.FIELD.MAX_SLUG_LENGTH, max_slug_length))
+        for lst_id, lst in sorted(self._lists.items(), key=lambda x: '' if x is None else str(x)):
+            context = {'generate': 'coolname.generate({})'.format('' if lst_id is None else repr(lst_id))}
+            # For each generator, perform checks
+            for field_name, field_value, predicate, warning_msg, exception_msg in checks:
+                context.update({'field_name': field_name, 'field_value': field_value})
+                bad_count = 0
+                for i in range(n):
+                    g = lst[randrange(lst.length)]
+                    if predicate(g):
+                        bad_count += 1
+                if bad_count >= n:
+                    raise ConfigurationError(exception_msg.format(**context))
+                elif bad_count >= warning_treshold:
+                    import warnings
+                    warnings.warn(warning_msg.format(**context))
 
 
 def _is_str(value):
