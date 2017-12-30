@@ -35,8 +35,10 @@ def compile_init_py():
             return [_to_str(x) for x in obj]
         elif isinstance(obj, tuple):
             return tuple(str(x) for x in obj)
-        else:
+        elif obj.__class__.__name__ == 'unicode':
             return str(obj)
+        else:
+            return obj
     config = _to_str(config)
     # Write to data/__init__.py to be used from .egg
     with codecs.open(os.path.join(config_path, '__init__.py'), 'w', encoding='utf-8') as file:
@@ -47,10 +49,15 @@ _INIT_TEMPLATE = '''
 # THIS FILE IS AUTO-GENERATED, DO NOT EDIT
 config = {!r}
 # Python 2 compatibility - all words must be unicode
+# (this is to make Python 2 and 3 both work from the same __init__.py code)
 try:
     for listdef in config.values():
         if listdef['type'] == 'words':
             listdef['words'] = [unicode(x) for x in listdef['words']]
+        elif listdef['type'] == 'phrases':
+            listdef['phrases'] = [tuple(unicode(y) for y in x) for x in listdef['phrases']]
+        elif listdef['type'] == 'const':
+            listdef['value'] = unicode(listdef['value'])
 except NameError:
     pass
 '''.lstrip()
