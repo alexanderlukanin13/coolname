@@ -70,7 +70,8 @@ class TestImplementation(TestCase):
         config = {
             'all': {
                 'type': 'cartesian',
-                'lists': ['nested1', 'nested2']
+                'lists': ['nested1', 'nested2'],
+                'ensure_unique': True
             },
             'nested1': {
                 'type': 'nested',
