@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
     # Import coolname and measure memory growth.
     # Give OS some time to correctly register amount of memory allocated.
-    start_time = time.monotonic()
+    start_time = time.time()
     from coolname import generate, generate_slug, get_combinations_count
-    print('Loading time:         {:.3f}'.format(time.monotonic() - start_time))
+    print('Loading time:         {:.3f}'.format(time.time() - start_time))
     time.sleep(3)
     print('RSS growth:           {} K'.format((process.memory_info().rss - rss_base) // 1024))
     print('VM growth:            {} K'.format((process.memory_info().vms - vm_base) // 1024))
