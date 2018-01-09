@@ -29,7 +29,7 @@ RUSSIAN_M = [
 ]
 
 
-def generate_slugs(number_of_slugs, data_dir=None, data_module=None, path=None):
+def generate_slugs(number_of_slugs, data_dir=None, data_module=None, path=None, expect_returncode=0):
     env = dict(os.environ)
     env['PYTHONPATH'] = PROJECT_DIR
     if path:
@@ -38,8 +38,15 @@ def generate_slugs(number_of_slugs, data_dir=None, data_module=None, path=None):
         env['COOLNAME_DATA_DIR'] = data_dir
     if data_module:
         env['COOLNAME_DATA_MODULE'] = data_module
-    output = subprocess.check_output([sys.executable, 'tests/import_coolname_and_print_slugs.py', str(number_of_slugs)],
-                                     cwd=PROJECT_DIR, env=env).decode('utf8')
+    process = subprocess.Popen([sys.executable, 'tests/import_coolname_and_print_slugs.py', str(number_of_slugs)],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               cwd=PROJECT_DIR, env=env)
+    process.wait()
+    assert process.returncode == expect_returncode
+    output = process.stdout.read().decode('utf8')
+    if not output:
+        output = process.stderr.read().decode('utf8')
     return [x.strip() for x in output.split('\n') if x.strip()]
 
 
@@ -58,3 +65,6 @@ def test_coolname_env():
                           data_dir=op.join(EXAMPLES_DIR, 'no_such'),
                           data_module='russian_module',
                           path=EXAMPLES_DIR) == RUSSIAN_M
+    # Only COOLNAME_DATA_DIR, and it is invalid
+    lines = generate_slugs(1, data_dir='no_such', expect_returncode=1)
+    assert lines[-1] == 'ImportError: Configure valid COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE'
