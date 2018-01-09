@@ -9,6 +9,7 @@
 
    Introduction <self>
    customization
+   environment-variables
    randomization
    classes-and-functions
    thread-safe

@@ -4,6 +4,8 @@ Custom generators
 
 .. py:currentmodule:: coolname
 
+.. _configuration-rules:
+
 Configuration rules
 ===================
 

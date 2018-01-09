@@ -6,6 +6,7 @@ Do not import anything directly from this module.
 import hashlib
 import itertools
 import os
+import os.path as op
 import random
 from random import randrange
 import re
@@ -562,12 +563,19 @@ def _create_lists(config, results, current, stack, inside_cartesian=None):
 
 
 def _create_default_generator():
-    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-    if os.path.isdir(data_dir):
+    data_dir = os.getenv('COOLNAME_DATA_DIR')
+    data_module = os.getenv('COOLNAME_DATA_MODULE')
+    if not data_dir and not data_module:
+        data_dir = op.join(op.dirname(op.abspath(__file__)), 'data')
+        data_module = 'coolname.data'  # used when imported from egg; consumes more memory
+    if data_dir and op.isdir(data_dir):
         from coolname.loader import load_config
         config = load_config(data_dir)
+    elif data_module:
+        import importlib
+        config = importlib.import_module(data_module).config
     else:
-        from coolname.data import config
+        raise ImportError('Configure valid COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE')
     config['all']['__nocheck'] = True
     return RandomGenerator(config)
 

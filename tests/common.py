@@ -1,4 +1,4 @@
-import binascii
+import os.path as op
 import unittest
 import six
 
@@ -9,6 +9,11 @@ try:
 except ImportError:
     import mock
     from mock import patch
+
+
+TESTS_DIR = op.dirname(op.abspath(__file__))
+PROJECT_DIR = op.abspath(op.join(TESTS_DIR, '..'))
+EXAMPLES_DIR = op.join(PROJECT_DIR, 'examples')
 
 
 class TestCase(unittest.TestCase):

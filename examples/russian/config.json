@@ -1,0 +1,6 @@
+{
+  "all": {
+    "type": "cartesian",
+    "lists": ["color", "animal"]
+  }
+}
