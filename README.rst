@@ -110,8 +110,8 @@ Installation
     :target: https://pypi.python.org/pypi/coolname
     :alt: pypi
 
-.. |build| image:: https://img.shields.io/travis/alexanderlukanin13/coolname.svg
-    :target: https://travis-ci.org/alexanderlukanin13/coolname
+.. |build| image:: https://api.travis-ci.org/alexanderlukanin13/coolname.svg?branch=master
+    :target: https://travis-ci.org/alexanderlukanin13/coolname?branch=master
     :alt: build status
 
 .. |coverage| image:: https://coveralls.io/repos/alexanderlukanin13/coolname/badge.svg?branch=master&service=github
