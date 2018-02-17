@@ -18,7 +18,7 @@ Release history
 * You can seed or even replace the underlying :class:`random.Random` instance, see
   `Randomization <https://coolname.readthedocs.io/en/latest/randomization.html>`_.
 
-* Change the default generator using `COOLNAME_DATA_DIR` and `COOLNAME_DATA_MODULE`. This also saves memory!
+* Change the default generator using ``COOLNAME_DATA_DIR`` and ``COOLNAME_DATA_MODULE``. This also saves memory!
 
 * Total number of combinations = 60 billions.
 
