@@ -111,7 +111,7 @@ Installation
     :alt: pypi
 
 .. |build| image:: https://img.shields.io/travis/alexanderlukanin13/coolname.svg
-    :target: https://travis-ci.org/alexanderlukanin13/coolname
+    :target: https://travis-ci.org/alexanderlukanin13/coolname.svg?branch=master
     :alt: build status
 
 .. |coverage| image:: https://coveralls.io/repos/alexanderlukanin13/coolname/badge.svg?branch=master&service=github
