@@ -103,7 +103,7 @@ Installation
 
     pip install coolname
 
-:mod:`coolname` is written in pure Python and has no dependencies. It works on any modern Python version, including PyPy.
+**coolname** is written in pure Python and has no dependencies. It works on any modern Python version, including PyPy.
 
 
 .. |pypi| image:: https://img.shields.io/pypi/v/coolname.svg

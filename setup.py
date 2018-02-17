@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import re
 
 try:
     from setuptools import setup
@@ -82,6 +82,10 @@ with open('README.rst') as readme_file:
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
+    history = history[:history.find('0.2.0')] + '''
+For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/history.html>`_
+'''
+    history = re.sub(r':\w+:`(\w+(?:\.\w+)*)`', r'``\1``', history)
 
 requirements = [
     # No setup requirements
@@ -94,7 +98,7 @@ test_requirements = [
 
 setup(
     name='coolname',
-    version='1.0.0',
+    version='1.0.2',
     description="Random name and slug generator",
     long_description=readme + '\n\n' + history,
     author="Alexander Lukanin",
