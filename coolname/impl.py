@@ -150,12 +150,12 @@ class NestedList(AbstractNestedList):
 
     def __getitem__(self, i):
         # Retrieve item from appropriate list
-        for sublist in self._lists:
-            length = sublist.length
-            if i < length:
-                return sublist[i]
+        for x in self._lists:
+            n = x.length
+            if i < n:
+                return x[i]
             else:
-                i -= length
+                i -= n
         raise IndexError('list index out of range')
 
     def squash(self, hard, cache):
