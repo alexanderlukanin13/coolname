@@ -25,11 +25,8 @@ class AbstractNestedList(object):
         # then subclass yields sequences instead of single words.
         self.multiword = any(x.multiword for x in self._lists)
 
-    def __len__(self):
-        return self.length
-
     def __str__(self):
-        return '{}({}, len={})'.format(self.__class__.__name__, len(self._lists), len(self))
+        return '{}({}, len={})'.format(self.__class__.__name__, len(self._lists), self.length)
 
     def __repr__(self):
         return self.__str__()
@@ -141,20 +138,20 @@ class WordAsPhraseWrapper(object):
 class NestedList(AbstractNestedList):
 
     def __init__(self, lists):
+        super(NestedList, self).__init__(lists)
         # If user mixes WordList and PhraseList in the same NestedList,
         # we need to make sure that __getitem__ always returns tuple.
         # For that, we wrap WordList instances.
-        if any(isinstance(x, WordList) for x in lists) and any(x.multiword for x in lists):
-            lists = [WordAsPhraseWrapper(x) if isinstance(x, WordList) else x for x in lists]
-        super(NestedList, self).__init__(lists)
+        if any(isinstance(x, WordList) for x in self._lists) and any(x.multiword for x in self._lists):
+            self._lists = [WordAsPhraseWrapper(x) if isinstance(x, WordList) else x for x in self._lists]
         # Fattest lists first (to reduce average __getitem__ time)
-        self._lists.sort(key=lambda x: -len(x))
-        self.length = sum(len(x) for x in lists)
+        self._lists.sort(key=lambda x: -x.length)
+        self.length = sum(x.length for x in self._lists)
 
     def __getitem__(self, i):
         # Retrieve item from appropriate list
         for sublist in self._lists:
-            length = len(sublist)
+            length = sublist.length
             if i < length:
                 return sublist[i]
             else:
@@ -186,14 +183,14 @@ class CartesianList(AbstractNestedList):
     def __init__(self, lists):
         super(CartesianList, self).__init__(lists)
         self.length = 1
-        for x in lists:
-            self.length *= len(x)
+        for x in self._lists:
+            self.length *= x.length
         # Let's say list lengths are 5, 7, 11, 13.
         # divs = [7*11*13, 11*13, 13, 1]
         divs = [1]
         prod = 1
-        for x in reversed(lists[1:]):
-            prod *= len(x)
+        for x in reversed(self._lists[1:]):
+            prod *= x.length
             divs.append(prod)
         self._list_divs = tuple(zip(self._lists, reversed(divs)))
         self.multiword = True
@@ -335,7 +332,7 @@ class RandomGenerator(object):
         for the given pattern.
         """
         lst = self._lists[pattern]
-        return len(lst)
+        return lst.length
 
     def _dump(self, stream, pattern=None, object_ids=False):
         """Dumps current tree into a text stream."""

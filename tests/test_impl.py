@@ -27,7 +27,7 @@ class TestImplementation(TestCase):
         nested_list = NestedList([[1, 2, 3],
                                   [4, 5],
                                   [6, 7, 8, 9]])
-        self.assertEqual(len(nested_list), 9)
+        self.assertEqual(nested_list.length, 9)
         self.assertEqual(nested_list[0], 6)
         self.assertEqual(nested_list[1], 7)
         self.assertEqual(nested_list[2], 8)
@@ -47,7 +47,7 @@ class TestImplementation(TestCase):
 
     def test_carthesian_list(self):
         cart_list = CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
-        self.assertEqual(len(cart_list), 24)
+        self.assertEqual(cart_list.length, 24)
         self.assertEqual(cart_list[0], [1, 4, 6])
         self.assertEqual(cart_list[1], [1, 4, 7])
         self.assertEqual(cart_list[4], [1, 5, 6])
@@ -59,7 +59,7 @@ class TestImplementation(TestCase):
             CartesianList([[10, 11], [12, 13]]),
             CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),
         ])
-        self.assertEqual(len(cart_list), 28)
+        self.assertEqual(cart_list.length, 28)
         self.assertEqual(cart_list[0], [1, 4, 6])
         self.assertEqual(cart_list[23], [3, 5, 9])
         self.assertEqual(cart_list[24], [10, 12])
