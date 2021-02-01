@@ -1,4 +1,3 @@
--r requirements.txt
 -r docs.txt
 
 bumpversion==0.5.3

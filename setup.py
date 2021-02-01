@@ -87,13 +87,10 @@ For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/hi
 '''
     history = re.sub(r':\w+:`(\w+(?:\.\w+)*)`', r'``\1``', history)
 
-requirements = [
-    # No setup requirements
-]
 
 test_requirements = [
-    'mock',
-    'six'
+    'mock==3.0.5',
+    'six==1.15.0'
 ]
 
 setup(
@@ -113,7 +110,6 @@ setup(
     },
     cmdclass=cmdclass,
     include_package_data=True,
-    install_requires=requirements,
     license="BSD",
     zip_safe=True,
     keywords='coolname',
@@ -125,10 +121,12 @@ setup(
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     test_suite='tests',
     tests_require=test_requirements
