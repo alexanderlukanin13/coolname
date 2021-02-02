@@ -159,7 +159,7 @@ class LoaderTest(TestCase):
     def test_load_data_invalid_json(self, *args):
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid JSON: "
-                                    r"((?:Expecting value|Unexpected 'w' at): line 1 column 1 \(char 0\)|"
+                                    r"((?:Expecting value|Unexpected 'w'(?: at)?): line 1 column 1 \(char 0\)|"
                                     r"No JSON object could be decoded)"):
             _load_data('/data')
 
