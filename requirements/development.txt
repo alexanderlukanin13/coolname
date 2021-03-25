@@ -6,4 +6,4 @@ watchdog==0.8.3
 tox==3.1.2
 coverage==4.5.1
 cryptography==3.2
-PyYAML==5.1
+PyYAML==5.4
