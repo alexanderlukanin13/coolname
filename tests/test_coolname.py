@@ -458,9 +458,9 @@ class TestCoolname(TestCase):
         random.seed(123)
         assert random.random() == 0.052363598850944326
         if six.PY2:  # randrange returns different results in Python 2
-            self.assertEqual(coolname.generate_slug(), six.u('smooth-tuscan-gecko-of-success'))
+            self.assertEqual(coolname.generate_slug(), six.u('smooth-tuscan-limpet-of-opportunity'))
         else:
-            self.assertEqual(coolname.generate_slug(), 'hypersonic-goat-of-sheer-downpour')
+            self.assertEqual(coolname.generate_slug(), 'accelerated-salamander-of-enjoyable-abracadabra')
 
         # 2. Replace default generator
         rand = random.Random()
@@ -468,9 +468,9 @@ class TestCoolname(TestCase):
         assert rand.random() == 0.7482025358782363
         coolname.replace_random(rand)
         if six.PY2:
-            self.assertEqual(coolname.generate_slug(), six.u('resilient-inventive-cricket-from-shambhala'))
+            self.assertEqual(coolname.generate_slug(), six.u('resilient-ingenious-skunk-from-pluto'))
         else:
-            self.assertEqual(coolname.generate_slug(), 'groovy-cerise-turkey-of-opportunity')
+            self.assertEqual(coolname.generate_slug(), 'glorious-rose-mouflon-of-opportunity')
 
         # 3. Custom generator with custom Random
         config = {

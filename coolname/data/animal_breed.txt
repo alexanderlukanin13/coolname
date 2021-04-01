@@ -17,6 +17,7 @@ collie
 corgi
 dalmatian
 doberman
+goldendoodle
 husky
 labradoodle
 labrador
