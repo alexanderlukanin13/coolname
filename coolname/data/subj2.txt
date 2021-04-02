@@ -15,7 +15,9 @@ barn swallow
 barred owl
 chimney swift
 cliff swallow
+eagle owl
 emperor goose
+fishing owl
 harlequin duck
 himalayan snowcock
 hyacinth macaw
@@ -27,6 +29,8 @@ prairie falcon
 red cardinal
 snow goose
 snowy owl
+stygian owl
+tawny owl
 trumpeter swan
 tufted puffin
 whooper swan
