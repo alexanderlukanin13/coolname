@@ -39,7 +39,15 @@ whooping crane
 # Insects
 fire ant
 
-# Mammals
+# Mammals (dog breeds)
+akita inu
+samoyed dog
+shiba inu
+
+# Mammals (other domestic)
+highland cow
+
+# Mammals (wild)
 alpine chipmunk
 beaked whale
 bottlenose dolphin

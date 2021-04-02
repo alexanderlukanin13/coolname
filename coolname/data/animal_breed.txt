@@ -8,7 +8,6 @@ max_length = 13
 longhorn
 
 # Dogs
-akita
 beagle
 bloodhound
 bulldog
