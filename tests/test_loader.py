@@ -1,6 +1,7 @@
 from functools import partial
 from io import StringIO
 import os
+import os.path as op
 import tempfile
 
 import unittest
@@ -11,6 +12,9 @@ from coolname import InitializationError
 from coolname.loader import _load_wordlist, _load_data
 
 from .common import patch, TestCase
+
+
+NO_DATA_DIR = op.normpath(op.join('.', 'no_such_dir', 'data'))
 
 
 class LoaderTest(TestCase):
@@ -64,7 +68,7 @@ class LoaderTest(TestCase):
 
     def test_load_data_no_dir(self):
         path = os.path.join(tempfile.gettempdir(), 'does', 'not', 'exist')
-        with self.assertRaisesRegex(InitializationError, 'Directory not found: {}'.format(path)):
+        with self.assertRaisesRegex(InitializationError, r'Directory not found: .+exist'):
             _load_data(path)
 
     def test_load_phrases(self):
@@ -113,8 +117,7 @@ class LoaderTest(TestCase):
         lists = iter([['one', 'ichi'], ['two', 'ni']])
         load_wordlist_mock.side_effect = lambda x, y: next(lists)
         json_mock.return_value = {'hello': 'world'}
-        path = '/data'
-        config, wordlists = _load_data(path)
+        config, wordlists = _load_data(NO_DATA_DIR)
         self.assertEqual(config, {'hello': 'world'})
         self.assertEqual(wordlists, {
             'one': ['one', 'ichi'],
@@ -126,8 +129,8 @@ class LoaderTest(TestCase):
     @patch('os.listdir', return_value=['one.txt', 'two.txt'])
     def test_load_data_os_error(self, listdir_mock, isdir_mock, open_mock):
         with self.assertRaisesRegex(InitializationError,
-                                    r'Failed to read /data/one.txt: BOOM!'):
-            _load_data('/data')
+                                    r'Failed to read .+one.txt: BOOM!'):
+            _load_data(NO_DATA_DIR)
 
     @patch('codecs.open')
     @patch('os.path.isdir', return_value=True)
@@ -149,9 +152,9 @@ class LoaderTest(TestCase):
 
         open_mock.side_effect = open_then_fail()
         with self.assertRaisesRegex(InitializationError,
-                                    "Failed to read config from "
-                                    "/data/config.json: BOOM!"):
-            _load_data('/data')
+                                    r"Failed to read config from "
+                                    ".+config\.json: BOOM!"):
+            _load_data(NO_DATA_DIR)
 
     @patch('codecs.open', side_effect=lambda *x, **y: StringIO(six.u('word')))
     @patch('os.path.isdir', return_value=True)
@@ -161,13 +164,13 @@ class LoaderTest(TestCase):
                                     r"Invalid config: Invalid JSON: "
                                     r"((?:Expecting value|Unexpected 'w'(?: at)?): line 1 column 1 \(char 0\)|"
                                     r"No JSON object could be decoded)"):
-            _load_data('/data')
+            _load_data(NO_DATA_DIR)
 
     @patch('codecs.open')
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt'])
     def test_invalid_options_in_txt(self, mock1, mock2, open_mock):
-        load_data = partial(_load_data, '/data')
+        load_data = partial(_load_data, NO_DATA_DIR)
         # Invalid syntax
         open_mock.return_value = StringIO(six.u('max_length=\n'))
         with self.assertRaisesRegex(InitializationError,
@@ -210,7 +213,7 @@ class LoaderTest(TestCase):
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Word is too long "
                                     r"at list u?'one' line 3: u?'abcdef'"):
-            _load_data('/data')
+            _load_data(NO_DATA_DIR)
 
     @patch('codecs.open')
     @patch('os.path.isdir', return_value=True)
@@ -220,7 +223,7 @@ class LoaderTest(TestCase):
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Phrase has 1 word\(s\) \(while number_of_words=2\) "
                                     r"at list u?'one' line 4: u?'five'"):
-            _load_data('/data')
+            _load_data(NO_DATA_DIR)
 
 
 if __name__ == '__main__':

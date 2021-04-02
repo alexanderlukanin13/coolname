@@ -2,6 +2,7 @@
 from functools import partial
 from itertools import cycle
 import random
+import sys
 import unittest
 import warnings
 
@@ -451,26 +452,22 @@ class TestCoolname(TestCase):
         values = set(generator.generate_slug() for i in range(28))
         self.assertEqual(values, set(['a-one', 'a-two', 'a-three-four', 'a-five-six']))
 
+    # randrange returns different results in Python 2. We skip this test to avoid updating it every time.
+    @unittest.skipUnless(sys.version_info[0] >= 3, "Skipped on Python 2")
     def test_random_default(self):
-        # NOTE: four slugs in this test must be updated every time you change word lists
+        # NOTE: two slugs in this test must be updated every time you change word lists
 
         # 1. Re-seed default generator
         random.seed(123)
-        assert random.random() == 0.052363598850944326
-        if six.PY2:  # randrange returns different results in Python 2
-            self.assertEqual(coolname.generate_slug(), six.u('smooth-tuscan-gecko-of-success'))
-        else:
-            self.assertEqual(coolname.generate_slug(), 'hypersonic-goat-of-sheer-downpour')
+        self.assertEqual(random.random(), 0.052363598850944326)
+        self.assertEqual(coolname.generate_slug(), 'hypersonic-goat-of-sheer-downpour')
 
         # 2. Replace default generator
         rand = random.Random()
         rand.seed(456)
-        assert rand.random() == 0.7482025358782363
+        self.assertEqual(rand.random(), 0.7482025358782363)
         coolname.replace_random(rand)
-        if six.PY2:
-            self.assertEqual(coolname.generate_slug(), six.u('resilient-inventive-cricket-from-shambhala'))
-        else:
-            self.assertEqual(coolname.generate_slug(), 'groovy-cerise-turkey-of-opportunity')
+        self.assertEqual(coolname.generate_slug(), 'groovy-cerise-rooster-of-opportunity')
 
         # 3. Custom generator with custom Random
         config = {
@@ -485,15 +482,9 @@ class TestCoolname(TestCase):
         }
         generator = RandomGenerator(config)
         generator.random.seed(12)
-        if six.PY2:
-            self.assertEqual(generator.generate_slug(), '4-7')
-        else:
-            self.assertEqual(generator.generate_slug(), '6-0')
+        self.assertEqual(generator.generate_slug(), '6-0')
         generator.random = FakeRandom(33)
-        if six.PY2:
-            generator.generate_slug() == '3-3'
-        else:
-            generator.generate_slug() == '3-3'
+        self.assertEqual(generator.generate_slug(), '3-4')
 
 
 if __name__ == '__main__':
