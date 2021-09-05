@@ -486,6 +486,13 @@ class TestCoolname(TestCase):
         generator.random = FakeRandom(33)
         self.assertEqual(generator.generate_slug(), '3-4')
 
+    def test_custom_separator(self):
+        name = coolname.generate_slug(separator='_')
+        self.assertTrue(name.count('_') > 0)
+        self.assertEqual(name.count('-'), 0)
+
+        name = coolname.generate_slug(2, separator='_')
+        self.assertEqual(name.count('_'), 1)
 
 if __name__ == '__main__':
     import sys

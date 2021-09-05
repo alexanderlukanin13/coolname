@@ -320,11 +320,11 @@ class RandomGenerator(object):
                 continue
             return result
 
-    def generate_slug(self, pattern=None):
+    def generate_slug(self, pattern=None, separator='-'):
         """
         Generates and returns random name as a slug.
         """
-        return '-'.join(self.generate(pattern))
+        return ('%s' % separator).join(self.generate(pattern))
 
     def get_combinations_count(self, pattern=None):
         """
