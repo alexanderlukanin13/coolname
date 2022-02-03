@@ -2,8 +2,6 @@
 import io
 import unittest
 
-import six
-
 from coolname import RandomGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
     WordList, PhraseList, WordAsPhraseWrapper,\
@@ -161,17 +159,17 @@ class TestImplementation(TestCase):
 
     def test_encode(self):
         # _encode must encode unicode strings
-        self.assertEqual(_to_bytes(six.u('привет')),
-                         six.u('привет').encode('utf-8'))
+        self.assertEqual(_to_bytes('привет'),
+                         'привет'.encode('utf-8'))
         # _encode must return byte strings unchanged
-        self.assertEqual(_to_bytes(six.u('привет').encode('utf-8')),
-                         six.u('привет').encode('utf-8'))
+        self.assertEqual(_to_bytes('привет'.encode('utf-8')),
+                         'привет'.encode('utf-8'))
 
     @patch('os.path.isdir', return_value=False)
     def test_import_data_from_init_py(self, *args):
         generator = _create_default_generator()
-        assert isinstance(generator.generate()[0], six.text_type)
-        assert isinstance(generator.generate_slug(), six.text_type)
+        assert isinstance(generator.generate()[0], str)
+        assert isinstance(generator.generate_slug(), str)
 
 
     def test_WordAsPhraseWrapper(self):

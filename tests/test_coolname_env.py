@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains tests for COOLNAME_DATA_DIR and COOLNAME_DATA_MODULE.
 """

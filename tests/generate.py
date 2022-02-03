@@ -11,8 +11,8 @@ from coolname import generate_slug
 
 
 def main(argv):
-    if sys.version_info[:2] < (3, 3):
-        sys.stderr.write('This script requires Python 3.3+\n')
+    if sys.version_info[:2] < (3, 6):
+        sys.stderr.write('This script requires Python 3.6+\n')
         return 1
     parser = argparse.ArgumentParser(description='Generate slug to stdout')
     parser.add_argument('length', default=None, nargs='?', type=int, help='Number of words')

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
 from functools import partial
 from itertools import cycle
 import random
 import sys
 import unittest
 import warnings
-
-import six
-from six import u
 
 import coolname
 from coolname import RandomGenerator, InitializationError
@@ -23,9 +19,9 @@ class TestCoolname(TestCase):
         # Basic test, to check that it doesn't crash.
         # Output of default generator is always unicode.
         items = coolname.generate()
-        self.assertIsInstance(items[0], six.text_type)
+        self.assertIsInstance(items[0], str)
         name = coolname.generate_slug()
-        self.assertIsInstance(name, six.text_type)
+        self.assertIsInstance(name, str)
         self.assertGreater(len(name), 10)
         self.assertIn('-', name)
 
@@ -123,25 +119,25 @@ class TestCoolname(TestCase):
 
     def test_unicode_config(self):
         generator = RandomGenerator({
-            u('all'): {
-                u('type'): u('cartesian'),
-                u('lists'): [u('прилагательное'), u('существительное')]
+            'all': {
+                'type': 'cartesian',
+                'lists': ['прилагательное', 'существительное']
             },
-            u('прилагательное'): {
-                u('type'): u('words'),
-                u('words'): [u('белый'), u('черный')]
+            'прилагательное': {
+                'type': 'words',
+                'words': ['белый', 'черный']
             },
-            u('существительное'): {
-                u('type'): u('words'),
-                u('words'): [u('круг'), u('квадрат')]
+            'существительное': {
+                'type': 'words',
+                'words': ['круг', 'квадрат']
             }
         })
         with patch.object(generator, '_randrange',
                    side_effect=partial(next, cycle(iter(range(4))))):
-            self.assertEqual(generator.generate_slug(), u('белый-круг'))
-            self.assertEqual(generator.generate_slug(), u('белый-квадрат'))
-            self.assertEqual(generator.generate_slug(), u('черный-круг'))
-            self.assertEqual(generator.generate(), [u('черный'), u('квадрат')])
+            self.assertEqual(generator.generate_slug(), 'белый-круг')
+            self.assertEqual(generator.generate_slug(), 'белый-квадрат')
+            self.assertEqual(generator.generate_slug(), 'черный-круг')
+            self.assertEqual(generator.generate(), ['черный', 'квадрат'])
 
     def test_ensure_unique(self):
         # Test without ensure_unique - should yield repeats
@@ -333,7 +329,7 @@ class TestCoolname(TestCase):
 
     def test_max_length(self):
         with self.assertRaisesRegex(InitializationError,
-                                   "Config at key u?'one' has invalid word u?'tiger' "
+                                   "Config at key 'one' has invalid word 'tiger' "
                                    "\(longer than 4 characters\)"):
             RandomGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},

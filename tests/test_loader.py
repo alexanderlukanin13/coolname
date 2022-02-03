@@ -6,8 +6,6 @@ import tempfile
 
 import unittest
 
-import six
-
 from coolname import InitializationError
 from coolname.loader import _load_wordlist, _load_data
 
@@ -20,13 +18,13 @@ NO_DATA_DIR = op.normpath(op.join('.', 'no_such_dir', 'data'))
 class LoaderTest(TestCase):
 
     def test_load_wordlist(self):
-        s = StringIO(six.u('\n'.join([
+        s = StringIO('\n'.join([
             'alpha',
             '',  # blank line
             'beta',
             '# Some comment',
             'gamma',
-        ])))
+        ]))
         wordlist = _load_wordlist('words', s)
         self.assertEqual(wordlist, {
             'type': 'words',
@@ -34,10 +32,10 @@ class LoaderTest(TestCase):
         })
 
     def test_load_wordlist_max_length(self):
-        s = StringIO(six.u('\n'.join([
+        s = StringIO('\n'.join([
             'max_length = 11',
             'alpha',
-        ])))
+        ]))
         wordlist = _load_wordlist('words', s)
         self.assertEqual(wordlist, {
             'type': 'words',
@@ -46,21 +44,21 @@ class LoaderTest(TestCase):
         })
 
     def test_invalid_wordlist(self):
-        s = StringIO(six.u('\n'.join([
+        s = StringIO('\n'.join([
             'alpha',
             'invalid?syntax',
-        ])))
+        ]))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid syntax "
                                     r"at list 'words' line 2: u?'invalid\?syntax'"):
             _load_wordlist('words', s)
 
     def test_word_too_long(self):
-        s = StringIO(six.u('\n'.join([
+        s = StringIO('\n'.join([
             'max_length = 11',
             'alpha',
             'augmentation',  # line exceeds 11 characters
-        ])))
+        ]))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Word is too long "
                                     r"at list 'words' line 3: u?'augmentation'"):
@@ -72,14 +70,14 @@ class LoaderTest(TestCase):
             _load_data(path)
 
     def test_load_phrases(self):
-        s = StringIO(six.u('\n'.join([
+        s = StringIO('\n'.join([
             'one',
             'two',
             'three',
             'four five',
             'six',
             'seven eight'
-        ])))
+        ]))
         wordlist = _load_wordlist('phrases', s)
         self.assertEqual(wordlist, {
             'type': 'phrases',
@@ -94,11 +92,11 @@ class LoaderTest(TestCase):
         })
 
     def test_phrase_too_long(self):
-        s = StringIO(six.u('\n'.join([
+        s = StringIO('\n'.join([
             'max_length = 9',
             'alpha beta',
             'gamma delta',  # 10 characters
-        ])))
+        ]))
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Phrase is too long "
                                     r"at list 'words' line 3: u?'gamma delta'"):
@@ -148,7 +146,7 @@ class LoaderTest(TestCase):
                 if self.called:
                     raise OSError('BOOM!')
                 self.called = True
-                return StringIO(six.u('word'))
+                return StringIO('word')
 
         open_mock.side_effect = open_then_fail()
         with self.assertRaisesRegex(InitializationError,
@@ -156,7 +154,7 @@ class LoaderTest(TestCase):
                                     ".+config\.json: BOOM!"):
             _load_data(NO_DATA_DIR)
 
-    @patch('codecs.open', side_effect=lambda *x, **y: StringIO(six.u('word')))
+    @patch('codecs.open', side_effect=lambda *x, **y: StringIO('word'))
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt', 'two.txt'])
     def test_load_data_invalid_json(self, *args):
@@ -172,7 +170,7 @@ class LoaderTest(TestCase):
     def test_invalid_options_in_txt(self, mock1, mock2, open_mock):
         load_data = partial(_load_data, NO_DATA_DIR)
         # Invalid syntax
-        open_mock.return_value = StringIO(six.u('max_length=\n'))
+        open_mock.return_value = StringIO('max_length=\n')
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
                                     r"at list u?'one' line 1: "
@@ -180,7 +178,7 @@ class LoaderTest(TestCase):
             load_data()
 
         # Unknown option
-        open_mock.return_value = StringIO(six.u('unknown_option=10\n'))
+        open_mock.return_value = StringIO('unknown_option=10\n')
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
                                     r"at list u?'one' line 1: "
@@ -188,7 +186,7 @@ class LoaderTest(TestCase):
             load_data()
 
         # max_length is not int
-        open_mock.return_value = StringIO(six.u('max_length=string\n'))
+        open_mock.return_value = StringIO('max_length=string\n')
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
                                     r"at list u?'one' line 1: "
@@ -196,7 +194,7 @@ class LoaderTest(TestCase):
             load_data()
 
         # max_length after some words are defined
-        open_mock.return_value = StringIO(six.u('something\nmax_length=9\n'))
+        open_mock.return_value = StringIO('something\nmax_length=9\n')
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Invalid assignment "
                                     r"at list u?'one' line 2: "
@@ -209,7 +207,7 @@ class LoaderTest(TestCase):
     @patch('os.listdir', return_value=['one.txt'])
     def test_max_length_in_txt(self, mock1, mock2, open_mock):
         # Valid option max_length
-        open_mock.return_value = StringIO(six.u('max_length=5\nabcde\nabcdef\nabc\n'))
+        open_mock.return_value = StringIO('max_length=5\nabcde\nabcdef\nabc\n')
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Word is too long "
                                     r"at list u?'one' line 3: u?'abcdef'"):
@@ -219,7 +217,7 @@ class LoaderTest(TestCase):
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt'])
     def test_number_of_words_in_txt(self, mock1, mock2, open_mock):
-        open_mock.return_value = StringIO(six.u('number_of_words=2\none two\nathree four\nfive\nsix\n'))
+        open_mock.return_value = StringIO('number_of_words=2\none two\nathree four\nfive\nsix\n')
         with self.assertRaisesRegex(InitializationError,
                                     r"Invalid config: Phrase has 1 word\(s\) \(while number_of_words=2\) "
                                     r"at list u?'one' line 4: u?'five'"):

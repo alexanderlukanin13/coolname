@@ -2,9 +2,6 @@
 Classes and functions
 =====================
 
-Functions and methods accept and return Unicode strings, that is,
-:class:`unicode` in Python 2 and :py:class:`str` in Python 3.
-
 .. py:module:: coolname
 
 Default generator

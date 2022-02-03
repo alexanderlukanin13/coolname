@@ -1,8 +1,6 @@
 """
 Do not import anything directly from this module.
 """
-
-
 import hashlib
 import itertools
 import os
@@ -15,10 +13,10 @@ from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
 
 
-class AbstractNestedList(object):
+class AbstractNestedList:
 
     def __init__(self, lists):
-        super(AbstractNestedList, self).__init__()
+        super().__init__()
         self._lists = [WordList(x) if x.__class__ is list else x
                        for x in lists]
         # If this is set to True in a subclass,
@@ -26,7 +24,7 @@ class AbstractNestedList(object):
         self.multiword = any(x.multiword for x in self._lists)
 
     def __str__(self):
-        return '{}({}, len={})'.format(self.__class__.__name__, len(self._lists), self.length)
+        return f'{self.__class__.__name__}({len(self._lists)}, len={self.length})'
 
     def __repr__(self):
         return self.__str__()
@@ -39,27 +37,18 @@ class AbstractNestedList(object):
             return self
 
     def _dump(self, stream, indent='', object_ids=False):
-        stream.write(indent + _unicode(self) +
-                     (' [id={}]'.format(id(self)) if object_ids else '') +
+        stream.write(indent + str(self) +
+                     (f' [id={id(self)}]' if object_ids else '') +
                      '\n')
         indent += '  '
         for sublist in self._lists:
             sublist._dump(stream, indent, object_ids=object_ids)
 
 
-# Poor man's `six`
-try:
-    _unicode = unicode
-    _str_types = (str, _unicode)  # pragma: nocover
-except NameError:
-    _unicode = str
-    _str_types = str
-
-
 # Convert value to bytes, for hashing
 # (used to calculate WordList or PhraseList hash)
 def _to_bytes(value):
-    if isinstance(value, _unicode):
+    if isinstance(value, str):
         return value.encode('utf-8')
     elif isinstance(value, tuple):
         return str(value).encode('utf-8')
@@ -89,7 +78,7 @@ class _BasicList(list, AbstractNestedList):
 
     @property
     def _hash(self):
-        if self.__hash is not None:
+        if self.__hash:
             return self.__hash
         md5 = hashlib.md5()
         md5.update(_to_bytes(str(len(self))))
@@ -107,11 +96,11 @@ class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
 
     def __init__(self, sequence=None):
-        super(PhraseList, self).__init__(tuple(_split_phrase(x)) for x in sequence)
+        super().__init__(tuple(_split_phrase(x)) for x in sequence)
         self.multiword = True
 
 
-class WordAsPhraseWrapper(object):
+class WordAsPhraseWrapper:
 
     multiword = True
 
@@ -129,16 +118,16 @@ class WordAsPhraseWrapper(object):
         return self
 
     def __str__(self):
-        return '{}({})'.format(self.__class__.__name__, str(self._list))
+        return f'{self.__class__.__name__}({self._list})'
 
     def __repr__(self):
-        return '{}({})'.format(self.__class__.__name__, repr(self._list))
+        return f'{self.__class__.__name__}({self._list!r})'
 
 
 class NestedList(AbstractNestedList):
 
     def __init__(self, lists):
-        super(NestedList, self).__init__(lists)
+        super().__init__(lists)
         # If user mixes WordList and PhraseList in the same NestedList,
         # we need to make sure that __getitem__ always returns tuple.
         # For that, we wrap WordList instances.
@@ -163,7 +152,7 @@ class NestedList(AbstractNestedList):
         # If we have 4 branches which finally point to the same list of nouns,
         # why not using the same WordList instance for all 4 branches?
         # This optimization is also applied to PhraseLists, just in case.
-        result = super(NestedList, self).squash(hard, cache)
+        result = super().squash(hard, cache)
         if result is self and hard:
             for cls in (WordList, PhraseList):
                 if all(isinstance(x, cls) for x in self._lists):
@@ -181,7 +170,7 @@ class NestedList(AbstractNestedList):
 class CartesianList(AbstractNestedList):
 
     def __init__(self, lists):
-        super(CartesianList, self).__init__(lists)
+        super().__init__(lists)
         self.length = 1
         for x in self._lists:
             self.length *= x.length
@@ -210,7 +199,7 @@ class CartesianList(AbstractNestedList):
 class Scalar(AbstractNestedList):
 
     def __init__(self, value):
-        super(Scalar, self).__init__([])
+        super().__init__([])
         self.value = value
         self.length = 1
 
@@ -218,13 +207,13 @@ class Scalar(AbstractNestedList):
         return self.value
 
     def __str__(self):
-        return '{}(value={!r})'.format(self.__class__.__name__, self.value)
+        return f'{self.__class__.__name__}(value={self.value!r})'
 
     def random(self):
         return self.value
 
 
-class RandomGenerator(object):
+class RandomGenerator:
     """
     This class provides random name generation interface.
 
@@ -258,31 +247,28 @@ class RandomGenerator(object):
         try:
             ensure_unique = config['all'][_CONF.FIELD.ENSURE_UNIQUE]
             if not isinstance(ensure_unique, bool):
-                raise ValueError('expected boolean, got {!r}'.format(ensure_unique))
+                raise ValueError(f'expected boolean, got {ensure_unique!r}')
             self._ensure_unique = ensure_unique
         except KeyError:
             self._ensure_unique = False
         except ValueError as ex:
-            raise ConfigurationError('Invalid {} value: {}'
-                                     .format(_CONF.FIELD.ENSURE_UNIQUE, ex))
+            raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE} value: {ex}')
         # Should we avoid duplicating prefixes?
         try:
             self._check_prefix = int(config['all'][_CONF.FIELD.ENSURE_UNIQUE_PREFIX])
             if self._check_prefix <= 0:
-                raise ValueError('expected a positive integer, got {!r}'.format(self._check_prefix))
+                raise ValueError(f'expected a positive integer, got {self._check_prefix!r}')
         except KeyError:
             self._check_prefix = None
         except ValueError as ex:
-            raise ConfigurationError('Invalid {} value: {}'
-                                     .format(_CONF.FIELD.ENSURE_UNIQUE_PREFIX, ex))
+            raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE_PREFIX} value: {ex}')
         # Get max slug length
         try:
             self._max_slug_length = int(config['all'][_CONF.FIELD.MAX_SLUG_LENGTH])
         except KeyError:
             self._max_slug_length = None
         except ValueError as ex:
-            raise ConfigurationError('Invalid {} value: {}'
-                                     .format(_CONF.FIELD.MAX_SLUG_LENGTH, ex))
+            raise ConfigurationError(f'Invalid {_CONF.FIELD.MAX_SLUG_LENGTH} value: {ex}')
         # Make sure that generate() does not go into long loop.
         # Default generator is a special case, we don't need check.
         if (not config['all'].get('__nocheck') and
@@ -394,9 +380,9 @@ def _is_str(value):
 
 # Translate phrases defined as strings to tuples
 def _split_phrase(x):
-    if isinstance(x, _str_types):
-        return re.split(_unicode(r'\s+'), x.strip())
-    else:
+    try:
+        return re.split(r'\s+', x.strip())
+    except AttributeError:  # Not str
         return x
 
 
@@ -411,12 +397,10 @@ def _validate_config(config):
         for key, listdef in list(config.items()):
             # Check if section is a list
             if not isinstance(listdef, dict):
-                raise ValueError('Value at key {!r} is not a dict'
-                                 .format(key))
+                raise ValueError(f'Value at key {key!r} is not a dict')
             # Check if it has correct type
             if _CONF.FIELD.TYPE not in listdef:
-                raise ValueError('Config at key {!r} has no {!r}'
-                                 .format(key, _CONF.FIELD.TYPE))
+                raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.TYPE!r}')
             # Nested or Cartesian
             if listdef[_CONF.FIELD.TYPE] in (_CONF.TYPE.NESTED, _CONF.TYPE.CARTESIAN):
                 sublists = listdef.get(_CONF.FIELD.LISTS)
@@ -480,7 +464,7 @@ def _validate_config(config):
                     max_length = None
                 for phrase in phrases:
                     phrase = _split_phrase(phrase)  # str -> sequence, if necessary
-                    if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, _str_types) for x in phrase):
+                    if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
                         raise ValueError('Config at key {!r} has invalid {!r}: '
                                          'must be all string/tuple/list'
                                          .format(key, _CONF.FIELD.PHRASES))

@@ -2,12 +2,6 @@ import argparse
 import itertools
 import sys
 
-# Ugly hack for Python 2
-try:
-    range = xrange
-except NameError:
-    pass
-
 
 class NotRandom(object):
 

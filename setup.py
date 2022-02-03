@@ -27,40 +27,11 @@ def compile_init_py():
         sys.path.remove(current_path)
     config_path = os.path.join(current_path, 'coolname', 'data')
     config = load_config(config_path)
-    # Eliminate u'' literals if setup.py is executed from Python 2
-    def _to_str(obj):
-        if isinstance(obj, dict):
-            return {str(x): _to_str(y) for x, y in obj.items()}
-        elif isinstance(obj, list):
-            return [_to_str(x) for x in obj]
-        elif isinstance(obj, tuple):
-            return tuple(str(x) for x in obj)
-        elif obj.__class__.__name__ == 'unicode':
-            return str(obj)
-        else:
-            return obj
-    config = _to_str(config)
     # Write to data/__init__.py to be used from .egg
     with codecs.open(os.path.join(config_path, '__init__.py'), 'w', encoding='utf-8') as file:
-        file.write(_INIT_TEMPLATE.format(config))
-
-
-_INIT_TEMPLATE = '''
-# THIS FILE IS AUTO-GENERATED, DO NOT EDIT
-config = {!r}
-# Python 2 compatibility - all words must be unicode
-# (this is to make Python 2 and 3 both work from the same __init__.py code)
-try:
-    for listdef in config.values():
-        if listdef['type'] == 'words':
-            listdef['words'] = [unicode(x) for x in listdef['words']]
-        elif listdef['type'] == 'phrases':
-            listdef['phrases'] = [tuple(unicode(y) for y in x) for x in listdef['phrases']]
-        elif listdef['type'] == 'const':
-            listdef['value'] = unicode(listdef['value'])
-except NameError:
-    pass
-'''.lstrip()
+        file.write(f'''# THIS FILE IS AUTO-GENERATED, DO NOT EDIT
+config = {config!r}
+''')
 
 
 def customize(cls):
@@ -88,14 +59,11 @@ For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/hi
     history = re.sub(r':\w+:`(\w+(?:\.\w+)*)`', r'``\1``', history)
 
 
-test_requirements = [
-    'mock==3.0.5',
-    'six==1.15.0'
-]
+test_requirements = []
 
 setup(
     name='coolname',
-    version='1.1.0',
+    version='2.0.0',
     description="Random name and slug generator",
     long_description=readme + '\n\n' + history,
     author="Alexander Lukanin",
@@ -114,19 +82,16 @@ setup(
     zip_safe=True,
     keywords='coolname',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     test_suite='tests',
     tests_require=test_requirements
