@@ -1,9 +1,9 @@
 -r docs.txt
 
-bumpversion==0.5.3
-wheel==0.31.1
-watchdog==0.8.3
-tox==3.1.2
-coverage==4.5.1
-cryptography==3.2
-PyYAML==5.1
+bumpversion==0.6.0
+wheel==0.37.1
+watchdog==2.1.9
+tox==3.26.0
+coverage==6.5.0
+cryptography==38.0.1
+PyYAML==6.0
