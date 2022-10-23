@@ -8,6 +8,7 @@ import os.path as op
 import random
 from random import randrange
 import re
+from typing import List, Union
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
@@ -289,7 +290,7 @@ class RandomGenerator:
             self._random = random
         self._randrange = self._random.randrange
 
-    def generate(self, pattern=None):
+    def generate(self, pattern: Union[None, str, int] = None) -> List[str]:
         """
         Generates and returns random name as a list of strings.
         """
@@ -306,13 +307,13 @@ class RandomGenerator:
                 continue
             return result
 
-    def generate_slug(self, pattern=None):
+    def generate_slug(self, pattern: Union[None, str, int] = None) -> str:
         """
         Generates and returns random name as a slug.
         """
         return '-'.join(self.generate(pattern))
 
-    def get_combinations_count(self, pattern=None):
+    def get_combinations_count(self, pattern: Union[None, str, int] = None) -> int:
         """
         Returns total number of unique combinations
         for the given pattern.
