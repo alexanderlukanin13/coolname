@@ -44,6 +44,9 @@ htmlcov
 output/*.html
 output/*/index.html
 
+# pyenv
+.python-version
+
 # Sphinx
 docs/_build
 
