@@ -42,7 +42,7 @@ class AbstractNestedList:
                      '\n')
         indent += '  '
         for sublist in self._lists:
-            sublist._dump(stream, indent, object_ids=object_ids)
+            sublist._dump(stream, indent, object_ids=object_ids)  # noqa
 
 
 # Convert value to bytes, for hashing
@@ -82,7 +82,7 @@ class _BasicList(list, AbstractNestedList):
             return self.__hash
         md5 = hashlib.md5()
         md5.update(_to_bytes(str(len(self))))
-        for x in self:
+        for x in self:  # noqa
             md5.update(_to_bytes(x))
         self.__hash = md5.digest()
         return self.__hash
@@ -112,9 +112,9 @@ class WordAsPhraseWrapper:
         return self.length
 
     def __getitem__(self, i):
-        return (self._list[i], )
+        return self._list[i],
 
-    def squash(self, hard, cache):
+    def squash(self, hard, cache):  # noqa
         return self
 
     def __str__(self):
@@ -160,10 +160,10 @@ class NestedList(AbstractNestedList):
                     # is a little wasteful, but it has no long-term consequences.
                     # And it's simple!
                     result = cls(sorted(set(itertools.chain.from_iterable(self._lists))))
-                    if result._hash in cache:
-                        result = cache.get(result._hash)
+                    if result._hash in cache:  # noqa
+                        result = cache.get(result._hash)  # noqa
                     else:
-                        cache[result._hash] = result
+                        cache[result._hash] = result  # noqa
         return result
 
 
@@ -234,7 +234,7 @@ class RandomGenerator:
             # Other generators independent from 'all'
             if listdef.get(_CONF.FIELD.GENERATOR) and key not in lists:
                 _create_lists(config, lists, key, [])
-            if (key == 'all' or key.isdigit() or listdef.get(_CONF.FIELD.GENERATOR)):
+            if key == 'all' or key.isdigit() or listdef.get(_CONF.FIELD.GENERATOR):
                 if key.isdigit():
                     pattern = int(key)
                 elif key == 'all':
@@ -322,7 +322,7 @@ class RandomGenerator:
 
     def _dump(self, stream, pattern=None, object_ids=False):
         """Dumps current tree into a text stream."""
-        return self._lists[pattern]._dump(stream, '', object_ids=object_ids)
+        return self._lists[pattern]._dump(stream, '', object_ids=object_ids)  # noqa
 
     def _check_not_hanging(self):
         """
@@ -356,20 +356,19 @@ class RandomGenerator:
             ))
         # Perform the relevant checks for all generators, starting from 'all'
         n = 100
-        warning_treshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
+        warning_threshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
         for lst_id, lst in sorted(self._lists.items(), key=lambda x: '' if x is None else str(x)):
             context = {'generate': 'coolname.generate({})'.format('' if lst_id is None else repr(lst_id))}
             # For each generator, perform checks
             for field_name, field_value, predicate, warning_msg, exception_msg in checks:
                 context.update({'field_name': field_name, 'field_value': field_value})
                 bad_count = 0
-                for i in range(n):
-                    g = lst[randrange(lst.length)]
-                    if predicate(g):
+                for _ in range(n):
+                    if predicate(lst[randrange(lst.length)]):
                         bad_count += 1
                 if bad_count >= n:
                     raise ConfigurationError(exception_msg.format(**context))
-                elif bad_count >= warning_treshold:
+                elif bad_count >= warning_threshold:
                     import warnings
                     warnings.warn(warning_msg.format(**context))
 
