@@ -43,11 +43,6 @@ def customize(cls):
     return cls
 
 
-cmdclass = {
-    'sdist': customize(sdist)
-}
-
-
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
@@ -76,8 +71,9 @@ setup(
     package_dir={
         'coolname': 'coolname'
     },
-    cmdclass=cmdclass,
+    cmdclass={'sdist': customize(sdist)},
     include_package_data=True,
+    entry_points={'console_scripts': ['coolname = coolname.__main__:main']},
     license="BSD",
     zip_safe=True,
     keywords='coolname',

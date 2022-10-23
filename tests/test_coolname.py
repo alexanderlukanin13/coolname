@@ -482,6 +482,11 @@ class TestCoolname(TestCase):
         generator.random = FakeRandom(33)
         self.assertEqual(generator.generate_slug(), '3-4')
 
+    @patch.object(sys, 'argv', ['coolname', '3', '-s', '_', '-n', '10'])
+    def test_command_line(self, *args):
+        from coolname.__main__ import main
+        main()  # just for the sake of coverage
+
 
 if __name__ == '__main__':
     import sys

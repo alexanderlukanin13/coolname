@@ -3,6 +3,15 @@
 Release history
 ===============
 
+2.0.0 (2022-10-24)
+------------------
+
+* Support for old Python versions (<3.5) is dropped, because it's 2022
+
+* Command line usage and pipx support.
+
+* With additional owls and bitterns
+
 1.1.0 (2018-08-02)
 ------------------
 
