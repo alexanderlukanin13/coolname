@@ -9,9 +9,17 @@ import random
 from random import randrange
 import re
 from typing import List, Union
+from functools import partial
+import sys
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
+
+
+if sys.version_info[:2] >= (3, 9):
+    _md5 = partial(hashlib.md5, usedforsecurity=False)
+else:
+    _md5 = hashlib.md5
 
 
 class AbstractNestedList:
@@ -81,7 +89,7 @@ class _BasicList(list, AbstractNestedList):
     def _hash(self):
         if self.__hash:
             return self.__hash
-        md5 = hashlib.md5()
+        md5 = _md5()
         md5.update(_to_bytes(str(len(self))))
         for x in self:  # noqa
             md5.update(_to_bytes(x))
