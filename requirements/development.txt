@@ -5,5 +5,5 @@ wheel==0.37.1
 watchdog==2.1.9
 tox==3.26.0
 coverage==6.5.0
-cryptography==38.0.1
+cryptography==38.0.3
 PyYAML==6.0
