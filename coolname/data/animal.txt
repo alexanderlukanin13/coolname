@@ -80,6 +80,7 @@ markhor
 mouflon
 muskox
 nyala
+oryx
 sheep
 wildebeest
 yak
