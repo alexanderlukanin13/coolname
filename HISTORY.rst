@@ -3,6 +3,11 @@
 Release history
 ===============
 
+2.1.0 (2022-12-07)
+------------------
+
+* Support OpenSSL FIPS by using ``hashlib.md5(..., usedforsecurity=False)``
+
 2.0.0 (2022-10-24)
 ------------------
 
