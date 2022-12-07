@@ -1,6 +1,7 @@
 """
 Do not import anything directly from this module.
 """
+from functools import partial
 import hashlib
 import itertools
 import os
@@ -12,6 +13,14 @@ from typing import List, Union
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
+
+# For new Python versions with (possible) OpenSSL FIPS support,
+# we should pass usedforsecurity=False argument to md5().
+try:
+    hashlib.md5(b'', usedforsecurity=False)  # noqa
+    _md5 = partial(hashlib.md5, usedforsecurity=False)
+except TypeError:
+    _md5 = hashlib.md5
 
 
 class AbstractNestedList:
@@ -81,7 +90,7 @@ class _BasicList(list, AbstractNestedList):
     def _hash(self):
         if self.__hash:
             return self.__hash
-        md5 = hashlib.md5()
+        md5 = _md5()
         md5.update(_to_bytes(str(len(self))))
         for x in self:  # noqa
             md5.update(_to_bytes(x))
