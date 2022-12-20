@@ -5,27 +5,67 @@
 max_length = 13
 
 # Cattle
+braford
+gir
+jersy
+kangayam
 longhorn
 
+#cats
+abyssian
+birman
+chartreux
+korat
+manx
+munchkin
+persian
+peterbald
+pixiebob
+ragdoll
+ragamuffin
+russianblue
+savannah
+sphynx
+
+
 # Dogs
+akita
 beagle
 bloodhound
+boxer
 bulldog
+bullmastiff
+canecorso
 chihuahua
+chowchow
 collie
 corgi
 dalmatian
+dachshund
 doberman
+foxhound
+greatdane
+greyhound
 husky
 labradoodle
 labrador
 mastiff
 malamute
+malinoi
 mongrel
+newfoundland
+pomeranian
 poodle
+pug
+retriever
 rottweiler
+saluki
+samoyed
+schipperke
 spaniel
+stbernard
 terrier
+whippet
 
 # Horses & Hybrids
 mule
@@ -34,3 +74,7 @@ pony
 
 # Rabbits
 angora
+argente
+chinchilla
+harlequin
+silverfox
