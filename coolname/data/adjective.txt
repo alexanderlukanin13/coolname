@@ -48,6 +48,7 @@ hairy
 heavy
 hissing
 horned
+hulky
 icy
 imaginary
 invisible
@@ -64,6 +65,7 @@ nebulous
 noisy
 nondescript
 organic
+paperlike
 purring
 quiet
 quirky
@@ -260,6 +262,7 @@ satisfied
 sly
 sincere
 snobbish
+solemn
 spirited
 spry
 stalwart
@@ -349,6 +352,7 @@ sloppy
 smart
 sophisticated
 stoic
+subtle
 succinct
 talented
 thoughtful
