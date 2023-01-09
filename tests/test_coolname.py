@@ -449,21 +449,20 @@ class TestCoolname(TestCase):
         self.assertEqual(values, set(['a-one', 'a-two', 'a-three-four', 'a-five-six']))
 
     # randrange returns different results in Python 2. We skip this test to avoid updating it every time.
-    @unittest.skipUnless(sys.version_info[0] >= 3, "Skipped on Python 2")
     def test_random_default(self):
         # NOTE: two slugs in this test must be updated every time you change word lists
 
         # 1. Re-seed default generator
         random.seed(123)
         self.assertEqual(random.random(), 0.052363598850944326)
-        self.assertEqual(coolname.generate_slug(), 'accelerated-frog-of-enjoyable-abracadabra')
+        self.assertEqual(coolname.generate_slug(), 'puzzling-jaguar-of-satisfying-advance')
 
         # 2. Replace default generator
         rand = random.Random()
         rand.seed(456)
         self.assertEqual(rand.random(), 0.7482025358782363)
         coolname.replace_random(rand)
-        self.assertEqual(coolname.generate_slug(), 'glorious-rose-mouflon-of-opportunity')
+        self.assertEqual(coolname.generate_slug(), 'excellent-brave-hedgehog-of-opportunity')
 
         # 3. Custom generator with custom Random
         config = {
@@ -489,5 +488,4 @@ class TestCoolname(TestCase):
 
 
 if __name__ == '__main__':
-    import sys
     sys.exit(unittest.main())
