@@ -117,7 +117,7 @@
         "type": "nested",
         "lists": [
             "adjective",
-            "color",
+            "adjective_near",
             "noun_adjective",
             "prefix"
         ]
@@ -127,7 +127,7 @@
         "type": "nested",
         "lists": [
             "adjective",
-            "color",
+            "adjective_near",
             "noun_adjective",
             "prefix",
             "size"

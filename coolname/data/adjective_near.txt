@@ -1,11 +1,12 @@
-# ==================================================
-# List of pure colors and colors named after things.
-# ==================================================
+# ======================================================================
+# Adjective that must be the nearest to the noun (color, material, etc.)
+# ======================================================================
 
 max_length = 13
 
 almond
 amaranth
+amigurumi
 apricot
 artichoke
 auburn
@@ -53,7 +54,9 @@ marigold
 mustard
 ochre
 orange
+origami
 papaya
+paper
 peach
 persimmon
 pink
@@ -97,6 +100,7 @@ asparagus
 beryl
 brass
 bronze
+clay
 cobalt
 coral
 cornflower
@@ -122,6 +126,7 @@ orchid
 pearl
 peridot
 platinum
+porcelain
 quartz
 ruby
 sandy

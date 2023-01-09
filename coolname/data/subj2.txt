@@ -53,14 +53,14 @@ shepherd dog
 shiba inu
 
 # Cat breeds
-abyssian cat
+abyssinian cat
 birman cat
 chartreux cat
 korat cat
 manx cat
 munchkin cat
 persian cat
-pixie bob
+pixiebob cat
 ragdoll cat
 ragamuffin cat
 savannah cat
