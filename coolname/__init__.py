@@ -1,4 +1,4 @@
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 # Hint: set COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE
 # before `import coolname` to change the default generator.
