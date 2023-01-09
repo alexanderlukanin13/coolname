@@ -4,18 +4,19 @@
 
 max_length = 13
 
-# Cattle
-longhorn
-
 # Dogs
 beagle
 bloodhound
 bulldog
+bullmastiff
 chihuahua
+chowchow
 collie
 corgi
 dalmatian
+dachshund
 doberman
+foxhound
 husky
 labradoodle
 labrador
@@ -23,14 +24,14 @@ mastiff
 malamute
 mongrel
 poodle
+pug
 rottweiler
+saluki
 spaniel
 terrier
+whippet
 
 # Horses & Hybrids
 mule
 mustang
 pony
-
-# Rabbits
-angora

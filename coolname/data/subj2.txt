@@ -39,13 +39,60 @@ whooping crane
 # Insects
 fire ant
 
-# Mammals (dog breeds)
+# Dog breeds
 akita inu
+belgian shepherd
+boxer dog
+cane corso
+great dane
+hulky dog
+newfoundland dog
+pomeranian dog
 samoyed dog
+shepherd dog
 shiba inu
 
-# Mammals (other domestic)
+# Cat breeds
+abyssian cat
+birman cat
+chartreux cat
+korat cat
+manx cat
+munchkin cat
+persian cat
+pixie bob
+ragdoll cat
+ragamuffin cat
+savannah cat
+sphynx cat
+
+# Domestic cattle (to keep it simple, we just copypaste bull+cow+calf here)
+braford cow
+braford bull
+braford calf
+brahman cow
+brahman bull
+brahman calf
+gyr cow
+gyr bull
+gyr calf
 highland cow
+highland bull
+highland calf
+jersey cow
+jersey bull
+jersey calf
+kangayam cow
+kangayam bull
+kangayam calf
+longhorn cow
+longhorn bull
+longhorn calf
+
+# Rabbit breeds
+angora rabbit
+chinchilla rabbit
+harlequin rabbit
 
 # Mammals (wild)
 alpine chipmunk
