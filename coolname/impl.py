@@ -552,7 +552,8 @@ def _create_lists(config, results, current, stack, inside_cartesian=None):
         stack.pop()
 
 
-def _create_default_generator():
+# Default generator is a global object
+def _default() -> RandomGenerator:
     data_dir = os.getenv('COOLNAME_DATA_DIR')
     data_module = os.getenv('COOLNAME_DATA_MODULE')
     if not data_dir and not data_module:
@@ -571,7 +572,7 @@ def _create_default_generator():
 
 
 # Default generator is a global object
-_default = _create_default_generator()
+_default = _default()
 
 # Global functions are actually methods of the default generator.
 # (most users don't care about creating generator instances)
