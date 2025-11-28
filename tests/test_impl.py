@@ -5,7 +5,7 @@ import unittest
 from coolname import RandomGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
     WordList, PhraseList, WordAsPhraseWrapper,\
-    _create_lists, _to_bytes, _create_default_generator
+    _create_lists, _to_bytes, _default
 
 from .common import TestCase, patch
 
@@ -167,7 +167,7 @@ class TestImplementation(TestCase):
 
     @patch('os.path.isdir', return_value=False)
     def test_import_data_from_init_py(self, *args):
-        generator = _create_default_generator()
+        generator = _default
         assert isinstance(generator.generate()[0], str)
         assert isinstance(generator.generate_slug(), str)
 
