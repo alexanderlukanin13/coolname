@@ -53,9 +53,6 @@ For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/hi
 '''
     history = re.sub(r':\w+:`(\w+(?:\.\w+)*)`', r'``\1``', history)
 
-
-test_requirements = []
-
 setup(
     name='coolname',
     version='2.2.0',
@@ -89,6 +86,4 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
-    test_suite='tests',
-    tests_require=test_requirements
 )
