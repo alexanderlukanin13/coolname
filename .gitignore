@@ -51,4 +51,5 @@ output/*/index.html
 docs/_build
 
 # Dynamically generated code
+coolname/_version.py
 coolname/data/__init__.py

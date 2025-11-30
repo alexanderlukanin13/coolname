@@ -55,7 +55,6 @@ For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/hi
 
 setup(
     name='coolname',
-    version='3.0.0',
     description="Random name and slug generator",
     long_description=readme + '\n\n' + history,
     author="Alexander Lukanin",
@@ -71,6 +70,8 @@ setup(
     cmdclass={'sdist': customize(sdist)},
     include_package_data=True,
     entry_points={'console_scripts': ['coolname = coolname.__main__:main']},
+    use_scm_version={"write_to": "coolname/_version.py"},
+    setup_requires=["setuptools_scm"],
     license="BSD",
     zip_safe=True,
     keywords='coolname',
