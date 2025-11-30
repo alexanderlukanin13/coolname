@@ -1,4 +1,4 @@
-__version__ = '3.0.0'
+from ._version import __version__
 
 # Hint: set COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE
 # before `import coolname` to change the default generator.
