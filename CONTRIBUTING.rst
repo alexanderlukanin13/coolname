@@ -38,4 +38,4 @@ Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. New functions/methods should be reasonably documented.
-3. The pull request should pass all tests at https://travis-ci.org/alexanderlukanin13/coolname/pull_requests.
+3. The pull request should pass all CI tests.
