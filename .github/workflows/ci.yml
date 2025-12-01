@@ -6,6 +6,33 @@ on:
       - master
 
 jobs:
+  build:
+    name: Build Test
+    runs-on: ubuntu-latest
+    container: ${{ matrix.python-interpreter }}:${{ matrix.python-version }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+        python-interpreter:
+          - python
+          - pypy
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install tox and any other packages
+        run: pip install tox
+
+      - name: Run tox
+        run: tox -e py
+
   coveralls:
     name: Test Coverage Measurement
     runs-on: ubuntu-latest
