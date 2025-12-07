@@ -19,9 +19,20 @@ jobs:
           - "3.8"
           - "3.9"
           - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
         python-interpreter:
           - python
           - pypy
+        exclude:
+          - python-version: "3.12"
+            python-interpreter: pypy
+          - python-version: "3.13"
+            python-interpreter: pypy
+          - python-version: "3.14"
+            python-interpreter: pypy
 
     steps:
       - uses: actions/checkout@v5
