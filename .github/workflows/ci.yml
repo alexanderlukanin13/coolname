@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  coveralls:
+    name: Test Coverage Measurement
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install coveralls
+        run: pip3 install --upgrade tox coveralls
+
+      - name: Run Tests
+        run: tox -e coverage
+
+      - name: Report Results
+        run: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
