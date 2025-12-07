@@ -23,3 +23,17 @@ jobs:
         run: coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lints:
+    runs-on: ubuntu-latest
+    name: flake8 Lints
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v6
+
+      - name: Run flake8
+        uses: py-actions/flake8@v2
+        with:
+          path: "coolname"
