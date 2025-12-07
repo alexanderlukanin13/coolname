@@ -113,7 +113,7 @@ Installation
 
     pip install coolname
 
-**coolname** is written in pure Python and has no dependencies. It works on any modern Python version (3.6+), including PyPy.
+**coolname** is written in pure Python and has no dependencies. It works on any modern Python version (3.7+), including PyPy.
 
 
 .. |pypi| image:: https://img.shields.io/pypi/v/coolname.svg
