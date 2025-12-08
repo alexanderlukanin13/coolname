@@ -26,6 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Install dependencies
+        if: matrix.python-interpreter == 'pypy'
+        run: |
+          apt-get update
+          apt-get install -y \
+            build-essential \
+            cargo \
+            libffi-dev \
+            libssl-dev \
+            pkg-config \
+            python3-dev
+
       - name: Install tox and any other packages
         run: pip install tox
 
