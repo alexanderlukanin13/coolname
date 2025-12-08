@@ -7,6 +7,5 @@ setuptools==80.10.1
 wheel==0.38.1
 watchdog==2.1.9
 tox==3.26.0
-cryptography==46.0.3
 PyYAML==6.0.3
 flake8==7.3.0
