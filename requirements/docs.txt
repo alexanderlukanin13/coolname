@@ -1,5 +1,5 @@
 Sphinx>=6.2.0
 sphinxcontrib-fulltoc==1.2.0
 sphinxcontrib-websupport==1.2.4
-setuptools>=64
+setuptools>=70.1
 setuptools_scm>=8
