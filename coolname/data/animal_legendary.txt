@@ -10,8 +10,18 @@
 max_length = 13
 
 basilisk
+chimera
 chupacabra
+cockatrice
 dragon
 griffin
+hippogriff
+jackalope
+kelpie
+kraken
+manticore
 pegasus
+phoenix
+serpent
 unicorn
+wyvern
