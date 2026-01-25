@@ -4,7 +4,7 @@ import re
 try:
     from setuptools import setup
     from setuptools.command.sdist import sdist
-except ImportError:
+except ImportError:  # Backwards compatibility for Python < 3.12, remove distutils when support is dropped
     from distutils.core import setup
     from distutils.command.sdist import sdist
 
