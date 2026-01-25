@@ -151,7 +151,7 @@ class LoaderTest(TestCase):
         open_mock.side_effect = open_then_fail()
         with self.assertRaisesRegex(InitializationError,
                                     r"Failed to read config from "
-                                    ".+config\.json: BOOM!"):
+                                    r".+config\.json: BOOM!"):
             _load_data(NO_DATA_DIR)
 
     @patch('coolname.loader.open', side_effect=lambda *x, **y: StringIO('word'))

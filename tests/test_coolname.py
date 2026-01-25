@@ -85,8 +85,8 @@ class TestCoolname(TestCase):
             {'mywords': ['a', 'b']})
         with self.assertRaisesRegex(InitializationError,
                                     r"^Conflict: list 'mywords' is defined both in config "
-                                    "and in \*\.txt file. If it's a 'words' list, "
-                                    "you should remove it from config\.$"):
+                                    r"and in \*\.txt file. If it's a 'words' list, "
+                                    r"you should remove it from config\.$"):
             RandomGenerator(load_config('dummy'))
 
     def test_generate_by_pattern(self):
@@ -278,7 +278,7 @@ class TestCoolname(TestCase):
                                     "Invalid config: Lists are referenced but not defined: one, two"):
             RandomGenerator({'all': {'type': 'nested', 'lists': ['one', 'two']}})
         with self.assertRaisesRegex(InitializationError,
-                                   "Invalid config: Rule 'all' is recursive: \['all', 'one'\]"):
+                                   r"Invalid config: Rule 'all' is recursive: \['all', 'one'\]"):
             RandomGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'nested', 'lists': ['all']}
@@ -304,7 +304,7 @@ class TestCoolname(TestCase):
                 'phrases': [['one', 'two'], ['three', 'four']]}
         })
         with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid phrase 'five' \(1 word\(s\) but number_of_words=2\)"):
+                                    r"Invalid config: Config at key 'all' has invalid phrase 'five' \(1 word\(s\) but number_of_words=2\)"):
             RandomGenerator({
                 'all': {
                     'type': 'phrases',
@@ -319,7 +319,7 @@ class TestCoolname(TestCase):
                 'phrases': [['black', 'goose'], ['white', 'hare']]}
         })
         with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid phrase 'white rabbit' \(longer than 10 characters\)"):
+                                    r"Invalid config: Config at key 'all' has invalid phrase 'white rabbit' \(longer than 10 characters\)"):
             RandomGenerator({
                 'all': {
                     'type': 'phrases',
@@ -329,8 +329,8 @@ class TestCoolname(TestCase):
 
     def test_max_length(self):
         with self.assertRaisesRegex(InitializationError,
-                                   "Config at key 'one' has invalid word 'tiger' "
-                                   "\(longer than 4 characters\)"):
+                                   r"Config at key 'one' has invalid word 'tiger' "
+                                   r"\(longer than 4 characters\)"):
             RandomGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'words', 'max_length': 4, 'words': ['cat', 'lion', 'tiger']}

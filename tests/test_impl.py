@@ -2,6 +2,8 @@
 import io
 import unittest
 
+import pytest
+
 from coolname import RandomGenerator, InitializationError
 from coolname.impl import NestedList, CartesianList, Scalar,\
     WordList, PhraseList, WordAsPhraseWrapper,\
@@ -63,6 +65,7 @@ class TestImplementation(TestCase):
         self.assertEqual(cart_list[24], [10, 12])
         self.assertEqual(cart_list[27], [11, 13])
 
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_phrase_list_squash_optimization(self):
         """PhraseLists should be squashed just like WordLists."""
         config = {
