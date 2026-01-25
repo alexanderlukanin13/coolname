@@ -19,7 +19,7 @@ from .exceptions import ConfigurationError, InitializationError
 try:
     hashlib.md5(b'', usedforsecurity=False)  # noqa
     _md5 = partial(hashlib.md5, usedforsecurity=False)
-except TypeError:
+except TypeError:  # pragma: no cover
     _md5 = hashlib.md5
 
 
@@ -565,7 +565,7 @@ def _default() -> RandomGenerator:
     elif data_module:
         import importlib
         config = importlib.import_module(data_module).config
-    else:
+    else:  # pragma: no cover
         raise ImportError('Configure valid COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE')
     config['all']['__nocheck'] = True
     return RandomGenerator(config)

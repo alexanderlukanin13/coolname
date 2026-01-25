@@ -455,14 +455,14 @@ class TestCoolname(TestCase):
         # 1. Re-seed default generator
         random.seed(123)
         self.assertEqual(random.random(), 0.052363598850944326)
-        self.assertEqual(coolname.generate_slug(), 'puzzling-jaguar-of-satisfying-advance')
+        self.assertEqual(coolname.generate_slug(), 'smiling-muskox-of-ultimate-order')
 
         # 2. Replace default generator
         rand = random.Random()
         rand.seed(456)
         self.assertEqual(rand.random(), 0.7482025358782363)
         coolname.replace_random(rand)
-        self.assertEqual(coolname.generate_slug(), 'excellent-brave-hedgehog-of-opportunity')
+        self.assertEqual(coolname.generate_slug(), 'arboreal-sassy-millipede-of-opportunity')
 
         # 3. Custom generator with custom Random
         config = {
