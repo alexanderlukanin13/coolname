@@ -143,6 +143,7 @@ eagle
 goshawk
 harrier
 hawk
+raptor
 vulture
 
 # Aves -> Anseriformes
@@ -591,7 +592,7 @@ turtle
 
 # Dinosaurs
 dinosaur
-raptor
+velociraptor
 
 # Not quite animals
 mushroom

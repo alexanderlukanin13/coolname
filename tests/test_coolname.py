@@ -450,19 +450,21 @@ class TestCoolname(TestCase):
 
     # randrange returns different results in Python 2. We skip this test to avoid updating it every time.
     def test_random_default(self):
-        # NOTE: two slugs in this test must be updated every time you change word lists
+        # ==================================================================================
+        # IMPORTANT: TWO SLUGS IN THIS TEST MUST BE UPDATED EVERY TIME YOU CHANGE WORD LISTS
+        # ==================================================================================
 
         # 1. Re-seed default generator
         random.seed(123)
         self.assertEqual(random.random(), 0.052363598850944326)
-        self.assertEqual(coolname.generate_slug(), 'smiling-muskox-of-ultimate-order')
+        self.assertEqual(coolname.generate_slug(), 'mellow-junglefowl-of-major-atheism')
 
         # 2. Replace default generator
         rand = random.Random()
         rand.seed(456)
         self.assertEqual(rand.random(), 0.7482025358782363)
         coolname.replace_random(rand)
-        self.assertEqual(coolname.generate_slug(), 'arboreal-sassy-millipede-of-opportunity')
+        self.assertEqual(coolname.generate_slug(), 'aquatic-succinct-lorikeet-of-opportunity')
 
         # 3. Custom generator with custom Random
         config = {

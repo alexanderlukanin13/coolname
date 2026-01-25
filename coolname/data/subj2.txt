@@ -128,6 +128,7 @@ snow leopard
 sperm whale
 spinner dolphin
 vampire bat
+woolly rhino
 
 # Reptiles
 gila monster
