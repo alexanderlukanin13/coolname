@@ -7,7 +7,6 @@ custom instance of RandomGenerator.
 """
 
 
-import codecs
 import json
 import os
 import re
@@ -61,9 +60,9 @@ def _load_data(path):
         file_path = os.path.join(path, file_name)
         name = os.path.splitext(os.path.split(file_path)[1])[0]
         try:
-            with codecs.open(file_path, encoding='utf-8') as file:
+            with open(file_path, encoding='utf-8') as file:
                 wordlists[name] = _load_wordlist(name, file)
-        except OSError as ex:
+        except (OSError, FileNotFoundError) as ex:
             raise InitializationError('Failed to read {}: {}'.format(file_path, ex))
     config = _load_config(os.path.join(path, 'config.json'))
     return (config, wordlists)
@@ -71,9 +70,9 @@ def _load_data(path):
 
 def _load_config(config_file_path):
     try:
-        with codecs.open(config_file_path, encoding='utf-8') as file:
+        with open(config_file_path, encoding='utf-8') as file:
             return json.load(file)
-    except OSError as ex:
+    except (OSError, FileNotFoundError) as ex:
         raise InitializationError('Failed to read config from {}: {}'.format(config_file_path, ex))
     except ValueError as ex:
         raise ConfigurationError('Invalid JSON: {}'.format(ex))

@@ -104,7 +104,7 @@ class LoaderTest(TestCase):
 
     @patch('json.load')
     @patch('coolname.loader._load_wordlist')
-    @patch('codecs.open')
+    @patch('coolname.loader.open')
     @patch('os.path.isdir')
     @patch('os.listdir')
     def test_load_data(self,
@@ -122,7 +122,7 @@ class LoaderTest(TestCase):
             'two': ['two', 'ni'],
         })
 
-    @patch('codecs.open', side_effect=OSError('BOOM!'))
+    @patch('coolname.loader.open', side_effect=OSError('BOOM!'))
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt', 'two.txt'])
     def test_load_data_os_error(self, listdir_mock, isdir_mock, open_mock):
@@ -130,7 +130,7 @@ class LoaderTest(TestCase):
                                     r'Failed to read .+one.txt: BOOM!'):
             _load_data(NO_DATA_DIR)
 
-    @patch('codecs.open')
+    @patch('coolname.loader.open')
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt'])
     def test_load_data_failed_to_read_config(self, listdir_mock, isdir_mock,
@@ -154,7 +154,7 @@ class LoaderTest(TestCase):
                                     ".+config\.json: BOOM!"):
             _load_data(NO_DATA_DIR)
 
-    @patch('codecs.open', side_effect=lambda *x, **y: StringIO('word'))
+    @patch('coolname.loader.open', side_effect=lambda *x, **y: StringIO('word'))
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt', 'two.txt'])
     def test_load_data_invalid_json(self, *args):
@@ -164,7 +164,7 @@ class LoaderTest(TestCase):
                                     r"No JSON object could be decoded)"):
             _load_data(NO_DATA_DIR)
 
-    @patch('codecs.open')
+    @patch('coolname.loader.open')
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt'])
     def test_invalid_options_in_txt(self, mock1, mock2, open_mock):
@@ -202,7 +202,7 @@ class LoaderTest(TestCase):
             load_data()
 
 
-    @patch('codecs.open')
+    @patch('coolname.loader.open')
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt'])
     def test_max_length_in_txt(self, mock1, mock2, open_mock):
@@ -213,7 +213,7 @@ class LoaderTest(TestCase):
                                     r"at list u?'one' line 3: u?'abcdef'"):
             _load_data(NO_DATA_DIR)
 
-    @patch('codecs.open')
+    @patch('coolname.loader.open')
     @patch('os.path.isdir', return_value=True)
     @patch('os.listdir', return_value=['one.txt'])
     def test_number_of_words_in_txt(self, mock1, mock2, open_mock):
