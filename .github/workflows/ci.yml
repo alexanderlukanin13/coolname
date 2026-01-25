@@ -72,6 +72,8 @@ jobs:
 
       - name: Set up Python environment
         uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
 
       - name: Run flake8
         uses: py-actions/flake8@v2
