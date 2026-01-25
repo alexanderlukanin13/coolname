@@ -514,7 +514,7 @@ galago
 gibbon
 gorilla
 lemur
-lori
+loris
 macaque
 mandrill
 marmoset

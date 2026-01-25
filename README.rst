@@ -10,7 +10,7 @@ Do you want random human-readable strings?
 
     >>> from coolname import generate_slug
     >>> generate_slug()
-    'big-maize-lori-of-renovation'
+    'big-maize-loris-of-renovation'
     >>> generate_slug()
     'tunneling-amaranth-rhino-of-holiness'
     >>> generate_slug()
