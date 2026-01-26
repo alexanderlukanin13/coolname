@@ -178,8 +178,8 @@ class TestImplementation(TestCase):
     def test_WordAsPhraseWrapper(self):
         wrapper = WordAsPhraseWrapper(WordList(['one', 'two']))
         assert len(wrapper) == 2
-        assert wrapper[0] == ('one', )
-        assert wrapper[1] == ('two', )
+        assert wrapper[0] == ['one']
+        assert wrapper[1] == ['two']
         assert str(wrapper) == "WordAsPhraseWrapper(WordList(['one', 'two'], len=2))"
         assert repr(wrapper) == str(wrapper)
 
