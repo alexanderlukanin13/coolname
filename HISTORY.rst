@@ -3,6 +3,17 @@
 Release history
 ===============
 
+3.0.0 (2026-01-29)
+------------------
+
+* **Breaking change:** Python 3.6 is not supported anymore. Tests cover Python 3.7-3.14 and PyPy 3.7-3.11.
+
+* Better type hints (now checked with mypy)
+
+* Minor bug fixed, concerning abnormal configs (most likely didn't affect anyone)
+
+* More mythical animals + one mistake fixed + few other words
+
 2.2.0 (2023-01-09)
 ------------------
 
