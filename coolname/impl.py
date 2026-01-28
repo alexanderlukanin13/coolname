@@ -7,16 +7,22 @@ import itertools
 import os
 import os.path as op
 import random
-from random import randrange
+from random import randrange, Random
 import re
-from typing import List, Union, Optional, Mapping, Callable, Any, Tuple
+import typing
+from typing import List, Dict, Union, Optional, Mapping, Callable, Any, Tuple
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
 
+if typing.TYPE_CHECKING:
+    HashType = hashlib._Hash
+else:
+    HashType = Any
+
 # For new Python versions with (possible) OpenSSL FIPS support,
 # we should pass usedforsecurity=False argument to md5().
-_md5: Callable[[], hashlib._Hash]
+_md5: Callable[[], HashType]
 try:
     hashlib.md5(b'', usedforsecurity=False)  # noqa
     _md5 = partial(hashlib.md5, usedforsecurity=False)
@@ -42,7 +48,7 @@ class AbstractNestedList:
     def __repr__(self):
         return self.__str__()
 
-    def __getitem__(self, item: int) -> Union[str, list[str]]:
+    def __getitem__(self, item: int) -> Union[str, List[str]]:
         raise NotImplementedError
 
     def squash(self, hard, cache):
@@ -131,7 +137,7 @@ class WordAsPhraseWrapper:
     def __len__(self):
         return self.length
 
-    def __getitem__(self, i: int) -> Union[str, list[str]]:
+    def __getitem__(self, i: int) -> Union[str, List[str]]:
         return [self._list[i]]
 
     def squash(self, hard, cache):  # noqa
@@ -161,7 +167,7 @@ class TopLevelMultiWrapper(WordAsPhraseWrapper):
 class NestedList(AbstractNestedList):
 
     length: int
-    _lists: list[AbstractNestedList]
+    _lists: List[AbstractNestedList]
 
     def __init__(self, lists):
         super().__init__(lists)
@@ -175,7 +181,7 @@ class NestedList(AbstractNestedList):
         self._lists.sort(key=lambda x: -x.length)
         self.length = sum(x.length for x in self._lists)
 
-    def __getitem__(self, i: int) -> Union[str, list[str]]:
+    def __getitem__(self, i: int) -> Union[str, List[str]]:
         # Retrieve item from appropriate list
         for x in self._lists:
             n = x.length  #type: ignore
@@ -224,7 +230,7 @@ class CartesianList(AbstractNestedList):
         self._list_divs = tuple(zip(self._lists, reversed(divs)))
         self.multiword = True
 
-    def __getitem__(self, i: int) -> Union[str, list[str]]:
+    def __getitem__(self, i: int) -> Union[str, List[str]]:
         result = []
         for sublist, n in self._list_divs:
             x = sublist[i // n]
@@ -266,20 +272,20 @@ class RandomGenerator:
     """
 
     # Structure that does the generation
-    _lists: dict[Union[str, int, None], AbstractNestedList]
+    _lists: Dict[Union[str, int, None], AbstractNestedList]
     # Custom random (if any)
-    _random: Optional[random.Random]
+    _random: Optional[Random]
     _randrange: Callable
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
     _check_prefix: Union[int, None]
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
     _max_slug_length: Union[int, None]
 
-    def __init__(self, config: Mapping[str, dict], rand: Optional[random.Random] = None):
+    def __init__(self, config: Mapping[str, dict], rand: Optional[Random] = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
         config = dict(config)
         _validate_config(config)
-        lists: dict[str, AbstractNestedList] = {}
+        lists: Dict[str, AbstractNestedList] = {}
         _create_lists(config, lists, 'all', [])
         self._lists = {}
         for key, list_config in config.items():
@@ -337,11 +343,11 @@ class RandomGenerator:
         assert self.generate_slug()
 
     @property
-    def random(self) -> Optional[random.Random]:
+    def random(self) -> Optional[Random]:
         return self._random
 
     @random.setter
-    def random(self, rand: Optional[random.Random]) -> None:
+    def random(self, rand: Optional[Random]) -> None:
         if rand:
             self._random = rand
             self._randrange = rand.randrange
@@ -440,7 +446,7 @@ def _is_str(value) -> bool:
 
 
 # Translate phrases defined as strings to tuples
-def _split_phrase(x: str) -> Union[str, list[str]]:
+def _split_phrase(x: str) -> Union[str, List[str]]:
     try:
         return re.split(r'\s+', x.strip())
     except AttributeError:  # Not str
@@ -552,9 +558,9 @@ def _validate_config(config: Mapping[str, dict]) -> None:
 
 def _create_lists(
         config: dict,
-        results: dict[str, AbstractNestedList],
+        results: Dict[str, AbstractNestedList],
         current: str,
-        stack: list[str],
+        stack: List[str],
         inside_cartesian: Optional[str] = None
 ) -> AbstractNestedList:
     """
@@ -639,6 +645,6 @@ generate_slug = _default.generate_slug
 get_combinations_count = _default.get_combinations_count
 
 
-def replace_random(rand: Optional[random.Random] = None) -> None:
+def replace_random(rand: Optional[Random] = None) -> None:
     """Replaces random number generator for the default RandomGenerator instance."""
     _default.random = rand
