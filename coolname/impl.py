@@ -184,7 +184,7 @@ class NestedList(AbstractNestedList):
     def __getitem__(self, i: int) -> Union[str, List[str]]:
         # Retrieve item from appropriate list
         for x in self._lists:
-            n = x.length  #type: ignore
+            n = x.length  # type: ignore
             if i < n:
                 return x[i]
             else:
