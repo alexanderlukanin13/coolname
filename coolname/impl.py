@@ -34,7 +34,7 @@ class AbstractNestedList:
                        for x in lists]
         # If this is set to True in a subclass,
         # then subclass yields sequences instead of single words.
-        self.multiword = any(x.multiword for x in self._lists)
+        self.multiword = getattr(self.__class__, 'multiword', None) or any(x.multiword for x in self._lists)
 
     def __str__(self):
         return f'{self.__class__.__name__}({len(self._lists)}, len={self.length})'
@@ -113,9 +113,10 @@ class WordList(_BasicList):
 class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
 
+    multiword = True
+
     def __init__(self, sequence=None):
         super().__init__(tuple(_split_phrase(x)) for x in sequence)
-        self.multiword = True
 
 
 class WordAsPhraseWrapper:
@@ -143,6 +144,20 @@ class WordAsPhraseWrapper:
         return f'{self.__class__.__name__}({self._list!r})'
 
 
+class TopLevelMultiWrapper(WordAsPhraseWrapper):
+    """
+    For abnormal but possible cases when there's no multiword list at the top generator level.
+    """
+
+    def __init__(self, any_list: AbstractNestedList):  # noqa
+        # Note that call to base class is omitted deliberately
+        self._list = any_list
+        self.length = any_list.length
+
+    def _dump(self, stream, indent='', object_ids=False):
+        return self._list._dump(stream, indent, object_ids)
+
+
 class NestedList(AbstractNestedList):
 
     length: int
@@ -153,7 +168,7 @@ class NestedList(AbstractNestedList):
         # If user mixes WordList and PhraseList in the same NestedList,
         # we need to make sure that __getitem__ always returns tuple.
         # For that, we wrap WordList instances.
-        # Note that it decreases performance somewhat, and it is avoided in default config.
+        # Note that such mixing decreases performance somewhat, and it is avoided in default config.
         if any(isinstance(x, WordList) for x in self._lists) and any(x.multiword for x in self._lists):
             self._lists = [WordAsPhraseWrapper(x) if isinstance(x, WordList) else x for x in self._lists]
         # Fattest lists first (to reduce average __getitem__ time)
@@ -279,7 +294,13 @@ class RandomGenerator:
                     pattern = None
                 else:
                     pattern = key
-                self._lists[pattern] = lists[key]
+                gen_list = lists[key]
+                # Abnormal but possible configuration - top list is not multiword.
+                # This requires a wrapper so that we avoid dealing with str instead of list in generate().
+                # See also test_degen_* in test_impl.py
+                if not lists[key].multiword:
+                    gen_list = TopLevelMultiWrapper(lists[key])  # type: ignore
+                self._lists[pattern] = gen_list
         self._lists[None] = self._lists[None].squash(True, {})
         # Should we avoid duplicates?
         try:
@@ -343,8 +364,9 @@ class RandomGenerator:
                     self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != n or
                     self._max_slug_length and sum(len(x) for x in result) + n - 1 > self._max_slug_length):
                 continue
-            # Most of the time it returns at first attempt, without repeating the loop
-            return result
+            # Most of the time it returns at first attempt, without repeating the loop.
+            # Note about typing: technically its List[str] | str, but we know it's always List[str] at this point.
+            return result  # type: ignore
 
     def generate_slug(self, pattern: Union[None, str, int] = None) -> str:
         """

@@ -189,6 +189,58 @@ class TestImplementation(TestCase):
         assert str(nested_list) == "NestedList(1, len=2)"
         assert repr(nested_list) == str(nested_list)
 
+    # Following are degenerate cases - technically valid but odd configs.
+    # They are unlikely to be found in real scenarios,
+    # but we still should handle them in a consistent manner.
+
+    def test_degen_just_words(self):
+        generator = RandomGenerator({'all': {'type': 'words', 'words': ['one', 'two']}})
+        assert generator.generate_slug() in ['one', 'two']
+
+    def test_degen_just_phrases(self):
+        generator = RandomGenerator({'all': {'type': 'phrases', 'phrases': ['thirty three', 'thirty four']}})
+        assert generator.generate_slug() in ['thirty-three', 'thirty-four']
+
+    def test_degen_words_and_words(self):
+        generator = RandomGenerator({
+            'all': {'type': 'nested', 'lists': ['words', 'words2']},
+            'words': {'type': 'words', 'words': ['one', 'two']},
+            'words2': {'type': 'words', 'words': ['three', 'four']},
+        })
+        results = set(generator.generate_slug() for _ in range(20))
+        assert results == {'one', 'two', 'three', 'four'}
+
+    def test_degen_words_and_phrases(self):
+        generator = RandomGenerator({
+            'all': {'type': 'nested', 'lists': ['words', 'phrases']},
+            'words': {'type': 'words', 'words': ['one', 'two']},
+            'phrases': {'type': 'phrases', 'phrases': ['twenty one', 'twenty two']},
+        })
+        results = set(generator.generate_slug() for _ in range(20))
+        assert results == {'one', 'two', 'twenty-one', 'twenty-two'}
+
+    def test_degen_words_and_cartesian(self):
+        generator = RandomGenerator({
+            'all': {'type': 'nested', 'lists': ['cartesian', 'words']},
+            'words': {'type': 'words', 'words': ['one', 'two']},
+            'cartesian': {'type': 'cartesian', 'lists': ['tens', 'ones']},
+            'tens': {'type': 'words', 'words': ['thirty', 'forty']},
+            'ones': {'type': 'words', 'words': ['three', 'four']},
+        })
+        results = set(generator.generate_slug() for _ in range(30))
+        assert results == {'one', 'two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
+
+    def test_degen_phrases_and_cartesian(self):
+        generator = RandomGenerator({
+            'all': {'type': 'nested', 'lists': ['cartesian', 'phrases']},
+            'phrases': {'type': 'phrases', 'phrases': ['twenty one', 'twenty two']},
+            'cartesian': {'type': 'cartesian', 'lists': ['tens', 'ones']},
+            'tens': {'type': 'words', 'words': ['thirty', 'forty']},
+            'ones': {'type': 'words', 'words': ['three', 'four']},
+        })
+        results = set(generator.generate_slug() for _ in range(30))
+        assert results == {'twenty-one', 'twenty-two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
+
 
 if __name__ == '__main__':
     import sys
