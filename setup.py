@@ -55,7 +55,7 @@ For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/hi
 
 setup(
     name='coolname',
-    version='2.2.0',
+    version='3.0.0',
     description="Random name and slug generator",
     long_description=readme + '\n\n' + history,
     author="Alexander Lukanin",
