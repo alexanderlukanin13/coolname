@@ -16,7 +16,7 @@ from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
 
 if typing.TYPE_CHECKING:
-    HashType = hashlib._Hash
+    HashType = hashlib._Hash  # pragma: no cover
 else:
     HashType = Any
 
@@ -32,7 +32,7 @@ except TypeError:  # pragma: no cover
 
 class AbstractNestedList:
 
-    length: int
+    length: int  # pragma: no cover
 
     def __init__(self, lists):
         super().__init__()
@@ -49,7 +49,7 @@ class AbstractNestedList:
         return self.__str__()
 
     def __getitem__(self, item: int) -> Union[str, List[str]]:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def squash(self, hard, cache):
         if len(self._lists) == 1:
@@ -80,7 +80,7 @@ def _to_bytes(value):
 
 class _BasicList(list, AbstractNestedList):
 
-    length: int
+    length: int  # pragma: no cover
 
     def __init__(self, sequence=None):
         list.__init__(self, sequence)
@@ -127,7 +127,7 @@ class PhraseList(_BasicList):
 
 class WordAsPhraseWrapper:
 
-    length: int
+    length: int  # pragma: no cover
     multiword = True
 
     def __init__(self, wordlist):
@@ -166,8 +166,8 @@ class TopLevelMultiWrapper(WordAsPhraseWrapper):
 
 class NestedList(AbstractNestedList):
 
-    length: int
-    _lists: List[AbstractNestedList]
+    length: int  # pragma: no cover
+    _lists: List[AbstractNestedList]  # pragma: no cover
 
     def __init__(self, lists):
         super().__init__(lists)
@@ -213,7 +213,7 @@ class NestedList(AbstractNestedList):
 
 class CartesianList(AbstractNestedList):
 
-    length: int
+    length: int  # pragma: no cover
 
     def __init__(self, lists):
         super().__init__(lists)
@@ -244,7 +244,7 @@ class CartesianList(AbstractNestedList):
 
 class Scalar(AbstractNestedList):
 
-    length: int
+    length: int  # pragma: no cover
 
     def __init__(self, value: str):
         super().__init__([])
@@ -272,14 +272,14 @@ class RandomGenerator:
     """
 
     # Structure that does the generation
-    _lists: Dict[Union[str, int, None], AbstractNestedList]
+    _lists: Dict[Union[str, int, None], AbstractNestedList]  # pragma: no cover
     # Custom random (if any)
-    _random: Optional[Random]
-    _randrange: Callable
+    _random: Optional[Random]  # pragma: no cover
+    _randrange: Callable  # pragma: no cover
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
-    _check_prefix: Union[int, None]
+    _check_prefix: Union[int, None]  # pragma: no cover
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
-    _max_slug_length: Union[int, None]
+    _max_slug_length: Union[int, None]  # pragma: no cover
 
     def __init__(self, config: Mapping[str, dict], rand: Optional[Random] = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
@@ -626,7 +626,7 @@ def _create_default_generator() -> RandomGenerator:
     if data_dir and op.isdir(data_dir):
         from coolname.loader import load_config
         config = load_config(data_dir)
-    elif data_module:
+    elif data_module:  # pragma: no cover (actually tested via subprocess - see test_coolname_env.py)
         import importlib
         config = importlib.import_module(data_module).config
     else:  # pragma: no cover
