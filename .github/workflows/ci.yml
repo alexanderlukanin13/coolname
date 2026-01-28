@@ -79,3 +79,22 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           path: "coolname"
+
+  mypy_check:
+    runs-on: ubuntu-latest
+    name: mypy
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements/mypy.txt
+
+      - name: Run mypy
+        run: |
+          mypy coolname

@@ -1,5 +1,6 @@
 -r docs.txt
 -r test.txt
+-r mypy.txt
 
 bumpversion==0.6.0
 setuptools==80.10.1
