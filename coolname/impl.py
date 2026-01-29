@@ -441,10 +441,6 @@ class RandomGenerator:
                     warnings.warn(warning_msg.format(**context))
 
 
-def _is_str(value) -> bool:
-    return value.__class__.__name__ in ('str', 'unicode')
-
-
 # Translate phrases defined as strings to tuples
 def _split_phrase(x: str) -> Union[str, List[str]]:
     try:
@@ -475,7 +471,7 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                     raise ValueError('Config at key {!r} has no {!r}'
                                      .format(key, _CONF.FIELD.LISTS))
                 if (not isinstance(sublists, list) or not sublists or
-                        not all(_is_str(x) for x in sublists)):
+                        not all(isinstance(x, str) for x in sublists)):
                     raise ValueError('Config at key {!r} has invalid {!r}'
                                      .format(key, _CONF.FIELD.LISTS))
                 referenced_sublists.update(sublists)
@@ -486,7 +482,7 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                 except KeyError:
                     raise ValueError('Config at key {!r} has no {!r}'
                                      .format(key, _CONF.FIELD.VALUE))
-                if not _is_str(value):
+                if not isinstance(value, str):
                     raise ValueError('Config at key {!r} has invalid {!r}'
                                      .format(key, _CONF.FIELD.VALUE))
             # Words
