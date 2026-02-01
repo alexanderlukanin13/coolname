@@ -8,12 +8,14 @@
 max_length = 13
 
 # Science
+biology
 chemistry
 education
 experiment
 mathematics
 psychology
 reading
+zoology
 
 # Art
 cubism
@@ -26,6 +28,7 @@ climate
 competition
 effort
 emphasis
+forgiveness
 foundation
 judgment
 memory

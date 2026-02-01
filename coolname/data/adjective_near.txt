@@ -95,6 +95,7 @@ yellow
 agate
 amber
 amethyst
+alchemical
 aquamarine
 asparagus
 beryl
@@ -109,13 +110,16 @@ emerald
 garnet
 golden
 granite
+iron
 ivory
 jade
 jasper
 lemon
 lime
 malachite
+marble
 maroon
+metal
 myrtle
 nickel
 olive

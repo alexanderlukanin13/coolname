@@ -26,6 +26,7 @@ blazing
 boisterous
 bouncy
 brawny
+broad
 bulky
 camouflaged
 caped
@@ -54,6 +55,7 @@ invisible
 lean
 loud
 loutish
+luminous
 lumpy
 lush
 masked
@@ -100,12 +102,14 @@ wooden
 
 # Beauty & Charm
 adorable
+admirable
 affable
 amazing
 amiable
 attractive
 beautiful
 calm
+casual
 charming
 cherubic
 classic
@@ -116,6 +120,7 @@ cuddly
 curly
 cute
 debonair
+easygoing
 elegant
 famous
 fresh
@@ -123,22 +128,27 @@ friendly
 funny
 gorgeous
 graceful
+gracious
 gregarious
 grinning
 handsome
+healthy
 hilarious
 hot
 interesting
 kind
 laughing
+likable
 lovely
 meek
 mellow
 merciful
 neat
 nifty
+noble
 notorious
 poetic
+popular
 pretty
 refined
 refreshing
@@ -147,6 +157,7 @@ smiling
 sociable
 spiffy
 stylish
+supportive
 sweet
 tactful
 whimsical
@@ -157,6 +168,7 @@ accurate
 adamant
 adaptable
 adventurous
+aggressive
 alluring
 aloof
 ambitious
@@ -164,6 +176,7 @@ amusing
 annoying
 arrogant
 aspiring
+audacious
 belligerent
 benign
 berserk
@@ -192,7 +205,10 @@ dramatic
 dynamic
 eager
 eccentric
+ecstatic
+effective
 elated
+emotional
 encouraging
 enigmatic
 enthusiastic
@@ -206,17 +222,25 @@ festive
 fierce
 fine
 free
+furious
 gabby
 garrulous
 gay
+generous
 gentle
+girlish
+gleeful
 glistening
+grateful
 greedy
 grumpy
 happy
+honorable
 honest
 hopeful
 hospitable
+humble
+humorous
 impetuous
 independent
 industrious
@@ -249,12 +273,15 @@ puzzling
 quixotic
 quizzical
 rebel
+relaxed
+reliable
 resolute
 rampant
 righteous
 romantic
 rough
 rousing
+sarcastic
 sassy
 satisfied
 sly
@@ -266,11 +293,15 @@ spry
 stalwart
 stirring
 swinging
+sympathetic
+talkative
 tasteful
+terrific
 thankful
 tidy
 tremendous
 truthful
+unbreakable
 unselfish
 upbeat
 uppish
@@ -279,6 +310,7 @@ vehement
 vengeful
 vigorous
 vivacious
+vociferous
 zealous
 zippy
 
@@ -295,6 +327,7 @@ capable
 careful
 cautious
 certain
+chivalrous
 clever
 competent
 conscious
@@ -316,6 +349,7 @@ impartial
 industrious
 ingenious
 inquisitive
+inscrutable
 intelligent
 inventive
 judicious
@@ -326,17 +360,21 @@ logical
 masterful
 mindful
 nonchalant
+objective
 observant
 omniscient
 poised
 practical
 pragmatic
+prodigious
 proficient
 provocative
 qualified
 radical
 rational
 realistic
+reasonable
+responsible
 resourceful
 savvy
 sceptical
@@ -371,8 +409,11 @@ athletic
 dashing
 deft
 dexterous
+durable
 energetic
 fast
+flexible
+formidable
 frisky
 hasty
 hypersonic
@@ -399,7 +440,9 @@ tough
 unyielding
 
 # Money & Power
+influential
 rich
+venerable
 wealthy
 
 # Science
@@ -426,6 +469,8 @@ aboriginal
 amphibian
 aquatic
 arboreal
+celestial
+international
 polar
 terrestrial
 urban
@@ -433,6 +478,7 @@ urban
 # Awesome
 accomplished
 astonishing
+advanced
 authentic
 awesome
 delectable
@@ -450,15 +496,20 @@ glorious
 groovy
 honored
 illustrious
+imperious
 imposing
 important
 impressive
 incredible
+infallible
 invaluable
 kickass
+legendary
+lucky
 majestic
 magnificent
 marvellous
+miraculous
 monumental
 perfect
 phenomenal
@@ -483,32 +534,47 @@ unique
 # Time
 ancient
 antique
+modern
 prehistoric
 primitive
 
 # Misc
 abstract
+academic
 acoustic
 angelic
 arcane
 archetypal
+artificial
 augmented
 auspicious
+automatic
 axiomatic
 beneficial
 bipedal
 bizarre
+comical
 complex
+controversial
 dancing
 dangerous
 demonic
 divergent
 economic
+educational
 electric
+electronic
+elfish
 elite
+elusive
 eminent
 enchanted
 esoteric
+essential
+exceptional
+expensive
+favorite
+fictional
 finicky
 fractal
 futuristic
@@ -521,10 +587,13 @@ hungry
 hypnotic
 hysterical
 illegal
+immortal
 imperial
 imported
 impossible
+indefinable
 inescapable
+invincible
 juicy
 liberal
 ludicrous
@@ -536,14 +605,21 @@ military
 macho
 married
 melodic
+memorable
+musical
+mystic
+native
 natural
 naughty
 nocturnal
+normal
 nostalgic
 optimal
+ordinary
 pastoral
 peculiar
 piquant
+predictable
 pristine
 prophetic
 psychedelic
@@ -551,6 +627,7 @@ quantum
 rare
 real
 secret
+significant
 simple
 spectral
 spiritual
@@ -558,12 +635,17 @@ stereotyped
 stimulating
 straight
 strange
+strategic
 tested
 therapeutic
+traditional
 true
 ubiquitous
+unbeatable
 uncovered
+undetectable
 unnatural
+unstoppable
 utopian
 vagabond
 vague
@@ -575,6 +657,7 @@ wakeful
 wandering
 watchful
 wild
+worthy
 
 # Pseudo-colors
 bright
