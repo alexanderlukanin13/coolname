@@ -91,10 +91,8 @@ jobs:
         with:
           python-version: '3.14'
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements/mypy.txt
+      - name: Install tox
+        run: pip install tox
 
       - name: Run mypy
-        run: |
-          mypy coolname
+        run: tox -e mypy
