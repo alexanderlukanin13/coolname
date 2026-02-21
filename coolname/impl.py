@@ -10,7 +10,7 @@ import random
 from random import randrange, Random
 import re
 import typing
-from typing import List, Dict, Union, Optional, Mapping, Callable, Any, Tuple
+from typing import Mapping, Callable, Any
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
@@ -48,7 +48,7 @@ class AbstractNestedList:
     def __repr__(self):
         return self.__str__()
 
-    def __getitem__(self, item: int) -> Union[str, List[str]]:
+    def __getitem__(self, item: int) -> str | list[str]:
         raise NotImplementedError  # pragma: no cover
 
     def squash(self, hard, cache):
@@ -137,7 +137,7 @@ class WordAsPhraseWrapper:
     def __len__(self):
         return self.length
 
-    def __getitem__(self, i: int) -> Union[str, List[str]]:
+    def __getitem__(self, i: int) -> str | list[str]:
         return [self._list[i]]
 
     def squash(self, hard, cache):  # noqa
@@ -167,7 +167,7 @@ class TopLevelMultiWrapper(WordAsPhraseWrapper):
 class NestedList(AbstractNestedList):
 
     length: int  # pragma: no cover
-    _lists: List[AbstractNestedList]  # pragma: no cover
+    _lists: list[AbstractNestedList]  # pragma: no cover
 
     def __init__(self, lists):
         super().__init__(lists)
@@ -181,7 +181,7 @@ class NestedList(AbstractNestedList):
         self._lists.sort(key=lambda x: -x.length)
         self.length = sum(x.length for x in self._lists)
 
-    def __getitem__(self, i: int) -> Union[str, List[str]]:
+    def __getitem__(self, i: int) -> str | list[str]:
         # Retrieve item from appropriate list
         for x in self._lists:
             n = x.length  # type: ignore
@@ -230,7 +230,7 @@ class CartesianList(AbstractNestedList):
         self._list_divs = tuple(zip(self._lists, reversed(divs)))
         self.multiword = True
 
-    def __getitem__(self, i: int) -> Union[str, List[str]]:
+    def __getitem__(self, i: int) -> str | list[str]:
         result = []
         for sublist, n in self._list_divs:
             x = sublist[i // n]
@@ -272,20 +272,20 @@ class RandomGenerator:
     """
 
     # Structure that does the generation
-    _lists: Dict[Union[str, int, None], AbstractNestedList]  # pragma: no cover
+    _lists: dict[str | int | None, AbstractNestedList]  # pragma: no cover
     # Custom random (if any)
-    _random: Optional[Random]  # pragma: no cover
+    _random: Random | None  # pragma: no cover
     _randrange: Callable  # pragma: no cover
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
-    _check_prefix: Union[int, None]  # pragma: no cover
+    _check_prefix: int | None  # pragma: no cover
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
-    _max_slug_length: Union[int, None]  # pragma: no cover
+    _max_slug_length: int | None  # pragma: no cover
 
-    def __init__(self, config: Mapping[str, dict], rand: Optional[Random] = None):
+    def __init__(self, config: Mapping[str, dict], rand: Random | None = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
         config = dict(config)
         _validate_config(config)
-        lists: Dict[str, AbstractNestedList] = {}
+        lists: dict[str, AbstractNestedList] = {}
         _create_lists(config, lists, 'all', [])
         self._lists = {}
         for key, list_config in config.items():
@@ -293,7 +293,7 @@ class RandomGenerator:
             if list_config.get(_CONF.FIELD.GENERATOR) and key not in lists:
                 _create_lists(config, lists, key, [])
             if key == 'all' or key.isdigit() or list_config.get(_CONF.FIELD.GENERATOR):
-                pattern: Union[str, int, None]
+                pattern: str | int | None
                 if key.isdigit():
                     pattern = int(key)
                 elif key == 'all':
@@ -343,11 +343,11 @@ class RandomGenerator:
         assert self.generate_slug()
 
     @property
-    def random(self) -> Optional[Random]:
+    def random(self) -> Random | None:
         return self._random
 
     @random.setter
-    def random(self, rand: Optional[Random]) -> None:
+    def random(self, rand: Random | None) -> None:
         if rand:
             self._random = rand
             self._randrange = rand.randrange
@@ -355,7 +355,7 @@ class RandomGenerator:
             self._random = random  # type: ignore
             self._randrange = random.randrange
 
-    def generate(self, pattern: Union[None, str, int] = None) -> List[str]:
+    def generate(self, pattern: str | int | None = None) -> list[str]:
         """
         Generates and returns random name as a list of strings.
         """
@@ -374,13 +374,13 @@ class RandomGenerator:
             # Note about typing: technically its List[str] | str, but we know it's always List[str] at this point.
             return result  # type: ignore
 
-    def generate_slug(self, pattern: Union[None, str, int] = None) -> str:
+    def generate_slug(self, pattern: str | int | None = None) -> str:
         """
         Generates and returns random name as a slug.
         """
         return '-'.join(self.generate(pattern))
 
-    def get_combinations_count(self, pattern: Union[None, str, int] = None) -> int:
+    def get_combinations_count(self, pattern: str | int | None = None) -> int:
         """
         Returns total number of unique combinations
         for the given pattern.
@@ -402,7 +402,7 @@ class RandomGenerator:
         # (field_name, predicate, warning_msg, exception_msg)
         # predicate(g) is a function that returns True if generated combination g must be rejected,
         # see checks in generate()
-        checks: List[Tuple[str, Any, Callable[[Any], bool], str, str]] = []
+        checks: list[tuple[str, Any, Callable[[Any], bool], str, str]] = []
         # ensure_unique can lead to infinite loops for some tiny erroneous configs
         if self._ensure_unique:
             checks.append((
@@ -442,7 +442,7 @@ class RandomGenerator:
 
 
 # Translate phrases defined as strings to tuples
-def _split_phrase(x: str) -> Union[str, List[str]]:
+def _split_phrase(x: str) -> str | list[str]:
     try:
         return re.split(r'\s+', x.strip())
     except AttributeError:  # Not str
@@ -554,10 +554,10 @@ def _validate_config(config: Mapping[str, dict]) -> None:
 
 def _create_lists(
         config: dict,
-        results: Dict[str, AbstractNestedList],
+        results: dict[str, AbstractNestedList],
         current: str,
-        stack: List[str],
-        inside_cartesian: Optional[str] = None
+        stack: list[str],
+        inside_cartesian: str | None = None
 ) -> AbstractNestedList:
     """
     An ugly recursive method to transform config dict
@@ -641,6 +641,6 @@ generate_slug = _default.generate_slug
 get_combinations_count = _default.get_combinations_count
 
 
-def replace_random(rand: Optional[Random] = None) -> None:
+def replace_random(rand: Random | None = None) -> None:
     """Replaces random number generator for the default RandomGenerator instance."""
     _default.random = rand
