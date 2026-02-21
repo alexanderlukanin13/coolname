@@ -17,28 +17,30 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Generate slug to stdout')
     parser.add_argument('length', default=None, nargs='?', type=int, help='Number of words')
     parser.add_argument('-w', '--word', help='With particular substring')
+    parser.add_argument('-n', '--number', type=int, default=1, help='Number of slugs to generate')
     parser.add_argument('-a', '--attempts', type=int, default=100000, help='Number of attempts before giving up')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output (with timing)')
     args = parser.parse_args(argv)
-    generate_slug(args.length)  # for more precise timing
-    if args.word:
-        words = args.word.split(',')
-        slug = None
-        for i in range(0, args.attempts):
+    for _ in range(args.number):
+        generate_slug(args.length)  # for more precise timing
+        if args.word:
+            words = args.word.split(',')
+            slug = None
+            for i in range(0, args.attempts):
+                start_time = time.perf_counter()
+                s = generate_slug(args.length)
+                elapsed_time = time.perf_counter() - start_time
+                if any(x in s for x in words):
+                    slug = s
+                    break
+            if slug is None:
+                print('Failed to generate in {} attempts'.format(args.attempts))
+                return 1
+        else:
             start_time = time.perf_counter()
-            s = generate_slug(args.length)
+            slug = generate_slug(args.length)
             elapsed_time = time.perf_counter() - start_time
-            if any(x in s for x in words):
-                slug = s
-                break
-        if slug is None:
-            print('Failed to generate in {} attempts'.format(args.attempts))
-            return 1
-    else:
-        start_time = time.perf_counter()
-        slug = generate_slug(args.length)
-        elapsed_time = time.perf_counter() - start_time
-    print(slug)
+        print(slug)
     if args.verbose:
         sys.stderr.write('Generated in {:0.06f} seconds\n'.format(elapsed_time))
     return 0
