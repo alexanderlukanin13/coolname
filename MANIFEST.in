@@ -4,10 +4,16 @@ include LICENSE
 include README.rst
 include coolname/data/*.json
 include coolname/data/*.txt
+include *.rst
 
-recursive-include tests *
-recursive-include examples *
+exclude MANIFEST.in
+exclude .*
+exclude tox.ini
+exclude mypy.ini
+recursive-exclude tests *
+recursive-exclude examples *
+recursive-exclude requirements *
+recursive-exclude docs *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-
-recursive-include docs *.rst conf.py Makefile make.bat
+recursive-exclude .* *
