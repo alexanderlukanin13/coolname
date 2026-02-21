@@ -1,20 +1,22 @@
 #!/usr/bin/env python
-import re
 
-try:
-    from setuptools import setup
-    from setuptools.command.sdist import sdist
-except ImportError:  # Backwards compatibility for Python < 3.12, remove distutils when support is dropped
-    from distutils.core import setup
-    from distutils.command.sdist import sdist
+from setuptools import setup, Command
+from setuptools.command.build import build
 
 
+# Compile default config from *.txt files. Initially it was to support packaging in *.egg (obsolete & unsupported).
+# Nowadays, it's not required in most (all?) scenarios, loading from *.txt would work just fine.
+# We keep it just in case.
+# It may have slight performance advantage due to reading only one *.py file vs 10+ *.txt files.
+#
+# Historical comment:
+# ---------
 # All this magic is needed to support packaging in zip/egg.
 # Reading files inside zip is problematic, so we compile
 # everything into config dict and stuff it into
 # coolname/data/__init__.py.
+# ---------
 def compile_init_py():
-    import codecs
     import os
     import sys
     current_path = os.path.dirname(__file__)
@@ -28,66 +30,31 @@ def compile_init_py():
     config_path = os.path.join(current_path, 'coolname', 'data')
     config = load_config(config_path)
     # Write to data/__init__.py to be used from .egg
-    with codecs.open(os.path.join(config_path, '__init__.py'), 'w', encoding='utf-8') as file:
+    with open(os.path.join(config_path, '__init__.py'), 'w', encoding='utf-8') as file:
         file.write(f'''# THIS FILE IS AUTO-GENERATED, DO NOT EDIT
 config = {config!r}
 ''')
 
 
-def customize(cls):
-    _old_run = cls.run
-    def run(self, *args, **kwargs):
+class GenerateData(Command):
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
         compile_init_py()
-        return _old_run(self, *args, **kwargs)
-    cls.run = run
-    return cls
 
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
+class CustomBuild(build):
+    sub_commands = [
+        ('generate_data', None),
+        *build.sub_commands
+    ]
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read().replace('.. :changelog:', '')
-    history = history[:history.find('0.2.0')] + '''
-For earlier releases, see `History <https://coolname.readthedocs.io/en/latest/history.html>`_
-'''
-    history = re.sub(r':\w+:`(\w+(?:\.\w+)*)`', r'``\1``', history)
 
 setup(
-    name='coolname',
-    description="Random name and slug generator",
-    long_description=readme + '\n\n' + history,
-    author="Alexander Lukanin",
-    author_email='alexander.lukanin.13@gmail.com',
-    url='https://github.com/alexanderlukanin13/coolname',
-    packages=[
-        'coolname',
-        'coolname.data',
-    ],
-    package_dir={
-        'coolname': 'coolname'
-    },
-    cmdclass={'sdist': customize(sdist)},
-    include_package_data=True,
-    entry_points={'console_scripts': ['coolname = coolname.__main__:main']},
-    use_scm_version={"write_to": "coolname/_version.py"},
-    setup_requires=["setuptools_scm"],
-    license="BSD",
-    zip_safe=True,
-    keywords='coolname',
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12',
-        'Programming Language :: Python :: 3.13',
-        'Programming Language :: Python :: 3.14',
-    ],
+    cmdclass={'build': CustomBuild, 'generate_data': GenerateData},
 )

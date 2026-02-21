@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools==80.10.1", "setuptools-scm==9.2.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coolname"
+dynamic = ["version"]
+description = "Random name and slug generator"
+requires-python = ">= 3.10"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+authors = [{name = "Alexander Lukanin", email = "alexander.lukanin.13@gmail.com"}]
+readme = "README.rst"
+keywords = ["random", "name", "string", "identifier", "slug", "animal"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+]
+
+[project.scripts]
+coolname = "coolname.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/alexanderlukanin13/coolname"
+Documentation = "https://coolname.readthedocs.io/en/latest/"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools_scm]
+version_file = "coolname/_version.py"
