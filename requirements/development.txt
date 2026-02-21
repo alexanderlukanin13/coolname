@@ -2,7 +2,6 @@
 -r test.txt
 -r mypy.txt
 
-setuptools==80.10.1
 tox==3.26.0
 PyYAML==6.0.3
 flake8==7.3.0
