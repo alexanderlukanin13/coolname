@@ -1,3 +1,13 @@
+[run]
+branch = True
+source = src/
+omit =
+    tests/*
+    */_version.py
+    */data/__init__.py
+
 [report]
-include = coolname/*
-omit = coolname/data/__init__.py
+show_missing = True
+
+[html]
+directory = htmlcov
