@@ -1,18 +1,19 @@
+#!/usr/bin/env python
 import argparse
 import os
 import sys
 import time
 
-PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
 if PROJECT_PATH not in sys.path:
     sys.path.append(PROJECT_PATH)
 
-from coolname import generate_slug
+from coolname import generate_slug  # noqa
 
 
 def main(argv):
-    if sys.version_info[:2] < (3, 7):
-        sys.stderr.write('This script requires Python 3.7+\n')
+    if sys.version_info[:2] < (3, 10):
+        sys.stderr.write('This script requires Python 3.10+\n')
         return 1
     parser = argparse.ArgumentParser(description='Generate slug to stdout')
     parser.add_argument('length', default=None, nargs='?', type=int, help='Number of words')
