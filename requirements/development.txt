@@ -2,7 +2,7 @@
 -r test.txt
 -r mypy.txt
 
-tox==3.26.0
+tox==4.44.0
 PyYAML==6.0.3
 flake8==7.3.0
 build==1.4.0

@@ -2,6 +2,7 @@
 
 from setuptools import setup, Command
 from setuptools.command.build import build
+from setuptools.command.sdist import sdist
 
 
 # Compile default config from *.txt files. Initially it was to support packaging in *.egg (obsolete & unsupported).
@@ -19,12 +20,12 @@ from setuptools.command.build import build
 def compile_init_py():
     import os
     import sys
-    current_path = os.path.dirname(__file__)
+    current_path = os.path.join(os.path.dirname(__file__), 'src')
     current_path_appended = False
     if current_path not in sys.path:
         sys.path.append(current_path)
         current_path_appended = True
-    from coolname.loader import load_config
+    from coolname.loader import load_config  # noqa
     if current_path_appended:
         sys.path.remove(current_path)
     config_path = os.path.join(current_path, 'coolname', 'data')
@@ -55,6 +56,12 @@ class CustomBuild(build):
     ]
 
 
+class CustomSDist(sdist):
+    def run(self):
+        compile_init_py()
+        super().run()
+
+
 setup(
-    cmdclass={'build': CustomBuild, 'generate_data': GenerateData},
+    cmdclass={'build': CustomBuild, 'sdist': CustomSDist, 'generate_data': GenerateData},
 )

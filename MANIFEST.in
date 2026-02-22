@@ -2,8 +2,8 @@ include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
-include coolname/data/*.json
-include coolname/data/*.txt
+include src/coolname/data/*.json
+include src/coolname/data/*.txt
 include *.rst
 
 exclude MANIFEST.in

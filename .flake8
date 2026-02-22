@@ -1,6 +1,6 @@
 [flake8]
 max-line-length = 119
 exclude =
-    coolname/__init__.py,
-    coolname/data/__init__.py,
+    src/coolname/__init__.py,
+    src/coolname/data/__init__.py,
     tests/*

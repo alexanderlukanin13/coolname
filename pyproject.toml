@@ -29,5 +29,8 @@ Documentation = "https://coolname.readthedocs.io/en/latest/"
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools_scm]
-version_file = "coolname/_version.py"
+version_file = "src/coolname/_version.py"
