@@ -15,4 +15,5 @@
    randomization
    classes-and-functions
    thread-safe
+   pyinstaller
    history

@@ -14,6 +14,13 @@ You can replace the default generator using one or both following variables:
 If *any* of these is set and not empty, default generator is not created (saving memory),
 and your custom generator is used instead.
 
+If you set environment variables from Python code, make sure to do it *before* importing coolname:
+
+.. code-block:: python
+
+    os.environ['COOLNAME_DATA_MODULE'] = 'some.module'
+    from coolname import generate_slug
+
 ``COOLNAME_DATA_DIR``
 =====================
 
@@ -33,9 +40,10 @@ Precedence
 
 1. If ``COOLNAME_DATA_DIR`` is defined and not empty, *and the directory exists*, it is used.
 
-2. If ``COOLNAME_DATA_MODULE`` is defined and not empty, it is used.
+2. If ``COOLNAME_DATA_MODULE`` is defined and not empty, it is imported and used.
 
-3. Otherwise, :py:class:`ImportError` is raised.
+3. Otherwise, the default generator is used.
 
-The reason for this order is to support packaging in egg files.
-If you don't care about eggs, use only ``COOLNAME_DATA_DIR`` because it's more efficient and easier to maintain.
+The reason for this is to support packaging in bundles (such as PyInstaller).
+
+For ordinary usage, ``COOLNAME_DATA_DIR`` is arguably better because text files are easier to read and maintain.

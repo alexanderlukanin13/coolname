@@ -1,5 +1,6 @@
-Sphinx>=6.2.0
+rst-pypi-ref==0.4.0
+Sphinx==9.1.0
 sphinxcontrib-fulltoc==1.2.0
-sphinxcontrib-websupport==1.2.4
+sphinxcontrib-websupport==1.2.7
 setuptools==80.10.1
 setuptools-scm==9.2.2

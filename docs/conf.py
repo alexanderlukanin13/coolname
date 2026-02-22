@@ -36,6 +36,7 @@ from setuptools_scm import get_version
 extensions = [
     'sphinx.ext.intersphinx',
     'sphinxcontrib.fulltoc',
+    'rst_pypi_ref.sphinx',
 ]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3/', None)}

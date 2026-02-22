@@ -10,11 +10,11 @@ Do you want random human-readable strings?
 
     >>> from coolname import generate_slug
     >>> generate_slug()
-    'big-maize-loris-of-renovation'
+    'tiny-optimal-crocodile-of-progress'
     >>> generate_slug()
-    'tunneling-amaranth-rhino-of-holiness'
+    'cherubic-leopard-of-delightful-serendipity'
     >>> generate_slug()
-    'soft-cuddly-shrew-of-expertise'
+    'wealthy-athletic-swift-of-tempest'
 
 Features
 ========
@@ -77,7 +77,7 @@ Features
 
         >>> from coolname import get_combinations_count
         >>> get_combinations_count(4)
-        64175336926
+        83090659634
 
 * Hand-picked vocabulary. ``sexy`` and ``demonic`` are about the most "offensive" words here -
   but there is only a pinch of them, for spice. Most words are either neutral, such as ``red``, or positive,
@@ -113,7 +113,7 @@ Installation
 
     pip install coolname
 
-**coolname** is written in pure Python and has no dependencies. It works on any modern Python version (3.7+), including PyPy.
+**coolname** is written in pure Python and has no dependencies. It works on any modern Python version (3.10+), including PyPy.
 
 
 .. |pypi| image:: https://img.shields.io/pypi/v/coolname.svg

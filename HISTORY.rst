@@ -3,6 +3,20 @@
 Release history
 ===============
 
+4.0.0 (2026-02-22)
+------------------
+
+* **Breaking change:** Python 3.10+ is required (because of packaging - see below).
+  Tests cover Python 3.10-3.14 and PyPy 3.10-3.11.
+
+* Switched to modern packaging with ``pyproject.toml``. This should not affect user experience.
+  Support for egg files is officially dropped, but the package is still pure Python and should work in bundles
+  (such as PyInstaller - see documentation).
+
+* Added a lot of adjectives
+
+* Minor optimizations
+
 3.0.0 (2026-01-29)
 ------------------
 
