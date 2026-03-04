@@ -67,6 +67,9 @@ savannah cat
 sphynx cat
 
 # Domestic cattle (to keep it simple, we just copypaste bull+cow+calf here)
+angus cow 
+angus bull
+angus calf
 braford cow
 braford bull
 braford calf
@@ -76,6 +79,9 @@ brahman calf
 gyr cow
 gyr bull
 gyr calf
+hereford cow
+hereford bull
+hereford calf
 highland cow
 highland bull
 highland calf
