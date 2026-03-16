@@ -16,4 +16,5 @@
    classes-and-functions
    thread-safe
    pyinstaller
+   deterministic-pseudohash
    history
