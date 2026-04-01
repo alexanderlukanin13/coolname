@@ -32,14 +32,31 @@ except TypeError:  # pragma: no cover
     _md5 = hashlib.md5
 
 
-class AbstractNestedList:
+class ListLike(Protocol):
+    """Protocol for AbstractNestedList and WordAsPhraseWrapper"""
+
+    length: int
+    multiword: bool
+
+    def __getitem__(self, item: int) -> str | list[str]:
+        ...
+
+    def squash(self, hard: bool, cache: dict[bytes, 'ListLike']) -> 'ListLike':
+        ...
+
+    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
+        ...
+
+
+class AbstractNestedList(ListLike):
 
     length: int  # pragma: no cover
+    _lists: list[ListLike]
 
-    def __init__(self, lists):
+    def __init__(self, lists: Iterable[ListLike] | Iterable[list[str]]):
         super().__init__()
-        self._lists = [WordList(x) if x.__class__ is list else x
-                       for x in lists]
+        # Note: we can't use isinstance() here because issubclass(WordList, list) == True
+        self._lists = [WordList(x) if type(x) is list[str] else x for x in lists]
         # If this is set to True in a subclass,
         # then subclass yields sequences instead of single words.
         self.multiword = getattr(self.__class__, 'multiword', None) or any(x.multiword for x in self._lists)
@@ -53,7 +70,7 @@ class AbstractNestedList:
     def __getitem__(self, item: int) -> str | list[str]:
         raise NotImplementedError  # pragma: no cover
 
-    def squash(self, hard, cache):
+    def squash(self, hard: bool, cache: dict[bytes, ListLike]) -> ListLike:
         if len(self._lists) == 1:
             return self._lists[0].squash(hard, cache)
         else:
@@ -80,11 +97,12 @@ def _to_bytes(value: str | tuple[str, ...] | bytes) -> bytes:
         return value
 
 
-class _BasicList(list, AbstractNestedList):
+# Base class for WordList and PhraseList
+class _BasicList(list[str | tuple[str, ...]], AbstractNestedList):
 
     length: int  # pragma: no cover
 
-    def __init__(self, sequence=None):
+    def __init__(self, sequence: list[str] | list[tuple[str, ...]]):
         list.__init__(self, sequence)
         AbstractNestedList.__init__(self, [])
         self.length = len(self)
@@ -99,12 +117,12 @@ class _BasicList(list, AbstractNestedList):
     def __repr__(self) -> str:
         return self.__str__()
 
-    def squash(self, hard, cache):
+    def squash(self, hard: bool, cache: dict[bytes, ListLike]) -> ListLike:
         return self
 
     @property
-    def _hash(self):
-        if self.__hash:
+    def _hash(self) -> bytes:
+        if self.__hash is not None:
             return self.__hash
         md5 = _md5()
         md5.update(_to_bytes(str(len(self))))
@@ -117,22 +135,29 @@ class _BasicList(list, AbstractNestedList):
 class WordList(_BasicList):
     """List of single words."""
 
+    def __init__(self, lst: list[str]):
+        _BasicList.__init__(self, lst)
+
 
 class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
 
     multiword = True
 
-    def __init__(self, sequence=None):
-        super().__init__(tuple(_split_phrase(x)) for x in sequence)
+    def __init__(self, lst: list[str] | list[tuple[str, ...]]):
+        if any(isinstance(x, str) for x in lst):
+            lst = [_split_phrase(x) if isinstance(x, str) else x for x in lst]
+        _BasicList.__init__(self, lst)
 
 
-class WordAsPhraseWrapper:
+class WordAsPhraseWrapper(ListLike):
 
     length: int  # pragma: no cover
     multiword = True
 
-    def __init__(self, wordlist):
+    _list: ListLike
+
+    def __init__(self, wordlist: WordList):
         self._list = wordlist
         self.length = len(wordlist)
 
@@ -142,10 +167,15 @@ class WordAsPhraseWrapper:
     def __getitem__(self, i: int) -> str | list[str]:
         return [cast(str, self._list[i])]
 
-    def squash(self, hard, cache):  # noqa
+    def squash(self, hard: bool, cache: dict[bytes, ListLike]) -> ListLike:  # noqa
         return self
 
-    def __str__(self):
+    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
+        stream.write(f"{indent}{self}{f' [id={id(self)}]' if object_ids else ''}\n")
+        indent += '  '
+        self._list.dump(stream, indent, object_ids)
+
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._list})'
 
     def __repr__(self) -> str:
@@ -171,7 +201,7 @@ class NestedList(AbstractNestedList):
     length: int  # pragma: no cover
     _lists: list[AbstractNestedList]  # pragma: no cover
 
-    def __init__(self, lists):
+    def __init__(self, lists: list[AbstractNestedList]):
         super().__init__(lists)
         # If user mixes WordList and PhraseList in the same NestedList,
         # we need to make sure that __getitem__ always returns tuple.
@@ -193,7 +223,7 @@ class NestedList(AbstractNestedList):
                 i -= n
         raise IndexError('list index out of range')
 
-    def squash(self, hard, cache):
+    def squash(self, hard: bool, cache: dict[bytes, ListLike]) -> ListLike:
         # Cache is used to avoid data duplication.
         # If we have 4 branches which finally point to the same list of nouns,
         # why not using the same WordList instance for all 4 branches?
@@ -233,13 +263,13 @@ class CartesianList(AbstractNestedList):
         self.multiword = True
 
     def __getitem__(self, i: int) -> str | list[str]:
-        result = []
+        result: list[str] = []
         for sublist, n in self._list_divs:
             x = sublist[i // n]
             if sublist.multiword:
-                result.extend(x)
+                result.extend(cast(list[str], x))
             else:
-                result.append(x)
+                result.append(cast(str, x))
             i %= n
         return result
 
@@ -280,7 +310,7 @@ class RandomGenerator:
     """
 
     # Structure that does the generation
-    _lists: dict[str | int | None, AbstractNestedList]  # pragma: no cover
+    _lists: dict[str | int | None, ListLike]  # pragma: no cover
     # Custom random (if any)
     _random: Random | None  # pragma: no cover
     _randrange: RandRange  # pragma: no cover
@@ -289,7 +319,7 @@ class RandomGenerator:
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
     _max_slug_length: int | None  # pragma: no cover
 
-    def __init__(self, config: Mapping[str, dict], rand: Random | None = None):
+    def __init__(self, config: _ConfigT, rand: Random | None = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
         config = dict(config)
         _validate_config(config)
@@ -450,11 +480,8 @@ class RandomGenerator:
 
 
 # Translate phrases defined as strings to tuples
-def _split_phrase(x: str) -> str | list[str]:
-    try:
-        return re.split(r'\s+', x.strip())
-    except AttributeError:  # Not str
-        return x
+def _split_phrase(x: str) -> tuple[str, ...]:
+    return tuple(re.split(r'\s+', x.strip()))
 
 
 def _validate_config(config: _ConfigT) -> None:
@@ -525,13 +552,15 @@ def _validate_config(config: _ConfigT) -> None:
                 except KeyError:
                     max_length = None
                 for phrase in phrases:
-                    phrase = _split_phrase(phrase)  # str -> sequence, if necessary
+                    if isinstance(phrase, str):
+                        phrase = _split_phrase(phrase)  # str -> sequence, if necessary
                     if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
                                          f'must be all string/tuple/list')
                     if number_of_words is not None and len(phrase) != number_of_words:
                         raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
-                                         f'({len(phrase)} word(s) but {_CONF.FIELD.NUMBER_OF_WORDS}={number_of_words})')
+                                         f'({len(phrase)} word(s) but '
+                                         f'{_CONF.FIELD.NUMBER_OF_WORDS}={number_of_words})')
                     if max_length is not None and sum(len(word) for word in phrase) > max_length:
                         raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
                                          f'(longer than {max_length} characters)')
