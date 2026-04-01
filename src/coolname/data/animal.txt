@@ -81,6 +81,7 @@ mouflon
 muskox
 nyala
 oryx
+saiga
 sheep
 wildebeest
 yak
@@ -269,6 +270,7 @@ wren
 # Aves -> Pelecaniformes
 heron
 ibis
+shoebill
 
 # Aves -> Piciformes
 jacamar
@@ -282,6 +284,9 @@ flamingo
 
 # Aves -> Podicipediformes
 grebe
+
+# Aves -> Podargiformes
+frogmouth
 
 # Aves -> Procellariiformes
 albatross

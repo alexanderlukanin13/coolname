@@ -27,6 +27,7 @@ northern cardinal
 peregrine falcon
 prairie falcon
 red cardinal
+secretary bird
 snow goose
 snowy owl
 stygian owl
@@ -122,6 +123,7 @@ killer whale
 mountain deer
 mountain goat
 mountain lion
+naked mole
 olympic marmot
 pampas deer
 pine marten
@@ -144,3 +146,11 @@ snapping turtle
 
 # Fictional
 walking mushroom
+
+# Fish and marine life
+blob fish
+ghost crab
+leafy seadragon
+mantis shrimp
+vampire squid
+zebra shark
