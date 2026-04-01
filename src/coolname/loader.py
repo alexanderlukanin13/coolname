@@ -6,16 +6,25 @@ You will need this only if you are creating
 custom instance of RandomGenerator.
 """
 
-
 import json
 import os
 import re
+from pathlib import Path
+from typing import cast, TextIO
 
 from .config import _CONF
 from .exceptions import InitializationError, ConfigurationError
 
 
-def load_config(path):
+# Top-level values of config dict, for example:
+# {"comment": "adjective-adjective-noun",
+#  "type": "cartesian",
+#  "lists": ["adj_far", "adj_near", "subj"]}
+_ListConfigT = dict[str, str | list[str] | list[tuple[str, ...]] | int]
+_ConfigT = dict[str, _ListConfigT]
+
+
+def load_config(path: str | Path) -> _ConfigT:
     """
     Loads configuration from a path.
 
@@ -43,7 +52,7 @@ def load_config(path):
     return config
 
 
-def _load_data(path):
+def _load_data(path: str | Path) -> tuple[_ConfigT, dict[str, _ListConfigT]]:
     """
     Loads data from a directory.
     Returns tuple (config_dict, wordlists).
@@ -67,10 +76,10 @@ def _load_data(path):
     return (config, wordlists)
 
 
-def _load_config(config_file_path):
+def _load_config(config_file_path: str | Path) -> _ConfigT:
     try:
         with open(config_file_path, encoding='utf-8') as file:
-            return json.load(file)
+            return cast(_ConfigT, json.load(file))
     except (OSError, FileNotFoundError) as ex:
         raise InitializationError(f'Failed to read config from {config_file_path}: {ex}')
     except ValueError as ex:
@@ -106,7 +115,7 @@ def _parse_option(line: str) -> tuple[str, int]:
     raise ValueError('Unknown option')
 
 
-def _load_wordlist(name, stream):
+def _load_wordlist(name: str, stream: TextIO) -> _ListConfigT:
     """
     Loads list of words or phrases from *.txt file.
 

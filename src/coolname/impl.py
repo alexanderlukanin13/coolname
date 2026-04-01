@@ -1,6 +1,7 @@
 """
 Do not import anything directly from this module.
 """
+from collections.abc import Iterable
 from functools import partial
 import hashlib
 import itertools
@@ -10,10 +11,11 @@ import random
 from random import randrange, Random
 import re
 import typing
-from typing import Mapping, Callable, Any
+from typing import Mapping, Callable, Any, TextIO, cast, Protocol
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
+from .loader import _ConfigT
 
 if typing.TYPE_CHECKING:
     HashType = hashlib._Hash  # pragma: no cover
@@ -42,10 +44,10 @@ class AbstractNestedList:
         # then subclass yields sequences instead of single words.
         self.multiword = getattr(self.__class__, 'multiword', None) or any(x.multiword for x in self._lists)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}({len(self._lists)}, len={self.length})'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
     def __getitem__(self, item: int) -> str | list[str]:
@@ -58,18 +60,18 @@ class AbstractNestedList:
             self._lists = [x.squash(hard, cache) for x in self._lists]
             return self
 
-    def _dump(self, stream, indent='', object_ids=False):
+    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
         stream.write(indent + str(self) +
                      (f' [id={id(self)}]' if object_ids else '') +
                      '\n')
         indent += '  '
         for sublist in self._lists:
-            sublist._dump(stream, indent, object_ids=object_ids)  # noqa
+            sublist.dump(stream, indent, object_ids=object_ids)  # noqa
 
 
 # Convert value to bytes, for hashing
 # (used to calculate WordList or PhraseList hash)
-def _to_bytes(value):
+def _to_bytes(value: str | tuple[str, ...] | bytes) -> bytes:
     if isinstance(value, str):
         return value.encode('utf-8')
     elif isinstance(value, tuple):
@@ -88,13 +90,13 @@ class _BasicList(list, AbstractNestedList):
         self.length = len(self)
         self.__hash = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         ls = [repr(x) for x in self[:4]]
         if len(ls) == 4:
             ls[3] = '...'
         return f'{self.__class__.__name__}([{", ".join(ls)}], len={len(self)})'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
     def squash(self, hard, cache):
@@ -134,11 +136,11 @@ class WordAsPhraseWrapper:
         self._list = wordlist
         self.length = len(wordlist)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.length
 
     def __getitem__(self, i: int) -> str | list[str]:
-        return [self._list[i]]
+        return [cast(str, self._list[i])]
 
     def squash(self, hard, cache):  # noqa
         return self
@@ -146,7 +148,7 @@ class WordAsPhraseWrapper:
     def __str__(self):
         return f'{self.__class__.__name__}({self._list})'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self._list!r})'
 
 
@@ -160,8 +162,8 @@ class TopLevelMultiWrapper(WordAsPhraseWrapper):
         self._list = any_list
         self.length = any_list.length
 
-    def _dump(self, stream, indent='', object_ids=False):
-        return self._list._dump(stream, indent, object_ids)
+    def dump(self, stream, indent='', object_ids=False):
+        return self._list.dump(stream, indent, object_ids)
 
 
 class NestedList(AbstractNestedList):
@@ -184,7 +186,7 @@ class NestedList(AbstractNestedList):
     def __getitem__(self, i: int) -> str | list[str]:
         # Retrieve item from appropriate list
         for x in self._lists:
-            n = x.length  # type: ignore
+            n = x.length
             if i < n:
                 return x[i]
             else:
@@ -215,7 +217,7 @@ class CartesianList(AbstractNestedList):
 
     length: int  # pragma: no cover
 
-    def __init__(self, lists):
+    def __init__(self, lists: list[AbstractNestedList]):
         super().__init__(lists)
         self.length = 1
         for x in self._lists:
@@ -245,20 +247,26 @@ class CartesianList(AbstractNestedList):
 class Scalar(AbstractNestedList):
 
     length: int  # pragma: no cover
+    value: str
 
     def __init__(self, value: str):
         super().__init__([])
         self.value = value
         self.length = 1
 
-    def __getitem__(self, i):
+    def __getitem__(self, i: int) -> str:
         return self.value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__}(value={self.value!r})'
 
-    def random(self):
+    def random(self) -> str:
         return self.value
+
+
+class RandRange(Protocol):
+    def __call__(self, start: int, stop: int | None = None, step: int = 1) -> int:
+        ...
 
 
 class RandomGenerator:
@@ -275,7 +283,7 @@ class RandomGenerator:
     _lists: dict[str | int | None, AbstractNestedList]  # pragma: no cover
     # Custom random (if any)
     _random: Random | None  # pragma: no cover
-    _randrange: Callable  # pragma: no cover
+    _randrange: RandRange  # pragma: no cover
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
     _check_prefix: int | None  # pragma: no cover
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
@@ -289,7 +297,7 @@ class RandomGenerator:
         _create_lists(config, lists, 'all', [])
         self._lists = {}
         for key, list_config in config.items():
-            # Other generators independent from 'all'
+            # Other generators independent of 'all'
             if list_config.get(_CONF.FIELD.GENERATOR) and key not in lists:
                 _create_lists(config, lists, key, [])
             if key == 'all' or key.isdigit() or list_config.get(_CONF.FIELD.GENERATOR):
@@ -320,7 +328,7 @@ class RandomGenerator:
             raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE} value: {ex}')
         # Should we avoid duplicating prefixes?
         try:
-            self._check_prefix = int(config['all'][_CONF.FIELD.ENSURE_UNIQUE_PREFIX])
+            self._check_prefix = int(config['all'][_CONF.FIELD.ENSURE_UNIQUE_PREFIX])  # type: ignore[arg-type]
             if self._check_prefix <= 0:
                 raise ValueError(f'expected a positive integer, got {self._check_prefix!r}')
         except KeyError:
@@ -329,7 +337,7 @@ class RandomGenerator:
             raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE_PREFIX} value: {ex}')
         # Get max slug length
         try:
-            self._max_slug_length = int(config['all'][_CONF.FIELD.MAX_SLUG_LENGTH])
+            self._max_slug_length = int(config['all'][_CONF.FIELD.MAX_SLUG_LENGTH])  # type: ignore[arg-type]
         except KeyError:
             self._max_slug_length = None
         except ValueError as ex:
@@ -388,9 +396,9 @@ class RandomGenerator:
         lst = self._lists[pattern]
         return lst.length
 
-    def _dump(self, stream, pattern=None, object_ids=False) -> None:
+    def _dump(self, stream: TextIO, pattern: str | int | None = None, object_ids: bool = False) -> None:
         """Dumps current tree into a text stream."""
-        self._lists[pattern]._dump(stream, '', object_ids=object_ids)  # noqa
+        self._lists[pattern].dump(stream, '', object_ids=object_ids)  # noqa
 
     def _check_not_hanging(self) -> None:
         """
@@ -449,14 +457,14 @@ def _split_phrase(x: str) -> str | list[str]:
         return x
 
 
-def _validate_config(config: Mapping[str, dict]) -> None:
+def _validate_config(config: _ConfigT) -> None:
     """
     A big and ugly method for config validation.
     It would be nice to use cerberus, but we don't
     want to introduce dependencies just for that.
     """
     try:
-        referenced_sublists = set()
+        referenced_sublists: set[str] = set()
         for key, listdef in list(config.items()):
             # Check if section is a list
             if not isinstance(listdef, dict):
@@ -472,7 +480,7 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                 if (not isinstance(sublists, list) or not sublists or
                         not all(isinstance(x, str) for x in sublists)):
                     raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.LISTS!r}')
-                referenced_sublists.update(sublists)
+                referenced_sublists.update(cast(list[str], sublists))
             # Const
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.CONST:
                 try:
@@ -491,7 +499,7 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                     raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}')
                 # Validate word length
                 try:
-                    max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
+                    max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
                 if max_length is not None:
@@ -509,11 +517,11 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                     raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}')
                 # Validate multi-word and max length
                 try:
-                    number_of_words = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])
+                    number_of_words = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])  # type: ignore[arg-type]
                 except KeyError:
                     number_of_words = None
                 try:
-                    max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
+                    max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
                 for phrase in phrases:
@@ -538,7 +546,7 @@ def _validate_config(config: Mapping[str, dict]) -> None:
 
 
 def _create_lists(
-        config: dict,
+        config: _ConfigT,
         results: dict[str, AbstractNestedList],
         current: str,
         stack: list[str],

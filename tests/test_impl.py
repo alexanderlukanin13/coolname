@@ -128,7 +128,7 @@ class TestImplementation(TestCase):
             CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),
         ])
         stream = io.StringIO()
-        cart_list._dump(stream)
+        cart_list.dump(stream)
         self.assertEqual(stream.getvalue(),
                          'NestedList(2, len=28)\n'
                          '  CartesianList(3, len=24)\n'
