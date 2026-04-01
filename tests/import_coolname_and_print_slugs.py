@@ -20,6 +20,7 @@ def _parse_args(argv):
 
 def main(argv):
     args = _parse_args(argv)
+    sys.path.append('src')  # make pytest work without tox for quick testing
     import coolname
     coolname.replace_random(NotRandom())
     for i in range(args.number_of_slugs):
