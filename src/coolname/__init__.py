@@ -6,3 +6,8 @@ from ._version import __version__, __version_tuple__
 from .exceptions import InitializationError
 from .impl import generate, generate_slug, get_combinations_count,\
     RandomGenerator, replace_random
+
+__all__ = [
+    'generate', 'generate_slug', 'get_combinations_count', 'RandomGenerator', 'replace_random',
+    'InitializationError'
+]
