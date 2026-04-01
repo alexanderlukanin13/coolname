@@ -33,13 +33,12 @@ def load_config(path):
         config = _load_config(path)
         wordlists = {}
     else:
-        raise InitializationError('File or directory not found: {0}'.format(path))
+        raise InitializationError(f'File or directory not found: {path}')
     for name, wordlist in wordlists.items():
         if name in config:
-            raise InitializationError("Conflict: list {!r} is defined both in config "
-                                      "and in *.txt file. If it's a {!r} list, "
-                                      "you should remove it from config."
-                                      .format(name, _CONF.TYPE.WORDS))
+            raise InitializationError(f"Conflict: list {name!r} is defined both in config "
+                                      f"and in *.txt file. If it's a {_CONF.TYPE.WORDS!r} list, "
+                                      f"you should remove it from config.")
         config[name] = wordlist
     return config
 
@@ -52,7 +51,7 @@ def _load_data(path):
     """
     path = os.path.abspath(path)
     if not os.path.isdir(path):
-        raise InitializationError('Directory not found: {0}'.format(path))
+        raise InitializationError(f'Directory not found: {path}')
     wordlists = {}
     for file_name in os.listdir(path):
         if os.path.splitext(file_name)[1] != '.txt':
@@ -63,7 +62,7 @@ def _load_data(path):
             with open(file_path, encoding='utf-8') as file:
                 wordlists[name] = _load_wordlist(name, file)
         except (OSError, FileNotFoundError) as ex:
-            raise InitializationError('Failed to read {}: {}'.format(file_path, ex))
+            raise InitializationError(f'Failed to read {file_path}: {ex}')
     config = _load_config(os.path.join(path, 'config.json'))
     return (config, wordlists)
 
@@ -73,9 +72,9 @@ def _load_config(config_file_path):
         with open(config_file_path, encoding='utf-8') as file:
             return json.load(file)
     except (OSError, FileNotFoundError) as ex:
-        raise InitializationError('Failed to read config from {}: {}'.format(config_file_path, ex))
+        raise InitializationError(f'Failed to read config from {config_file_path}: {ex}')
     except ValueError as ex:
-        raise ConfigurationError('Invalid JSON: {}'.format(ex))
+        raise ConfigurationError(f'Invalid JSON: {ex}')
 
 
 # Word must be in English, 1-N letters, lowercase.
@@ -125,15 +124,12 @@ def _load_wordlist(name, stream):
         # Is it an option line, e.g. 'max_length = 10'?
         if '=' in line:
             if items:
-                raise ConfigurationError('Invalid assignment at list {!r} line {}: {!r} '
-                                         '(options must be defined before words)'
-                                         .format(name, i, line))
+                raise ConfigurationError(f'Invalid assignment at list {name!r} line {i}: {line!r} '
+                                         f'(options must be defined before words)')
             try:
                 option, option_value = _parse_option(line)
             except ValueError as ex:
-                raise ConfigurationError('Invalid assignment at list {!r} line {}: {!r} '
-                                         '({})'
-                                         .format(name, i, line, ex))
+                raise ConfigurationError(f'Invalid assignment at list {name!r} line {i}: {line!r} ({ex})')
             if option == _CONF.FIELD.MAX_LENGTH:
                 max_length = option_value
             elif option == _CONF.FIELD.NUMBER_OF_WORDS:
@@ -142,8 +138,7 @@ def _load_wordlist(name, stream):
         # Parse words
         if not multiword and _WORD_REGEX.match(line):
             if max_length is not None and len(line) > max_length:
-                raise ConfigurationError('Word is too long at list {!r} line {}: {!r}'
-                                         .format(name, i, line))
+                raise ConfigurationError(f'Word is too long at list {name!r} line {i}: {line!r}')
             items.append(line)
         elif _PHRASE_REGEX.match(line):
             if not multiword:
@@ -151,16 +146,13 @@ def _load_wordlist(name, stream):
                 multiword_start = len(items)
             phrase = tuple(line.split(' '))
             if number_of_words is not None and len(phrase) != number_of_words:
-                raise ConfigurationError('Phrase has {} word(s) (while number_of_words={}) '
-                                         'at list {!r} line {}: {!r}'
-                                         .format(len(phrase), number_of_words, name, i, line))
+                raise ConfigurationError(f'Phrase has {len(phrase)} word(s) (while number_of_words={number_of_words}) '
+                                         f'at list {name!r} line {i}: {line!r}')
             if max_length is not None and sum(len(x) for x in phrase) > max_length:
-                raise ConfigurationError('Phrase is too long at list {!r} line {}: {!r}'
-                                         .format(name, i, line))
+                raise ConfigurationError(f'Phrase is too long at list {name!r} line {i}: {line!r}')
             items.append(phrase)
         else:
-            raise ConfigurationError('Invalid syntax at list {!r} line {}: {!r}'
-                                     .format(name, i, line))
+            raise ConfigurationError(f'Invalid syntax at list {name!r} line {i}: {line!r}')
     if multiword:
         # If in phrase mode, convert everything to tuples
         for i in range(0, multiword_start):

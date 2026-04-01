@@ -92,7 +92,7 @@ class _BasicList(list, AbstractNestedList):
         ls = [repr(x) for x in self[:4]]
         if len(ls) == 4:
             ls[3] = '...'
-        return '{}([{}], len={})'.format(self.__class__.__name__, ', '.join(ls), len(self))
+        return f'{self.__class__.__name__}([{", ".join(ls)}], len={len(self)})'
 
     def __repr__(self):
         return self.__str__()
@@ -426,7 +426,7 @@ class RandomGenerator:
         n = 100
         warning_threshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
         for lst_id, lst in sorted(self._lists.items(), key=lambda x: '' if x is None else str(x)):
-            context = {'generate': 'coolname.generate({})'.format('' if lst_id is None else repr(lst_id))}
+            context = {'generate': f'coolname.generate({"" if lst_id is None else repr(lst_id)})'}
             # For each generator, perform checks
             for field_name, field_value, predicate, warning_msg, exception_msg in checks:
                 context.update({'field_name': field_name, 'field_value': field_value})
@@ -468,33 +468,27 @@ def _validate_config(config: Mapping[str, dict]) -> None:
             if listdef[_CONF.FIELD.TYPE] in (_CONF.TYPE.NESTED, _CONF.TYPE.CARTESIAN):
                 sublists = listdef.get(_CONF.FIELD.LISTS)
                 if sublists is None:
-                    raise ValueError('Config at key {!r} has no {!r}'
-                                     .format(key, _CONF.FIELD.LISTS))
+                    raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.LISTS!r}')
                 if (not isinstance(sublists, list) or not sublists or
                         not all(isinstance(x, str) for x in sublists)):
-                    raise ValueError('Config at key {!r} has invalid {!r}'
-                                     .format(key, _CONF.FIELD.LISTS))
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.LISTS!r}')
                 referenced_sublists.update(sublists)
             # Const
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.CONST:
                 try:
                     value = listdef[_CONF.FIELD.VALUE]
                 except KeyError:
-                    raise ValueError('Config at key {!r} has no {!r}'
-                                     .format(key, _CONF.FIELD.VALUE))
+                    raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.VALUE!r}')
                 if not isinstance(value, str):
-                    raise ValueError('Config at key {!r} has invalid {!r}'
-                                     .format(key, _CONF.FIELD.VALUE))
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.VALUE!r}')
             # Words
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.WORDS:
                 try:
                     words = listdef[_CONF.FIELD.WORDS]
                 except KeyError:
-                    raise ValueError('Config at key {!r} has no {!r}'
-                                     .format(key, _CONF.FIELD.WORDS))
+                    raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.WORDS!r}')
                 if not isinstance(words, list) or not words:
-                    raise ValueError('Config at key {!r} has invalid {!r}'
-                                     .format(key, _CONF.FIELD.WORDS))
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}')
                 # Validate word length
                 try:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])
@@ -503,19 +497,16 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                 if max_length is not None:
                     for word in words:
                         if len(word) > max_length:
-                            raise ValueError('Config at key {!r} has invalid word {!r} '
-                                             '(longer than {} characters)'
-                                             .format(key, word, max_length))
+                            raise ValueError(f'Config at key {key!r} has invalid word {word!r} '
+                                             f'(longer than {max_length} characters)')
             # Phrases (sequences of one or more words)
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.PHRASES:
                 try:
                     phrases = listdef[_CONF.FIELD.PHRASES]
                 except KeyError:
-                    raise ValueError('Config at key {!r} has no {!r}'
-                                     .format(key, _CONF.FIELD.PHRASES))
+                    raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.PHRASES!r}')
                 if not isinstance(phrases, list) or not phrases:
-                    raise ValueError('Config at key {!r} has invalid {!r}'
-                                     .format(key, _CONF.FIELD.PHRASES))
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}')
                 # Validate multi-word and max length
                 try:
                     number_of_words = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])
@@ -528,26 +519,20 @@ def _validate_config(config: Mapping[str, dict]) -> None:
                 for phrase in phrases:
                     phrase = _split_phrase(phrase)  # str -> sequence, if necessary
                     if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
-                        raise ValueError('Config at key {!r} has invalid {!r}: '
-                                         'must be all string/tuple/list'
-                                         .format(key, _CONF.FIELD.PHRASES))
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                         f'must be all string/tuple/list')
                     if number_of_words is not None and len(phrase) != number_of_words:
-                        raise ValueError('Config at key {!r} has invalid phrase {!r} '
-                                         '({} word(s) but {}={})'
-                                         .format(key, ' '.join(phrase),
-                                                 len(phrase), _CONF.FIELD.NUMBER_OF_WORDS, number_of_words))
+                        raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
+                                         f'({len(phrase)} word(s) but {_CONF.FIELD.NUMBER_OF_WORDS}={number_of_words})')
                     if max_length is not None and sum(len(word) for word in phrase) > max_length:
-                        raise ValueError('Config at key {!r} has invalid phrase {!r} '
-                                         '(longer than {} characters)'
-                                         .format(key, ' '.join(phrase), max_length))
+                        raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
+                                         f'(longer than {max_length} characters)')
             else:
-                raise ValueError('Config at key {!r} has invalid {!r}'
-                                 .format(key, _CONF.FIELD.TYPE))
+                raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.TYPE!r}')
         # Check that all sublists are defined
         diff = referenced_sublists.difference(config.keys())
         if diff:
-            raise ValueError('Lists are referenced but not defined: {}'
-                             .format(', '.join(sorted(diff)[:10])))
+            raise ValueError(f'Lists are referenced but not defined: {", ".join(sorted(diff)[:10])}')
     except (KeyError, ValueError) as ex:
         raise ConfigurationError(str(ex))
 
@@ -570,9 +555,9 @@ def _create_lists(
         pass
     # Check recursion depth and detect loops
     if current in stack:
-        raise ConfigurationError('Rule {!r} is recursive: {!r}'.format(stack[0], stack))
+        raise ConfigurationError(f'Rule {stack[0]!r} is recursive: {stack!r}')
     if len(stack) > 99:
-        raise ConfigurationError('Rule {!r} is too deep'.format(stack[0]))
+        raise ConfigurationError(f'Rule {stack[0]!r} is too deep')
     # Track recursion depth
     stack.append(current)
     try:
@@ -594,9 +579,8 @@ def _create_lists(
         # 3. Cartesian list of lists
         elif list_type == _CONF.TYPE.CARTESIAN:
             if inside_cartesian is not None:
-                raise ConfigurationError("Cartesian list {!r} contains another Cartesian list "
-                                         "{!r}. Nested Cartesian lists are not allowed."
-                                         .format(inside_cartesian, current))
+                raise ConfigurationError(f"Cartesian list {inside_cartesian!r} contains another Cartesian list "
+                                         f"{current!r}. Nested Cartesian lists are not allowed.")
             results[current] = CartesianList([_create_lists(config, results, x, stack,
                                                             inside_cartesian=current)
                                               for x in list_config[_CONF.FIELD.LISTS]])
@@ -605,7 +589,7 @@ def _create_lists(
             results[current] = Scalar(list_config[_CONF.FIELD.VALUE])
         # Unknown type
         else:
-            raise InitializationError("Unknown list type: {!r}".format(list_type))
+            raise InitializationError(f"Unknown list type: {list_type!r}")
         # Return the result
         return results[current]
     finally:

@@ -11,5 +11,5 @@ class InitializationError(Exception):
 class ConfigurationError(InitializationError):
     """Specific exception for invalid configuration."""
 
-    def __init__(self, msg):
-        super(ConfigurationError, self).__init__('Invalid config: {}'.format(msg))
+    def __init__(self, msg: str):
+        super(ConfigurationError, self).__init__(f'Invalid config: {msg}')
