@@ -83,14 +83,15 @@ _PHRASE_REGEX = re.compile(r'^\w+(?: \w+)*$')
 
 
 # Options are defined using simple notation: 'option = value'
+# Value is always integer
 _OPTION_REGEX = re.compile(r'^([a-z_]+)\s*=\s*(\w+)$', re.UNICODE)
-_OPTIONS = [
-    (_CONF.FIELD.MAX_LENGTH, int),
-    (_CONF.FIELD.NUMBER_OF_WORDS, int)
+_OPTIONS: list[str] = [
+    _CONF.FIELD.MAX_LENGTH,
+    _CONF.FIELD.NUMBER_OF_WORDS,
 ]
 
 
-def _parse_option(line):
+def _parse_option(line: str) -> tuple[str, int]:
     """
     Parses option line.
     Returns (name, value).
@@ -99,24 +100,23 @@ def _parse_option(line):
     match = _OPTION_REGEX.match(line)
     if not match:
         raise ValueError('Invalid syntax')
-    for name, type_ in _OPTIONS:
+    for name in _OPTIONS:
         if name == match.group(1):
-            return name, type_(match.group(2))
+            return name, int(match.group(2))
     raise ValueError('Unknown option')
 
 
 def _load_wordlist(name, stream):
     """
-    Loads list of words or phrases from file.
+    Loads list of words or phrases from *.txt file.
 
     Returns "words" or "phrases" dictionary, the same as used in config.
     Raises Exception if file is missing or invalid.
     """
-    items = []
-    max_length = None
-    multiword = False
-    multiword_start = None
-    number_of_words = None
+    items: list[str | tuple[str, ...]] = []
+    max_length: int | None = None
+    multiword_start: int | None = None
+    number_of_words: int | None = None
     for i, line in enumerate(stream, start=1):
         line = line.strip()
         if not line or line.startswith('#'):
@@ -136,13 +136,12 @@ def _load_wordlist(name, stream):
                 number_of_words = option_value
             continue  # pragma: no cover
         # Parse words
-        if not multiword and _WORD_REGEX.match(line):
+        if multiword_start is None and _WORD_REGEX.match(line):
             if max_length is not None and len(line) > max_length:
                 raise ConfigurationError(f'Word is too long at list {name!r} line {i}: {line!r}')
             items.append(line)
         elif _PHRASE_REGEX.match(line):
-            if not multiword:
-                multiword = True
+            if multiword_start is None:
                 multiword_start = len(items)
             phrase = tuple(line.split(' '))
             if number_of_words is not None and len(phrase) != number_of_words:
@@ -153,7 +152,7 @@ def _load_wordlist(name, stream):
             items.append(phrase)
         else:
             raise ConfigurationError(f'Invalid syntax at list {name!r} line {i}: {line!r}')
-    if multiword:
+    if multiword_start is not None:
         # If in phrase mode, convert everything to tuples
         for i in range(0, multiword_start):
             items[i] = (items[i], )
