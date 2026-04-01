@@ -1,7 +1,6 @@
 """
 Do not import anything directly from this module.
 """
-from collections.abc import Iterable
 from functools import partial
 import hashlib
 import itertools
@@ -11,7 +10,7 @@ import random
 from random import randrange, Random
 import re
 import typing
-from typing import Mapping, Callable, Any, TextIO, cast, Protocol
+from typing import ClassVar, Callable, Any, TextIO, cast, Protocol
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
@@ -51,15 +50,19 @@ class ListLike(Protocol):
 class AbstractNestedList(ListLike):
 
     length: int  # pragma: no cover
+    multiword: bool
+
     _lists: list[ListLike]
 
-    def __init__(self, lists: Iterable[ListLike] | Iterable[list[str]]):
+    MULTIWORD: ClassVar[bool] = False
+
+    def __init__(self, lists: list[ListLike] | list[list[str]]):
         super().__init__()
         # Note: we can't use isinstance() here because issubclass(WordList, list) == True
-        self._lists = [WordList(x) if type(x) is list[str] else x for x in lists]
+        self._lists = [WordList(x) if type(x) is list else cast(ListLike, x) for x in lists]
         # If this is set to True in a subclass,
         # then subclass yields sequences instead of single words.
-        self.multiword = getattr(self.__class__, 'multiword', None) or any(x.multiword for x in self._lists)
+        self.multiword = any(x.multiword for x in self._lists) or self.MULTIWORD  # order matters
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({len(self._lists)}, len={self.length})'
@@ -98,9 +101,11 @@ def _to_bytes(value: str | tuple[str, ...] | bytes) -> bytes:
 
 
 # Base class for WordList and PhraseList
-class _BasicList(list[str | tuple[str, ...]], AbstractNestedList):
+class _BasicList(list[Any], AbstractNestedList):
 
     length: int  # pragma: no cover
+
+    __hash: bytes | None
 
     def __init__(self, sequence: list[str] | list[tuple[str, ...]]):
         list.__init__(self, sequence)
@@ -136,30 +141,38 @@ class WordList(_BasicList):
     """List of single words."""
 
     def __init__(self, lst: list[str]):
+        for x in lst:
+            if not isinstance(x, str):
+                raise TypeError(f'Invalid item in WordList: expected str, got {x.__class__.__qualname__!r}')
         _BasicList.__init__(self, lst)
 
 
 class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
 
-    multiword = True
+    MULTIWORD: typing.ClassVar[bool] = True
 
-    def __init__(self, lst: list[str] | list[tuple[str, ...]]):
-        if any(isinstance(x, str) for x in lst):
-            lst = [_split_phrase(x) if isinstance(x, str) else x for x in lst]
-        _BasicList.__init__(self, lst)
+    def __init__(self, lst: list[str | tuple[str, ...] | list[str]]):
+        for x in lst:
+            if not isinstance(x, (str, list, tuple)):
+                raise TypeError(f'Invalid item in PhraseList: expected str | list[str] | tuple[str, ...], '
+                                f'got {x.__class__.__qualname__!r}')
+        # Accept mixed input, ensure that we store only tuple[str, ...]
+        _BasicList.__init__(self, [_split_phrase(x) if isinstance(x, str) else tuple(x) for x in lst])
 
 
 class WordAsPhraseWrapper(ListLike):
 
+    MULTIWORD: typing.ClassVar[bool] = True
+
     length: int  # pragma: no cover
-    multiword = True
 
     _list: ListLike
 
     def __init__(self, wordlist: WordList):
         self._list = wordlist
         self.length = len(wordlist)
+        self.multiword = True
 
     def __len__(self) -> int:
         return self.length
@@ -191,17 +204,15 @@ class TopLevelMultiWrapper(WordAsPhraseWrapper):
         # Note that call to base class is omitted deliberately
         self._list = any_list
         self.length = any_list.length
+        self.multiword = True
 
-    def dump(self, stream, indent='', object_ids=False):
+    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
         return self._list.dump(stream, indent, object_ids)
 
 
 class NestedList(AbstractNestedList):
 
-    length: int  # pragma: no cover
-    _lists: list[AbstractNestedList]  # pragma: no cover
-
-    def __init__(self, lists: list[AbstractNestedList]):
+    def __init__(self, lists: list[ListLike] | list[list[str]]):
         super().__init__(lists)
         # If user mixes WordList and PhraseList in the same NestedList,
         # we need to make sure that __getitem__ always returns tuple.
@@ -235,19 +246,22 @@ class NestedList(AbstractNestedList):
                     # Creating combined WordList/PhraseList and then checking cache
                     # is a little wasteful, but it has no long-term consequences.
                     # And it's simple!
-                    result = cls(sorted(set(itertools.chain.from_iterable(self._lists))))
-                    if result._hash in cache:  # noqa
-                        result = cache.get(result._hash)  # noqa
-                    else:
-                        cache[result._hash] = result  # noqa
+                    result = cls(sorted(set(itertools.chain.from_iterable(cast(list[_BasicList], self._lists)))))
+                    try:
+                        result = cache[cast(_BasicList, result)._hash]
+                    except KeyError:
+                        cache[cast(_BasicList, result)._hash] = result
+                    break
         return result
 
 
 class CartesianList(AbstractNestedList):
 
+    MULTIWORD: typing.ClassVar[bool] = True
+
     length: int  # pragma: no cover
 
-    def __init__(self, lists: list[AbstractNestedList]):
+    def __init__(self, lists: list[ListLike] | list[list[str]]):
         super().__init__(lists)
         self.length = 1
         for x in self._lists:
@@ -260,7 +274,6 @@ class CartesianList(AbstractNestedList):
             prod *= x.length
             divs.append(prod)
         self._list_divs = tuple(zip(self._lists, reversed(divs)))
-        self.multiword = True
 
     def __getitem__(self, i: int) -> str | list[str]:
         result: list[str] = []
@@ -323,7 +336,7 @@ class RandomGenerator:
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
         config = dict(config)
         _validate_config(config)
-        lists: dict[str, AbstractNestedList] = {}
+        lists: dict[str, ListLike] = {}
         _create_lists(config, lists, 'all', [])
         self._lists = {}
         for key, list_config in config.items():
@@ -576,11 +589,11 @@ def _validate_config(config: _ConfigT) -> None:
 
 def _create_lists(
         config: _ConfigT,
-        results: dict[str, AbstractNestedList],
+        results: dict[str, ListLike],
         current: str,
         stack: list[str],
         inside_cartesian: str | None = None
-) -> AbstractNestedList:
+) -> ListLike:
     """
     An ugly recursive method to transform config dict
     into a tree of AbstractNestedList.
