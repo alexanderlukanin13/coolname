@@ -207,7 +207,7 @@ class TestImplementation(TestCase):
             'words': {'type': 'words', 'words': ['one', 'two']},
             'words2': {'type': 'words', 'words': ['three', 'four']},
         })
-        results = set(generator.generate_slug() for _ in range(20))
+        results = set(generator.generate_slug() for _ in range(30))
         assert results == {'one', 'two', 'three', 'four'}
 
     def test_degen_words_and_phrases(self):
@@ -216,7 +216,7 @@ class TestImplementation(TestCase):
             'words': {'type': 'words', 'words': ['one', 'two']},
             'phrases': {'type': 'phrases', 'phrases': ['twenty one', 'twenty two']},
         })
-        results = set(generator.generate_slug() for _ in range(20))
+        results = set(generator.generate_slug() for _ in range(30))
         assert results == {'one', 'two', 'twenty-one', 'twenty-two'}
 
     def test_degen_words_and_cartesian(self):
@@ -227,7 +227,7 @@ class TestImplementation(TestCase):
             'tens': {'type': 'words', 'words': ['thirty', 'forty']},
             'ones': {'type': 'words', 'words': ['three', 'four']},
         })
-        results = set(generator.generate_slug() for _ in range(30))
+        results = set(generator.generate_slug() for _ in range(50))
         assert results == {'one', 'two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
 
     def test_degen_phrases_and_cartesian(self):
@@ -238,7 +238,7 @@ class TestImplementation(TestCase):
             'tens': {'type': 'words', 'words': ['thirty', 'forty']},
             'ones': {'type': 'words', 'words': ['three', 'four']},
         })
-        results = set(generator.generate_slug() for _ in range(30))
+        results = set(generator.generate_slug() for _ in range(50))
         assert results == {'twenty-one', 'twenty-two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
 
 
