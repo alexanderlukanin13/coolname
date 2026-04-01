@@ -574,27 +574,36 @@ def _create_lists(
         list_type = list_config[_CONF.FIELD.TYPE]
         # 1. List of words
         if list_type == _CONF.TYPE.WORDS:
-            results[current] = WordList(list_config['words'])
+            _ = list_config['words']
+            assert isinstance(_, list)
+            results[current] = WordList(_)
         # List of phrases
         elif list_type == _CONF.TYPE.PHRASES:
-            results[current] = PhraseList(list_config['phrases'])
+            _ = list_config['phrases']
+            assert isinstance(_, list)
+            results[current] = PhraseList(_)
         # 2. Simple list of lists
         elif list_type == _CONF.TYPE.NESTED:
+            _ = list_config[_CONF.FIELD.LISTS]
+            assert isinstance(_, list)
             results[current] = NestedList([_create_lists(config, results, x, stack,
                                                          inside_cartesian=inside_cartesian)
-                                           for x in list_config[_CONF.FIELD.LISTS]])
-
+                                           for x in _])
         # 3. Cartesian list of lists
         elif list_type == _CONF.TYPE.CARTESIAN:
             if inside_cartesian is not None:
                 raise ConfigurationError(f"Cartesian list {inside_cartesian!r} contains another Cartesian list "
                                          f"{current!r}. Nested Cartesian lists are not allowed.")
+            _ = list_config[_CONF.FIELD.LISTS]
+            assert isinstance(_, list)
             results[current] = CartesianList([_create_lists(config, results, x, stack,
                                                             inside_cartesian=current)
-                                              for x in list_config[_CONF.FIELD.LISTS]])
+                                              for x in _])
         # 4. Scalar
         elif list_type == _CONF.TYPE.CONST:
-            results[current] = Scalar(list_config[_CONF.FIELD.VALUE])
+            _ = list_config[_CONF.FIELD.VALUE]
+            assert isinstance(_, str)
+            results[current] = Scalar(_)
         # Unknown type
         else:
             raise InitializationError(f"Unknown list type: {list_type!r}")
