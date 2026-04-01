@@ -122,9 +122,10 @@ def _load_wordlist(name: str, stream: TextIO) -> _ListConfigT:
     Returns "words" or "phrases" dictionary, the same as used in config.
     Raises Exception if file is missing or invalid.
     """
-    items: list[str | tuple[str, ...]] = []
+    words: list[str] = []
+    phrases: list[tuple[str, ...]] = []
     max_length: int | None = None
-    multiword_start: int | None = None
+    multiword = False
     number_of_words: int | None = None
     for i, line in enumerate(stream, start=1):
         line = line.strip()
@@ -132,7 +133,7 @@ def _load_wordlist(name: str, stream: TextIO) -> _ListConfigT:
             continue
         # Is it an option line, e.g. 'max_length = 10'?
         if '=' in line:
-            if items:
+            if words or phrases:
                 raise ConfigurationError(f'Invalid assignment at list {name!r} line {i}: {line!r} '
                                          f'(options must be defined before words)')
             try:
@@ -145,36 +146,35 @@ def _load_wordlist(name: str, stream: TextIO) -> _ListConfigT:
                 number_of_words = option_value
             continue  # pragma: no cover
         # Parse words
-        if multiword_start is None and _WORD_REGEX.match(line):
+        if not multiword and _WORD_REGEX.match(line):
             if max_length is not None and len(line) > max_length:
                 raise ConfigurationError(f'Word is too long at list {name!r} line {i}: {line!r}')
-            items.append(line)
+            words.append(line)
         elif _PHRASE_REGEX.match(line):
-            if multiword_start is None:
-                multiword_start = len(items)
+            if not multiword:
+                multiword = True
             phrase = tuple(line.split(' '))
             if number_of_words is not None and len(phrase) != number_of_words:
                 raise ConfigurationError(f'Phrase has {len(phrase)} word(s) (while number_of_words={number_of_words}) '
                                          f'at list {name!r} line {i}: {line!r}')
             if max_length is not None and sum(len(x) for x in phrase) > max_length:
                 raise ConfigurationError(f'Phrase is too long at list {name!r} line {i}: {line!r}')
-            items.append(phrase)
+            phrases.append(phrase)
         else:
             raise ConfigurationError(f'Invalid syntax at list {name!r} line {i}: {line!r}')
-    if multiword_start is not None:
-        # If in phrase mode, convert everything to tuples
-        for i in range(0, multiword_start):
-            items[i] = (items[i], )
+    result: _ListConfigT
+    if multiword:
+        # If in phrase mode, push all words we encountered before the first phrase into phrases
         result = {
             _CONF.FIELD.TYPE: _CONF.TYPE.PHRASES,
-            _CONF.FIELD.PHRASES: items
+            _CONF.FIELD.PHRASES: [(x, ) for x in words] + phrases
         }
         if number_of_words is not None:
             result[_CONF.FIELD.NUMBER_OF_WORDS] = number_of_words
     else:
         result = {
             _CONF.FIELD.TYPE: _CONF.TYPE.WORDS,
-            _CONF.FIELD.WORDS: items
+            _CONF.FIELD.WORDS: words
         }
     if max_length is not None:
         result[_CONF.FIELD.MAX_LENGTH] = max_length
