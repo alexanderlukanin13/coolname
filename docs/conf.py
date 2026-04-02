@@ -152,6 +152,10 @@ html_static_path = ['_static']
 if not op.isdir('_static'):  # To avoid warning if it doesn't exist
     os.mkdir('_static')
 
+html_css_files = [
+    'css/custom.css',
+]
+
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
