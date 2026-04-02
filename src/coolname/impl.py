@@ -14,16 +14,12 @@ from typing import ClassVar, Callable, Any, TextIO, cast, Protocol
 
 from .config import _CONF
 from .exceptions import ConfigurationError, InitializationError
-from .loader import _ConfigT
+from .types import HashT, ConfigT, RandRangeT
 
-if typing.TYPE_CHECKING:
-    HashType = hashlib._Hash  # pragma: no cover
-else:
-    HashType = Any
 
 # For new Python versions with (possible) OpenSSL FIPS support,
 # we should pass usedforsecurity=False argument to md5().
-_md5: Callable[[], HashType]
+_md5: Callable[[], HashT]
 try:
     hashlib.md5(b'', usedforsecurity=False)  # noqa
     _md5 = partial(hashlib.md5, usedforsecurity=False)
@@ -257,7 +253,7 @@ class NestedList(AbstractNestedList):
 
 class CartesianList(AbstractNestedList):
 
-    MULTIWORD: typing.ClassVar[bool] = True
+    MULTIWORD: ClassVar[bool] = True
 
     length: int  # pragma: no cover
 
@@ -307,11 +303,6 @@ class Scalar(AbstractNestedList):
         return self.value
 
 
-class RandRange(Protocol):
-    def __call__(self, start: int, stop: int | None = None, step: int = 1) -> int:
-        ...
-
-
 class RandomGenerator:
     """
     This class provides random name generation interface.
@@ -326,13 +317,13 @@ class RandomGenerator:
     _lists: dict[str | int | None, ListLike]  # pragma: no cover
     # Custom random (if any)
     _random: Random | None  # pragma: no cover
-    _randrange: RandRange  # pragma: no cover
+    _randrange: RandRangeT  # pragma: no cover
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
     _check_prefix: int | None  # pragma: no cover
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
     _max_slug_length: int | None  # pragma: no cover
 
-    def __init__(self, config: _ConfigT, rand: Random | None = None):
+    def __init__(self, config: ConfigT, rand: Random | None = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
         config = dict(config)
         _validate_config(config)
@@ -497,7 +488,7 @@ def _split_phrase(x: str) -> tuple[str, ...]:
     return tuple(re.split(r'\s+', x.strip()))
 
 
-def _validate_config(config: _ConfigT) -> None:
+def _validate_config(config: ConfigT) -> None:
     """
     A big and ugly method for config validation.
     It would be nice to use cerberus, but we don't
@@ -588,7 +579,7 @@ def _validate_config(config: _ConfigT) -> None:
 
 
 def _create_lists(
-        config: _ConfigT,
+        config: ConfigT,
         results: dict[str, ListLike],
         current: str,
         stack: list[str],

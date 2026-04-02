@@ -14,17 +14,10 @@ from typing import cast, TextIO
 
 from .config import _CONF
 from .exceptions import InitializationError, ConfigurationError
+from .types import ConfigT, ListConfigT
 
 
-# Top-level values of config dict, for example:
-# {"comment": "adjective-adjective-noun",
-#  "type": "cartesian",
-#  "lists": ["adj_far", "adj_near", "subj"]}
-_ListConfigT = dict[str, str | list[str] | list[tuple[str, ...]] | int]
-_ConfigT = dict[str, _ListConfigT]
-
-
-def load_config(path: str | Path) -> _ConfigT:
+def load_config(path: str | Path) -> ConfigT:
     """
     Loads configuration from a path.
 
@@ -52,7 +45,7 @@ def load_config(path: str | Path) -> _ConfigT:
     return config
 
 
-def _load_data(path: str | Path) -> tuple[_ConfigT, dict[str, _ListConfigT]]:
+def _load_data(path: str | Path) -> tuple[ConfigT, dict[str, ListConfigT]]:
     """
     Loads data from a directory.
     Returns tuple (config_dict, wordlists).
@@ -76,10 +69,10 @@ def _load_data(path: str | Path) -> tuple[_ConfigT, dict[str, _ListConfigT]]:
     return (config, wordlists)
 
 
-def _load_config(config_file_path: str | Path) -> _ConfigT:
+def _load_config(config_file_path: str | Path) -> ConfigT:
     try:
         with open(config_file_path, encoding='utf-8') as file:
-            return cast(_ConfigT, json.load(file))
+            return cast(ConfigT, json.load(file))
     except (OSError, FileNotFoundError) as ex:
         raise InitializationError(f'Failed to read config from {config_file_path}: {ex}')
     except ValueError as ex:
@@ -115,7 +108,7 @@ def _parse_option(line: str) -> tuple[str, int]:
     raise ValueError('Unknown option')
 
 
-def _load_wordlist(name: str, stream: TextIO) -> _ListConfigT:
+def _load_wordlist(name: str, stream: TextIO) -> ListConfigT:
     """
     Loads list of words or phrases from *.txt file.
 
@@ -162,7 +155,7 @@ def _load_wordlist(name: str, stream: TextIO) -> _ListConfigT:
             phrases.append(phrase)
         else:
             raise ConfigurationError(f'Invalid syntax at list {name!r} line {i}: {line!r}')
-    result: _ListConfigT
+    result: ListConfigT
     if multiword:
         # If in phrase mode, push all words we encountered before the first phrase into phrases
         result = {
