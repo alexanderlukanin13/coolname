@@ -5,10 +5,9 @@ import unittest
 
 import pytest
 
-from coolname import RandomGenerator, InitializationError
-from coolname.impl import NestedList, CartesianList, Scalar,\
-    WordList, PhraseList, WordAsPhraseWrapper,\
-    _create_lists, _to_bytes, _default
+from coolname import RandomGenerator, InitializationError, _default
+from coolname._impl import NestedList, CartesianList, Scalar, \
+    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists
 
 from .common import TestCase, patch
 
@@ -136,7 +135,7 @@ class TestImplementation(TestCase):
             CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']]),
         ])
         stream = io.StringIO()
-        cart_list.dump(stream)
+        cart_list.write(stream)
         self.assertEqual(stream.getvalue(),
                          "NestedList(2, len=28)\n"
                          "  CartesianList(3, len=24)\n"
@@ -155,10 +154,21 @@ class TestImplementation(TestCase):
             }
         }
         generator = RandomGenerator(config)
+        expected = ("RandomGenerator\n"
+                    "  TopLevelMultiWrapper\n"
+                    "    WordList(['one', 'two', 'three'], len=3)\n")
+
         stream = io.StringIO()
-        generator._dump(stream)
-        self.assertEqual(stream.getvalue(),
-                         "WordList(['one', 'two', 'three'], len=3)\n")
+        generator.write(stream)
+        self.assertEqual(stream.getvalue(), expected)
+
+        self.assertEqual(generator.render(), expected)
+
+        print(generator._lists[None])
+        expected = (f"RandomGenerator\n"
+                    f"  TopLevelMultiWrapper  # id={id(generator._lists[None])}\n"
+                    f"    WordList(['one', 'two', 'three'], len=3)  # id={id(generator._lists[None]._list)}\n")
+        self.assertEqual(generator.render(object_ids=True), expected)
 
     def test_create_lists(self):
         # For the sake of coverage
@@ -166,7 +176,7 @@ class TestImplementation(TestCase):
             config = {
                 'all': {'type': 'wrong'}
             }
-            _create_lists(config, {}, 'all', [])
+            create_lists(config, {}, 'all', [])
 
     def test_encode(self):
         # _encode must encode unicode strings

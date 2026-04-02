@@ -394,9 +394,7 @@ class TestCoolname(TestCase):
                                     "Invalid config: Rule 'all' is too deep"):
             RandomGenerator(config)
 
-
-    @patch('coolname.impl.randrange', side_effect=partial(next, cycle(iter(range(8)))))
-    def test_configuration_error_cartesian_inside_cartesian(self, mock):
+    def test_configuration_error_cartesian_inside_cartesian(self):
         config = {
             'all': {
                 'type': 'cartesian',

@@ -12,12 +12,14 @@ import re
 from pathlib import Path
 from typing import cast, TextIO
 
-from .config import _CONF
+from ._config import _CONF
 from .exceptions import InitializationError, ConfigurationError
-from .types import ConfigT, ListConfigT
+from .types import CoolnameConfigT, CoolnameConfigListT
+
+__all__ = ['load_config']
 
 
-def load_config(path: str | Path) -> ConfigT:
+def load_config(path: str | Path) -> CoolnameConfigT:
     """
     Loads configuration from a path.
 
@@ -45,7 +47,7 @@ def load_config(path: str | Path) -> ConfigT:
     return config
 
 
-def _load_data(path: str | Path) -> tuple[ConfigT, dict[str, ListConfigT]]:
+def _load_data(path: str | Path) -> tuple[CoolnameConfigT, dict[str, CoolnameConfigListT]]:
     """
     Loads data from a directory.
     Returns tuple (config_dict, wordlists).
@@ -69,10 +71,10 @@ def _load_data(path: str | Path) -> tuple[ConfigT, dict[str, ListConfigT]]:
     return (config, wordlists)
 
 
-def _load_config(config_file_path: str | Path) -> ConfigT:
+def _load_config(config_file_path: str | Path) -> CoolnameConfigT:
     try:
         with open(config_file_path, encoding='utf-8') as file:
-            return cast(ConfigT, json.load(file))
+            return cast(CoolnameConfigT, json.load(file))
     except (OSError, FileNotFoundError) as ex:
         raise InitializationError(f'Failed to read config from {config_file_path}: {ex}')
     except ValueError as ex:
@@ -108,7 +110,7 @@ def _parse_option(line: str) -> tuple[str, int]:
     raise ValueError('Unknown option')
 
 
-def _load_wordlist(name: str, stream: TextIO) -> ListConfigT:
+def _load_wordlist(name: str, stream: TextIO) -> CoolnameConfigListT:
     """
     Loads list of words or phrases from *.txt file.
 
@@ -155,7 +157,7 @@ def _load_wordlist(name: str, stream: TextIO) -> ListConfigT:
             phrases.append(phrase)
         else:
             raise ConfigurationError(f'Invalid syntax at list {name!r} line {i}: {line!r}')
-    result: ListConfigT
+    result: CoolnameConfigListT
     if multiword:
         # If in phrase mode, push all words we encountered before the first phrase into phrases
         result = {

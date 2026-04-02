@@ -4,17 +4,12 @@ Do not import anything directly from this module.
 from functools import partial
 import hashlib
 import itertools
-import os
-import os.path as op
-import random
-from random import randrange, Random
 import re
-import typing
-from typing import ClassVar, Callable, Any, TextIO, cast, Protocol
+from typing import Callable, Any, TextIO, cast, ClassVar
 
-from .config import _CONF
+from ._config import _CONF
 from .exceptions import ConfigurationError, InitializationError
-from .types import HashT, ConfigT, RandRangeT
+from .types import HashT, CoolnameConfigT, ListLike
 
 
 # For new Python versions with (possible) OpenSSL FIPS support,
@@ -25,22 +20,6 @@ try:
     _md5 = partial(hashlib.md5, usedforsecurity=False)
 except TypeError:  # pragma: no cover
     _md5 = hashlib.md5
-
-
-class ListLike(Protocol):
-    """Protocol for AbstractNestedList and WordAsPhraseWrapper"""
-
-    length: int
-    multiword: bool
-
-    def __getitem__(self, item: int) -> str | list[str]:
-        ...
-
-    def squash(self, hard: bool, cache: dict[bytes, 'ListLike']) -> 'ListLike':
-        ...
-
-    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
-        ...
 
 
 class AbstractNestedList(ListLike):
@@ -76,13 +55,13 @@ class AbstractNestedList(ListLike):
             self._lists = [x.squash(hard, cache) for x in self._lists]
             return self
 
-    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
+    def write(self, stream: TextIO, *, indent: str = '', object_ids: bool = False) -> None:
         stream.write(indent + str(self) +
-                     (f' [id={id(self)}]' if object_ids else '') +
+                     (f'  # id={id(self)}' if object_ids else '') +
                      '\n')
         indent += '  '
         for sublist in self._lists:
-            sublist.dump(stream, indent, object_ids=object_ids)  # noqa
+            sublist.write(stream, indent=indent, object_ids=object_ids)  # noqa
 
 
 # Convert value to bytes, for hashing
@@ -146,7 +125,7 @@ class WordList(_BasicList):
 class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
 
-    MULTIWORD: typing.ClassVar[bool] = True
+    MULTIWORD: ClassVar[bool] = True
 
     def __init__(self, lst: list[str | tuple[str, ...] | list[str]]):
         for x in lst:
@@ -159,7 +138,7 @@ class PhraseList(_BasicList):
 
 class WordAsPhraseWrapper(ListLike):
 
-    MULTIWORD: typing.ClassVar[bool] = True
+    MULTIWORD: ClassVar[bool] = True
 
     length: int  # pragma: no cover
 
@@ -179,10 +158,10 @@ class WordAsPhraseWrapper(ListLike):
     def squash(self, hard: bool, cache: dict[bytes, ListLike]) -> ListLike:  # noqa
         return self
 
-    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
-        stream.write(f"{indent}{self}{f' [id={id(self)}]' if object_ids else ''}\n")
+    def write(self, stream: TextIO, *, indent: str = '', object_ids: bool = False) -> None:
+        stream.write(f"{indent}{self.__class__.__name__}{f'  # id={id(self)}' if object_ids else ''}\n")
         indent += '  '
-        self._list.dump(stream, indent, object_ids)
+        self._list.write(stream, indent=indent, object_ids=object_ids)
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._list})'
@@ -196,14 +175,11 @@ class TopLevelMultiWrapper(WordAsPhraseWrapper):
     For abnormal but possible cases when there's no multiword list at the top generator level.
     """
 
-    def __init__(self, any_list: AbstractNestedList):  # noqa
+    def __init__(self, lst: ListLike):  # noqa
         # Note that call to base class is omitted deliberately
-        self._list = any_list
-        self.length = any_list.length
+        self._list = lst
+        self.length = lst.length
         self.multiword = True
-
-    def dump(self, stream: TextIO, indent: str = '', object_ids: bool = False) -> None:
-        return self._list.dump(stream, indent, object_ids)
 
 
 class NestedList(AbstractNestedList):
@@ -303,192 +279,12 @@ class Scalar(AbstractNestedList):
         return self.value
 
 
-class RandomGenerator:
-    """
-    This class provides random name generation interface.
-
-    Create an instance of this class if you want to create custom
-    configuration.
-    If default implementation is enough, just use `generate`,
-    `generate_slug` and other exported functions.
-    """
-
-    # Structure that does the generation
-    _lists: dict[str | int | None, ListLike]  # pragma: no cover
-    # Custom random (if any)
-    _random: Random | None  # pragma: no cover
-    _randrange: RandRangeT  # pragma: no cover
-    # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
-    _check_prefix: int | None  # pragma: no cover
-    # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
-    _max_slug_length: int | None  # pragma: no cover
-
-    def __init__(self, config: ConfigT, rand: Random | None = None):
-        self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
-        config = dict(config)
-        _validate_config(config)
-        lists: dict[str, ListLike] = {}
-        _create_lists(config, lists, 'all', [])
-        self._lists = {}
-        for key, list_config in config.items():
-            # Other generators independent of 'all'
-            if list_config.get(_CONF.FIELD.GENERATOR) and key not in lists:
-                _create_lists(config, lists, key, [])
-            if key == 'all' or key.isdigit() or list_config.get(_CONF.FIELD.GENERATOR):
-                pattern: str | int | None
-                if key.isdigit():
-                    pattern = int(key)
-                elif key == 'all':
-                    pattern = None
-                else:
-                    pattern = key
-                gen_list = lists[key]
-                # Abnormal but possible configuration - top list is not multiword.
-                # This requires a wrapper so that we avoid dealing with str instead of list in generate().
-                # See also test_degen_* in test_impl.py
-                if not lists[key].multiword:
-                    gen_list = TopLevelMultiWrapper(lists[key])  # type: ignore
-                self._lists[pattern] = gen_list
-        self._lists[None] = self._lists[None].squash(True, {})
-        # Should we avoid duplicates?
-        try:
-            ensure_unique = config['all'][_CONF.FIELD.ENSURE_UNIQUE]
-            if not isinstance(ensure_unique, bool):
-                raise ValueError(f'expected boolean, got {ensure_unique!r}')
-            self._ensure_unique = ensure_unique
-        except KeyError:
-            self._ensure_unique = False
-        except ValueError as ex:
-            raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE} value: {ex}')
-        # Should we avoid duplicating prefixes?
-        try:
-            self._check_prefix = int(config['all'][_CONF.FIELD.ENSURE_UNIQUE_PREFIX])  # type: ignore[arg-type]
-            if self._check_prefix <= 0:
-                raise ValueError(f'expected a positive integer, got {self._check_prefix!r}')
-        except KeyError:
-            self._check_prefix = None
-        except ValueError as ex:
-            raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE_PREFIX} value: {ex}')
-        # Get max slug length
-        try:
-            self._max_slug_length = int(config['all'][_CONF.FIELD.MAX_SLUG_LENGTH])  # type: ignore[arg-type]
-        except KeyError:
-            self._max_slug_length = None
-        except ValueError as ex:
-            raise ConfigurationError(f'Invalid {_CONF.FIELD.MAX_SLUG_LENGTH} value: {ex}')
-        # Make sure that generate() does not go into long loop.
-        # Default generator is a special case, we don't need check.
-        if (not config['all'].get('__nocheck') and
-                self._ensure_unique or self._check_prefix or self._max_slug_length):
-            self._check_not_hanging()
-        # Fire it up
-        assert self.generate_slug()
-
-    @property
-    def random(self) -> Random | None:
-        return self._random
-
-    @random.setter
-    def random(self, rand: Random | None) -> None:
-        if rand:
-            self._random = rand
-            self._randrange = rand.randrange
-        else:
-            self._random = random  # type: ignore
-            self._randrange = random.randrange
-
-    def generate(self, pattern: str | int | None = None) -> list[str]:
-        """
-        Generates and returns random name as a list of strings.
-        """
-        lst = self._lists[pattern]
-        while True:
-            result = lst[self._randrange(lst.length)]
-            # 1. Check that there are no duplicates
-            # 2. Check that there are no duplicate prefixes
-            # 3. Check max slug length
-            n = len(result)
-            if (self._ensure_unique and len(set(result)) != n or
-                    self._check_prefix and len(set(x[:self._check_prefix] for x in result)) != n or
-                    self._max_slug_length and sum(len(x) for x in result) + n - 1 > self._max_slug_length):
-                continue
-            # Most of the time it returns at first attempt, without repeating the loop.
-            # Note about typing: technically its List[str] | str, but we know it's always List[str] at this point.
-            return result  # type: ignore
-
-    def generate_slug(self, pattern: str | int | None = None) -> str:
-        """
-        Generates and returns random name as a slug.
-        """
-        return '-'.join(self.generate(pattern))
-
-    def get_combinations_count(self, pattern: str | int | None = None) -> int:
-        """
-        Returns total number of unique combinations
-        for the given pattern.
-        """
-        lst = self._lists[pattern]
-        return lst.length
-
-    def _dump(self, stream: TextIO, pattern: str | int | None = None, object_ids: bool = False) -> None:
-        """Dumps current tree into a text stream."""
-        self._lists[pattern].dump(stream, '', object_ids=object_ids)  # noqa
-
-    def _check_not_hanging(self) -> None:
-        """
-        Rough check that generate() will not hang or be very slow.
-
-        Raises ConfigurationError if generate() spends too much time in retry loop.
-        Issues a warning.warn() if there is a risk of slowdown.
-        """
-        # (field_name, predicate, warning_msg, exception_msg)
-        # predicate(g) is a function that returns True if generated combination g must be rejected,
-        # see checks in generate()
-        checks: list[tuple[str, Any, Callable[[Any], bool], str, str]] = []
-        # ensure_unique can lead to infinite loops for some tiny erroneous configs
-        if self._ensure_unique:
-            checks.append((
-                _CONF.FIELD.ENSURE_UNIQUE,
-                self._ensure_unique,
-                lambda g: len(set(g)) != len(g),
-                '{generate} may be slow because a significant fraction of combinations contain repeating words and {field_name} is set',  # noqa
-                'Impossible to generate with {field_name}'
-            ))
-        #
-        # max_slug_length can easily slow down or block generation if set too small
-        if self._max_slug_length:
-            checks.append((
-                _CONF.FIELD.MAX_SLUG_LENGTH,
-                self._max_slug_length,
-                lambda g: sum(len(x) for x in g) + len(g) - 1 > self._max_slug_length,  # type: ignore
-                '{generate} may be slow because a significant fraction of combinations exceed {field_name}={field_value}',  # noqa
-                'Impossible to generate with {field_name}={field_value}'
-            ))
-        # Perform the relevant checks for all generators, starting from 'all'
-        n = 100
-        warning_threshold = 20  # fail probability: 0.04 for 2 attempts, 0.008 for 3 attempts, etc.
-        for lst_id, lst in sorted(self._lists.items(), key=lambda x: '' if x is None else str(x)):
-            context = {'generate': f'coolname.generate({"" if lst_id is None else repr(lst_id)})'}
-            # For each generator, perform checks
-            for field_name, field_value, predicate, warning_msg, exception_msg in checks:
-                context.update({'field_name': field_name, 'field_value': field_value})
-                bad_count = 0
-                for _ in range(n):
-                    if predicate(lst[randrange(lst.length)]):
-                        bad_count += 1
-                if bad_count >= n:
-                    raise ConfigurationError(exception_msg.format(**context))
-                elif bad_count >= warning_threshold:
-                    import warnings
-                    warnings.warn(warning_msg.format(**context))
-
-
 # Translate phrases defined as strings to tuples
 def _split_phrase(x: str) -> tuple[str, ...]:
     return tuple(re.split(r'\s+', x.strip()))
 
 
-def _validate_config(config: ConfigT) -> None:
+def validate_config(config: CoolnameConfigT) -> None:
     """
     A big and ugly method for config validation.
     It would be nice to use cerberus, but we don't
@@ -578,8 +374,8 @@ def _validate_config(config: ConfigT) -> None:
         raise ConfigurationError(str(ex))
 
 
-def _create_lists(
-        config: ConfigT,
+def create_lists(
+        config: CoolnameConfigT,
         results: dict[str, ListLike],
         current: str,
         stack: list[str],
@@ -607,20 +403,20 @@ def _create_lists(
         list_type = list_config[_CONF.FIELD.TYPE]
         # 1. List of words
         if list_type == _CONF.TYPE.WORDS:
-            _ = list_config['words']
+            _ = list_config[_CONF.FIELD.WORDS]
             assert isinstance(_, list)
             results[current] = WordList(_)
         # List of phrases
         elif list_type == _CONF.TYPE.PHRASES:
-            _ = list_config['phrases']
+            _ = list_config[_CONF.FIELD.PHRASES]
             assert isinstance(_, list)
             results[current] = PhraseList(_)
         # 2. Simple list of lists
         elif list_type == _CONF.TYPE.NESTED:
             _ = list_config[_CONF.FIELD.LISTS]
             assert isinstance(_, list)
-            results[current] = NestedList([_create_lists(config, results, x, stack,
-                                                         inside_cartesian=inside_cartesian)
+            results[current] = NestedList([create_lists(config, results, x, stack,
+                                                        inside_cartesian=inside_cartesian)
                                            for x in _])
         # 3. Cartesian list of lists
         elif list_type == _CONF.TYPE.CARTESIAN:
@@ -629,8 +425,8 @@ def _create_lists(
                                          f"{current!r}. Nested Cartesian lists are not allowed.")
             _ = list_config[_CONF.FIELD.LISTS]
             assert isinstance(_, list)
-            results[current] = CartesianList([_create_lists(config, results, x, stack,
-                                                            inside_cartesian=current)
+            results[current] = CartesianList([create_lists(config, results, x, stack,
+                                                           inside_cartesian=current)
                                               for x in _])
         # 4. Scalar
         elif list_type == _CONF.TYPE.CONST:
@@ -644,37 +440,3 @@ def _create_lists(
         return results[current]
     finally:
         stack.pop()
-
-
-# Default generator is a global object
-def _create_default_generator() -> RandomGenerator:
-    data_dir = os.getenv('COOLNAME_DATA_DIR')
-    data_module = os.getenv('COOLNAME_DATA_MODULE')
-    if not data_dir and not data_module:
-        data_dir = op.join(op.dirname(op.abspath(__file__)), 'data')
-        data_module = 'coolname.data'  # used when imported from egg; consumes more memory
-    if data_dir and op.isdir(data_dir):
-        from coolname.loader import load_config
-        config = load_config(data_dir)
-    elif data_module:  # pragma: no cover (actually tested via subprocess - see test_coolname_env.py)
-        import importlib
-        config = importlib.import_module(data_module).config
-    else:  # pragma: no cover
-        raise ImportError('Configure valid COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE')
-    config['all']['__nocheck'] = True
-    return RandomGenerator(config)
-
-
-# Default generator is a global object
-_default: RandomGenerator = _create_default_generator()
-
-# Global functions are actually methods of the default generator.
-# (most users don't care about creating generator instances)
-generate = _default.generate
-generate_slug = _default.generate_slug
-get_combinations_count = _default.get_combinations_count
-
-
-def replace_random(rand: Random | None = None) -> None:
-    """Replaces random number generator for the default RandomGenerator instance."""
-    _default.random = rand
