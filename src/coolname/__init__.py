@@ -34,14 +34,14 @@ class RandomGenerator:
     """
 
     # Structure that does the generation
-    _lists: dict[str | int | None, types.ListLike]  # pragma: no cover
+    _lists: dict[str | int | None, types.ListLike]
     # Custom random (if any)
-    _random: types.RandomT | None  # pragma: no cover
-    _randrange: types.RandRangeT  # pragma: no cover
+    _random: types.RandomT | None
+    _randrange: types.RandRangeT
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
-    _check_prefix: int | None  # pragma: no cover
+    _check_prefix: int | None
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
-    _max_slug_length: int | None  # pragma: no cover
+    _max_slug_length: int | None
 
     def __init__(self, config: types.CoolnameConfigT, rand: types.RandomT | None = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.

@@ -139,7 +139,7 @@ def _load_wordlist(name: str, stream: TextIO) -> CoolnameConfigListT:
                 max_length = option_value
             elif option == _CONF.FIELD.NUMBER_OF_WORDS:
                 number_of_words = option_value
-            continue  # pragma: no cover
+            continue
         # Parse words
         if not multiword and _WORD_REGEX.match(line):
             if max_length is not None and len(line) > max_length:

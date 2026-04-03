@@ -25,7 +25,7 @@ except TypeError:  # pragma: no cover
 
 class AbstractNestedList(ListLike):
 
-    length: int  # pragma: no cover
+    length: int
     multiword: bool
 
     _lists: list[ListLike]
@@ -82,7 +82,7 @@ def _to_bytes(value: str | tuple[str, ...] | bytes) -> bytes:
 # Base class for WordList and PhraseList
 class _BasicList(list[typing.Any], AbstractNestedList):
 
-    length: int  # pragma: no cover
+    length: int
 
     __hash: bytes | None
 
@@ -147,7 +147,7 @@ class WordAsPhraseWrapper(ListLike):
 
     MULTIWORD: ClassVar[bool] = True
 
-    length: int  # pragma: no cover
+    length: int
 
     _list: ListLike
 
@@ -242,7 +242,7 @@ class CartesianList(AbstractNestedList):
 
     MULTIWORD: ClassVar[bool] = True
 
-    length: int  # pragma: no cover
+    length: int
 
     def __init__(self, lists: list[ListLike] | list[list[str]]):
         super().__init__(lists)
@@ -272,7 +272,7 @@ class CartesianList(AbstractNestedList):
 
 class Scalar(AbstractNestedList):
 
-    length: int  # pragma: no cover
+    length: int
     value: str
 
     def __init__(self, value: str):

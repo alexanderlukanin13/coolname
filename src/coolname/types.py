@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 # we should pass usedforsecurity=False argument to md5().
 if typing.TYPE_CHECKING:
     import hashlib
-    HashT = hashlib._Hash  # pragma: no cover
+    HashT = hashlib._Hash
 else:
     HashT = typing.Any
 

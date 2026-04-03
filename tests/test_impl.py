@@ -125,8 +125,8 @@ class TestImplementation(TestCase):
     def test_str_regression(self):
         with pytest.raises(TypeError, match=re.escape("Invalid item in WordList: expected str, got 'int'")):
             NestedList([
-                CartesianList([[10, 11], [12, 13]]),
-                CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),
+                CartesianList([[10, 11], [12, 13]]),               # type: ignore
+                CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),  # type: ignore
             ])
 
     def test_dump_list(self):
