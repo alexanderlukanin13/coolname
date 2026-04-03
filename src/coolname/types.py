@@ -6,6 +6,7 @@ __all__ = [
     'RandRangeT', 'RandomT'
 ]
 
+from abc import ABC, abstractmethod
 
 # For new Python versions with (possible) OpenSSL FIPS support,
 # we should pass usedforsecurity=False argument to md5().
@@ -50,17 +51,27 @@ class RandomT(typing.Protocol):
         ...
 
 
-class ListLike(typing.Protocol):
-    """Unified Protocol for AbstractNestedList and WordWrapper"""
+class ListLike(ABC):
+    """Unified interface for AbstractNestedList and WordWrapper"""
 
     length: int
     multiword: bool
 
+    @abstractmethod
     def __getitem__(self, item: int) -> str | list[str]:
         ...
 
+    @abstractmethod
     def squash(self, hard: bool, cache: dict[bytes, 'ListLike']) -> 'ListLike':
         ...
 
-    def write(self, stream: typing.TextIO, *, indent: str = '', object_ids: bool = False) -> None:
+    @abstractmethod
+    def write(self, stream: typing.TextIO, *,
+              indent: str = '  ', base_indent: str = '',
+              max_items: int = 4, object_ids: bool = False,
+              ) -> None:
         ...
+
+    # Default implementation ignores max_items, and is a synonym for __str__
+    def render(self, *, max_items: int = 4) -> str:
+        return self.__str__()

@@ -150,23 +150,47 @@ class RandomGenerator:
         lst = self._lists[pattern]
         return lst.length
 
-    def write(self, stream: typing.TextIO, pattern: str | int | None = None, object_ids: bool = False) -> None:
+    def write(self,
+              stream: typing.TextIO, *,
+              pattern: str | int | None = None,
+              indent: str | int = 2,
+              max_items: int = 4,
+              object_ids: bool = False,
+              ) -> None:
         """
         Writes the generator's tree-like structure into a text stream.
 
         Text representation is the same as in render().
-        """
-        stream.write(f'{self.__class__.__qualname__}\n')
-        self._lists[pattern].write(stream, indent='  ', object_ids=object_ids)  # noqa
 
-    def render(self, pattern: str | int | None = None, object_ids: bool = False) -> str:
+        :arg stream: Output stream to write into
+        :arg pattern: Same as in ``generate``
+        :arg indent: Single indent: any number of spaces, a tab,
+            or anything else really. If integer, number of spaces.
+        :arg max_items: Maximum number of words or phrases to display.
+            If there are more, the remaining items are replaced with ellipsis.
+        :arg object_ids: If True, display Python ``id()`` for each object
+            (possibly in easy-to-read humanized form).
+            Useful to check which lists are reused in more than one place in the tree.
+        """
+        if isinstance(indent, int):
+            indent = ' ' * indent
+        stream.write(f'{self.__class__.__qualname__}\n')
+        self._lists[pattern].write(stream, indent=indent, base_indent='  ',
+                                   max_items=max_items, object_ids=object_ids)  # noqa
+
+    def render(self, *,
+               pattern: str | int | None = None,
+               indent: str | int = 2,
+               max_items: int = 4,
+               object_ids: bool = False
+               ) -> str:
         """
         Returns the generator's tree-like structure as a multiline string.
 
-        Text representation is the same as in write().
+        Text representation is the same as in write(). Arguments are also the same.
         """
         s = StringIO()
-        self.write(s, pattern, object_ids)
+        self.write(s, pattern=pattern, indent=indent, object_ids=object_ids)
         return s.getvalue()
 
     def _check_not_hanging(self) -> None:

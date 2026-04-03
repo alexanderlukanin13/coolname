@@ -5,7 +5,8 @@ from functools import partial
 import hashlib
 import itertools
 import re
-from typing import Callable, Any, TextIO, cast, ClassVar
+import typing
+from typing import Callable, cast, ClassVar, Iterable
 
 from ._config import _CONF
 from .exceptions import ConfigurationError, InitializationError
@@ -55,13 +56,16 @@ class AbstractNestedList(ListLike):
             self._lists = [x.squash(hard, cache) for x in self._lists]
             return self
 
-    def write(self, stream: TextIO, *, indent: str = '', object_ids: bool = False) -> None:
-        stream.write(indent + str(self) +
-                     (f'  # id={id(self)}' if object_ids else '') +
-                     '\n')
-        indent += '  '
+    def write(self, stream: typing.TextIO, *,
+              indent: str = '  ', base_indent: str = '',
+              max_items: int = 4, object_ids: bool = False
+              ) -> None:
+        stream.write(f"{base_indent}{self.render(max_items=max_items)}" +
+                     (f'  # id={id(self)}' if object_ids else '') + '\n')
+        base_indent += indent
         for sublist in self._lists:
-            sublist.write(stream, indent=indent, object_ids=object_ids)  # noqa
+            sublist.write(stream, indent=indent, max_items=max_items,
+                          base_indent=base_indent, object_ids=object_ids)  # noqa
 
 
 # Convert value to bytes, for hashing
@@ -76,7 +80,7 @@ def _to_bytes(value: str | tuple[str, ...] | bytes) -> bytes:
 
 
 # Base class for WordList and PhraseList
-class _BasicList(list[Any], AbstractNestedList):
+class _BasicList(list[typing.Any], AbstractNestedList):
 
     length: int  # pragma: no cover
 
@@ -88,11 +92,14 @@ class _BasicList(list[Any], AbstractNestedList):
         self.length = len(self)
         self.__hash = None
 
+    def render(self, *, max_items: int = 4) -> str:
+        it: Iterable[str] = (repr(x) for x in itertools.islice(self, max_items))
+        if self.length > max_items:
+            it = itertools.chain(it, ['...'])
+        return f'{self.__class__.__name__}([{", ".join(it)}], len={len(self)})'
+
     def __str__(self) -> str:
-        ls = [repr(x) for x in self[:4]]
-        if len(ls) == 4:
-            ls[3] = '...'
-        return f'{self.__class__.__name__}([{", ".join(ls)}], len={len(self)})'
+        return self.render()
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -158,10 +165,14 @@ class WordAsPhraseWrapper(ListLike):
     def squash(self, hard: bool, cache: dict[bytes, ListLike]) -> ListLike:  # noqa
         return self
 
-    def write(self, stream: TextIO, *, indent: str = '', object_ids: bool = False) -> None:
-        stream.write(f"{indent}{self.__class__.__name__}{f'  # id={id(self)}' if object_ids else ''}\n")
-        indent += '  '
-        self._list.write(stream, indent=indent, object_ids=object_ids)
+    def write(self, stream: typing.TextIO, *,
+              indent: str = '  ', base_indent: str = '',
+              max_items: int = 4, object_ids: bool = False
+              ) -> None:
+        stream.write(f"{base_indent}{self.__class__.__name__}{f'  # id={id(self)}' if object_ids else ''}\n")
+        base_indent += indent
+        self._list.write(stream, indent=indent, base_indent=base_indent,
+                         max_items=max_items, object_ids=object_ids)
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._list})'
