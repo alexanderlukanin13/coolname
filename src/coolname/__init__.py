@@ -175,7 +175,7 @@ class RandomGenerator:
         if isinstance(indent, int):
             indent = ' ' * indent
         stream.write(f'{self.__class__.__qualname__}\n')
-        self._lists[pattern].write(stream, indent=indent, base_indent='  ',
+        self._lists[pattern].write(stream, indent=indent, base_indent=indent,
                                    max_items=max_items, object_ids=object_ids)  # noqa
 
     def render(self, *,
@@ -190,7 +190,7 @@ class RandomGenerator:
         Text representation is the same as in write(). Arguments are also the same.
         """
         s = StringIO()
-        self.write(s, pattern=pattern, indent=indent, object_ids=object_ids)
+        self.write(s, pattern=pattern, indent=indent, max_items=max_items, object_ids=object_ids)
         return s.getvalue()
 
     def _check_not_hanging(self) -> None:
