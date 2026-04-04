@@ -155,7 +155,7 @@ class RandomGenerator:
               pattern: str | int | None = None,
               indent: str | int = 2,
               max_items: int = 4,
-              object_ids: bool = False,
+              ids: bool = False,
               ) -> None:
         """
         Writes the generator's tree-like structure into a text stream.
@@ -168,21 +168,20 @@ class RandomGenerator:
             or anything else really. If integer, number of spaces.
         :arg max_items: Maximum number of words or phrases to display.
             If there are more, the remaining items are replaced with ellipsis.
-        :arg object_ids: If True, display Python ``id()`` for each object
-            (possibly in easy-to-read humanized form).
+        :arg ids: If True, display Python ``id()`` for each object.
             Useful to check which lists are reused in more than one place in the tree.
         """
         if isinstance(indent, int):
             indent = ' ' * indent
         stream.write(f'{self.__class__.__qualname__}\n')
         self._lists[pattern].write(stream, indent=indent, base_indent=indent,
-                                   max_items=max_items, object_ids=object_ids)  # noqa
+                                   max_items=max_items, ids=ids)  # noqa
 
     def render(self, *,
                pattern: str | int | None = None,
                indent: str | int = 2,
                max_items: int = 4,
-               object_ids: bool = False
+               ids: bool = False
                ) -> str:
         """
         Returns the generator's tree-like structure as a multiline string.
@@ -190,7 +189,7 @@ class RandomGenerator:
         Text representation is the same as in write(). Arguments are also the same.
         """
         s = StringIO()
-        self.write(s, pattern=pattern, indent=indent, max_items=max_items, object_ids=object_ids)
+        self.write(s, pattern=pattern, indent=indent, max_items=max_items, ids=ids)
         return s.getvalue()
 
     def _check_not_hanging(self) -> None:

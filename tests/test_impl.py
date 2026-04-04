@@ -178,7 +178,7 @@ class TestImplementation(TestCase):
         expected = (f"RandomGenerator\n"
                     f"  TopLevelMultiWrapper  # id={id(generator._lists[None])}\n"
                     f"    WordList(['one', 'two', 'three'], len=3)  # id={id(generator._lists[None]._list)}\n")
-        self.assertEqual(generator.render(object_ids=True), expected)
+        self.assertEqual(generator.render(ids=True), expected)
 
     def test_create_lists(self):
         # For the sake of coverage

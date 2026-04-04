@@ -58,14 +58,14 @@ class AbstractNestedList(ListLike):
 
     def write(self, stream: typing.TextIO, *,
               indent: str = '  ', base_indent: str = '',
-              max_items: int = 4, object_ids: bool = False
+              max_items: int = 4, ids: bool = False
               ) -> None:
         stream.write(f"{base_indent}{self.render(max_items=max_items)}" +
-                     (f'  # id={id(self)}' if object_ids else '') + '\n')
+                     (f'  # id={id(self)}' if ids else '') + '\n')
         base_indent += indent
         for sublist in self._lists:
             sublist.write(stream, indent=indent, max_items=max_items,
-                          base_indent=base_indent, object_ids=object_ids)  # noqa
+                          base_indent=base_indent, ids=ids)  # noqa
 
 
 # Convert value to bytes, for hashing
@@ -157,12 +157,12 @@ class WordAsPhraseWrapper(ListLike):
 
     def write(self, stream: typing.TextIO, *,
               indent: str = '  ', base_indent: str = '',
-              max_items: int = 4, object_ids: bool = False
+              max_items: int = 4, ids: bool = False
               ) -> None:
-        stream.write(f"{base_indent}{self.__class__.__name__}{f'  # id={id(self)}' if object_ids else ''}\n")
+        stream.write(f"{base_indent}{self.__class__.__name__}{f'  # id={id(self)}' if ids else ''}\n")
         base_indent += indent
         self._list.write(stream, indent=indent, base_indent=base_indent,
-                         max_items=max_items, object_ids=object_ids)
+                         max_items=max_items, ids=ids)
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__}({self._list})'

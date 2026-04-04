@@ -68,7 +68,7 @@ class ListLike(ABC):
     @abstractmethod
     def write(self, stream: typing.TextIO, *,
               indent: str = '  ', base_indent: str = '',
-              max_items: int = 4, object_ids: bool = False,
+              max_items: int = 4, ids: bool = False,
               ) -> None:
         ...
 
