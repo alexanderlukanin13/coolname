@@ -122,12 +122,6 @@ class _BasicList(list[typing.Any], AbstractNestedList):
 class WordList(_BasicList):
     """List of single words."""
 
-    def __init__(self, lst: list[str]):
-        for x in lst:
-            if not isinstance(x, str):
-                raise TypeError(f'Invalid item in WordList: expected str, got {x.__class__.__qualname__!r}')
-        _BasicList.__init__(self, lst)
-
 
 class PhraseList(_BasicList):
     """List of phrases (sequences of one or more words)."""
@@ -135,10 +129,6 @@ class PhraseList(_BasicList):
     MULTIWORD: ClassVar[bool] = True
 
     def __init__(self, lst: list[str | tuple[str, ...] | list[str]]):
-        for x in lst:
-            if not isinstance(x, (str, list, tuple)):
-                raise TypeError(f'Invalid item in PhraseList: expected str | list[str] | tuple[str, ...], '
-                                f'got {x.__class__.__qualname__!r}')
         # Accept mixed input, ensure that we store only tuple[str, ...]
         _BasicList.__init__(self, [_split_phrase(x) if isinstance(x, str) else tuple(x) for x in lst])
 
@@ -292,7 +282,10 @@ class Scalar(AbstractNestedList):
 
 # Translate phrases defined as strings to tuples
 def _split_phrase(x: str) -> tuple[str, ...]:
-    return tuple(re.split(r'\s+', x.strip()))
+    x = x.strip()
+    if not x:
+        return tuple()
+    return tuple(re.split(r'\s+', x))
 
 
 def validate_config(config: CoolnameConfigT) -> None:
@@ -333,26 +326,39 @@ def validate_config(config: CoolnameConfigT) -> None:
                     words = listdef[_CONF.FIELD.WORDS]
                 except KeyError:
                     raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.WORDS!r}')
-                if not isinstance(words, list) or not words:
-                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}')
+                if not isinstance(words, list):
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                     f'expected list[str], got {words.__class__.__qualname__}')
+                if not words:
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: list is empty')
                 # Validate word length
                 try:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
-                if max_length is not None:
-                    for word in words:
-                        if len(word) > max_length:
-                            raise ValueError(f'Config at key {key!r} has invalid word {word!r} '
-                                             f'(longer than {max_length} characters)')
+                for word in words:
+                    if not isinstance(word, str):
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                         f'expected all words to be str, got {word!r}')
+                    word = word.strip()
+                    if not word:
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                         f'empty or whitespace-only word not allowed')
+                    if max_length is not None and len(word) > max_length:
+                        raise ValueError(f'Config at key {key!r} has invalid word {word!r} '
+                                         f'(longer than {max_length} characters)')
             # Phrases (sequences of one or more words)
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.PHRASES:
                 try:
                     phrases = listdef[_CONF.FIELD.PHRASES]
                 except KeyError:
                     raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.PHRASES!r}')
-                if not isinstance(phrases, list) or not phrases:
-                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}')
+                if not isinstance(phrases, list):
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                     f'expected list[str] | list[list[str]] | list[tuple[str, ...]], '
+                                     f'got {phrases.__class__.__qualname__}')
+                if not phrases:
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: list is empty')
                 # Validate multi-word and max length
                 try:
                     number_of_words = int(listdef[_CONF.FIELD.NUMBER_OF_WORDS])  # type: ignore[arg-type]
@@ -365,9 +371,16 @@ def validate_config(config: CoolnameConfigT) -> None:
                 for phrase in phrases:
                     if isinstance(phrase, str):
                         phrase = _split_phrase(phrase)  # str -> sequence, if necessary
+                    if not phrase:
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                         f'empty or whitespace-only phrase not allowed')
                     if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                         f'must be all string/tuple/list')
+                                         f'expected all phrases to be str | list[str] | tuple[str, ...], '
+                                         f'got {phrase!r}')
+                    if any(not x.strip() for x in phrase):
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                         f'empty or whitespace-only word within phrase not allowed: {phrase!r}')
                     if number_of_words is not None and len(phrase) != number_of_words:
                         raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
                                          f'({len(phrase)} word(s) but '

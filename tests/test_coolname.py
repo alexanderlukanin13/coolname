@@ -1,9 +1,12 @@
 from functools import partial
 from itertools import cycle
 import random
+from re import escape as esc
 import sys
 import unittest
 import warnings
+
+import pytest
 
 import coolname
 from coolname import RandomGenerator, InitializationError
@@ -284,18 +287,73 @@ class TestCoolname(TestCase):
                 'one': {'type': 'nested', 'lists': ['all']}
             })
 
+    def test_configuration_error_words(self):
+        # No "words" key
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has no 'words'"):
+            RandomGenerator({'all': {'type': 'words', 'phrases': []}})
+        # 'words' is not a list
+        with pytest.raises(InitializationError, match=esc("Invalid config: Config at key 'all' has invalid 'words': "
+                                                          "expected list[str], got dict")):
+            RandomGenerator({'all': {'type': 'words', 'words': {}}})
+        # 'words' list is empty
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'words': list is empty"):
+            RandomGenerator({'all': {'type': 'words', 'words': []}})
+        # 'words' list contains invalid item
+        with pytest.raises(InitializationError, match=esc("Invalid config: Config at key 'all' has invalid 'words': "
+                                     "expected all words to be str, "
+                                     "got ['too many square brackets']")):
+            RandomGenerator({'all': {'type': 'words', 'words': [['too many square brackets']]}})
+        # 'words' list contains empty or blank string
+        # tab is also treated as whitespace
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'words': "
+                                                      "empty or whitespace-only word not allowed"):
+            RandomGenerator({'all': {'type': 'words', 'words': ['good', '']}})
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'words': "
+                                                      "empty or whitespace-only word not allowed"):
+            RandomGenerator({'all': {'type': 'words', 'words': ['good', '  ']}})
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'words': "
+                                                      "empty or whitespace-only word not allowed"):
+            RandomGenerator({'all': {'type': 'words', 'words': ['good', '\t']}})
+
     def test_configuration_error_phrases(self):
-        with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has no 'phrases'"):
-            RandomGenerator({'all': {'type': 'phrases', 'words': []}})
-        with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid 'phrases'"):
-            RandomGenerator({'all': {'type': 'phrases', 'phrases': []}})
-        generator = RandomGenerator({'all': {'type': 'phrases', 'phrases': ['str is allowed']}})
+        generator = RandomGenerator({'all': {'type': 'phrases', 'phrases': ['  str  is  allowed  ']}})
         assert generator.generate_slug() == 'str-is-allowed'
-        with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Config at key 'all' has invalid 'phrases': must be all string/tuple/list"):
+        # No "phrases" key
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has no 'phrases'"):
+            RandomGenerator({'all': {'type': 'phrases', 'words': []}})
+        # 'phrases' is not a list
+        with pytest.raises(InitializationError, match=esc("Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                          "expected list[str] | list[list[str]] | list[tuple[str, ...]], got dict")):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': {}}})
+        # 'phrases' list is empty
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                      "list is empty"):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': []}})
+        # 'phrases' list contains invalid item
+        with pytest.raises(InitializationError, match=esc("Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                          "expected all phrases to be str | list[str] | tuple[str, ...], "
+                                                          "got [['too many square brackets']]")):
             RandomGenerator({'all': {'type': 'phrases', 'phrases': [[['too many square brackets']]]}})
+        # 'phrases' list contains empty or blank string
+        # tab is also treated as whitespace
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                      "empty or whitespace-only phrase not allowed"):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': ['good phrase', '']}})
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                      "empty or whitespace-only phrase not allowed"):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': ['good phrase', '  ']}})
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                      "empty or whitespace-only phrase not allowed"):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': ['good phrase', '\t']}})
+        # subitem within an item in 'phrase' list contains empty or blank string
+        # tab is also treated as whitespace
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                      "empty or whitespace-only word within phrase not allowed"):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': ['good phrase', ['good', '  ']]}})
+        with pytest.raises(InitializationError, match="Invalid config: Config at key 'all' has invalid 'phrases': "
+                                                      "empty or whitespace-only word within phrase not allowed"):
+            RandomGenerator({'all': {'type': 'phrases', 'phrases': ['good phrase', ['good', '\t']]}})
+
         # Number of words
         RandomGenerator({
             'all': {
@@ -303,8 +361,7 @@ class TestCoolname(TestCase):
                 'number_of_words': 2,
                 'phrases': [['one', 'two'], ['three', 'four']]}
         })
-        with self.assertRaisesRegex(InitializationError,
-                                    r"Invalid config: Config at key 'all' has invalid phrase 'five' \(1 word\(s\) but number_of_words=2\)"):
+        with pytest.raises(InitializationError, match=r"Invalid config: Config at key 'all' has invalid phrase 'five' \(1 word\(s\) but number_of_words=2\)"):
             RandomGenerator({
                 'all': {
                     'type': 'phrases',
@@ -318,8 +375,7 @@ class TestCoolname(TestCase):
                 'max_length': 10,
                 'phrases': [['black', 'goose'], ['white', 'hare']]}
         })
-        with self.assertRaisesRegex(InitializationError,
-                                    r"Invalid config: Config at key 'all' has invalid phrase 'white rabbit' \(longer than 10 characters\)"):
+        with pytest.raises(InitializationError, match=r"Invalid config: Config at key 'all' has invalid phrase 'white rabbit' \(longer than 10 characters\)"):
             RandomGenerator({
                 'all': {
                     'type': 'phrases',
@@ -328,9 +384,7 @@ class TestCoolname(TestCase):
             })
 
     def test_max_length(self):
-        with self.assertRaisesRegex(InitializationError,
-                                   r"Config at key 'one' has invalid word 'tiger' "
-                                   r"\(longer than 4 characters\)"):
+        with pytest.raises(InitializationError, match=r"Config at key 'one' has invalid word 'tiger' \(longer than 4 characters\)"):
             RandomGenerator({
                 'all': {'type': 'nested', 'lists': ['one']},
                 'one': {'type': 'words', 'max_length': 4, 'words': ['cat', 'lion', 'tiger']}

@@ -7,12 +7,20 @@ import pytest
 
 from coolname import RandomGenerator, InitializationError, _default
 from coolname._impl import NestedList, CartesianList, Scalar, \
-    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists
+    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists, _split_phrase
 
 from .common import TestCase, patch
 
 
 class TestImplementation(TestCase):
+
+    def test_strip_phrase(self):
+        assert _split_phrase('') == tuple()
+        assert _split_phrase('  ') == tuple()
+        assert _split_phrase('\t') == tuple()
+        assert _split_phrase('lala haha') == ('lala', 'haha')
+        assert _split_phrase('   lala    haha   ') == ('lala', 'haha')
+        assert _split_phrase('\tlala\thaha\t') == ('lala', 'haha')
 
     def test_phrase_list(self):
         phrase_list = PhraseList([('black', 'cat'), ('white', 'dog')])
@@ -122,12 +130,14 @@ class TestImplementation(TestCase):
         scalar = Scalar('10')
         self.assertEqual(str(scalar), "Scalar(value='10')")
 
-    def test_str_regression(self):
-        with pytest.raises(TypeError, match=re.escape("Invalid item in WordList: expected str, got 'int'")):
-            NestedList([
-                CartesianList([[10, 11], [12, 13]]),               # type: ignore
-                CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),  # type: ignore
-            ])
+    def test_integers_no_error(self):
+        # This is wrong, but we deliberately don't do validation within AbstractNestedList subclasses.
+        # User must not instantiate them directly, they live in ``coolname._impl``
+        lst = NestedList([
+            CartesianList([[10, 11], [12, 13]]),               # type: ignore
+            CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),  # type: ignore
+        ])
+        assert isinstance(lst[0][0], int)
 
     def test_dump_list(self):
         cart_list = NestedList([
