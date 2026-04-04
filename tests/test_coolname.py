@@ -3,7 +3,6 @@ from itertools import cycle
 import random
 from re import escape as esc
 import sys
-import unittest
 import warnings
 
 import pytest
@@ -17,6 +16,40 @@ from .common import patch, TestCase, FakeRandom
 
 
 class TestCoolname(TestCase):
+
+    def test_random_default(self):
+        # ==================================================================================
+        # IMPORTANT: TWO SLUGS IN THIS TEST MUST BE UPDATED EVERY TIME YOU CHANGE WORD LISTS
+        # ==================================================================================
+
+        # 1. Re-seed default generator
+        random.seed(123)
+        self.assertEqual(random.random(), 0.052363598850944326)
+        self.assertEqual(coolname.generate_slug(), 'slim-bald-pronghorn-of-temperance')
+
+        # 2. Replace default generator
+        rand = random.Random()
+        rand.seed(456)
+        self.assertEqual(rand.random(), 0.7482025358782363)
+        coolname.replace_random(rand)
+        self.assertEqual(coolname.generate_slug(), 'enormous-elusive-mandrill-of-youth')
+
+        # 3. Custom generator with custom Random
+        config = {
+            'all': {
+                'type': 'cartesian',
+                'lists': ['digits', 'digits']
+            },
+            'digits': {
+                'type': 'words',
+                'words': list(str(x) for x in range(10))
+            }
+        }
+        generator = RandomGenerator(config)
+        generator.random.seed(12)
+        self.assertEqual(generator.generate_slug(), '6-0')
+        generator.random = FakeRandom(33)
+        self.assertEqual(generator.generate_slug(), '3-4')
 
     def test_slug(self):
         # Basic test, to check that it doesn't crash.
@@ -407,18 +440,17 @@ class TestCoolname(TestCase):
             if len(w) > 0:
                 assert len(w) == 1
                 assert str(w[0].message) == 'coolname.generate() may be slow because a significant fraction of combinations exceed max_slug_length=9'
-        self.assertEqual(set(generator.generate_slug() for i in range(0, 100)),
-                         set(['big-cat', 'big-tiger', 'small-cat']))
+        assert set(generator.generate_slug() for i in range(0, 100)) == {'big-cat', 'big-tiger', 'small-cat'}
 
     def test_max_slug_length_too_small(self):
-        badlist = [str(i) for i in range(10, 100)]
+        bad_list = [str(i) for i in range(10, 100)]
         with self.assertRaisesRegex(InitializationError,
                                     r'Invalid config: Impossible to generate '
                                     r'with max_slug_length=3'):
             RandomGenerator({
                 'all': {'type': 'cartesian', 'max_slug_length': 3, 'lists': ['one', 'two']},
-                'one': {'type': 'words', 'words': badlist},
-                'two': {'type': 'words', 'words': badlist},
+                'one': {'type': 'words', 'words': bad_list},
+                'two': {'type': 'words', 'words': bad_list},
             })
 
     @patch('warnings.warn')
@@ -497,49 +529,45 @@ class TestCoolname(TestCase):
         }
         generator = RandomGenerator(config)
         random.seed(0)
-        values = set(generator.generate_slug() for i in range(28))
-        self.assertEqual(values, set(['a-one', 'a-two', 'a-three-four', 'a-five-six']))
+        assert {generator.generate_slug() for i in range(28)} == {'a-one', 'a-two', 'a-three-four', 'a-five-six'}
 
-    # randrange returns different results in Python 2. We skip this test to avoid updating it every time.
-    def test_random_default(self):
-        # ==================================================================================
-        # IMPORTANT: TWO SLUGS IN THIS TEST MUST BE UPDATED EVERY TIME YOU CHANGE WORD LISTS
-        # ==================================================================================
+    def test_render(self):
+        generator = RandomGenerator({
+            'all': {'type': 'nested', 'lists': ['long', 'short']},
+            'long': {'type': 'cartesian', 'generator': True, 'lists': ['adj', 'noun', 'from', 'loc']},
+            'short': {'type': 'cartesian', 'generator': True, 'lists': ['adj', 'noun']},
+            'adj': {'type': 'words', 'words': ['white', 'black']},
+            'noun': {'type': 'words', 'words': ['dog', 'cat', 'bird']},
+            'from': {'type': 'const', 'value': 'from'},
+            'loc': {'type': 'phrases', 'phrases': ['big city', 'small town']}
+        })
+        expected_all =("RandomGenerator\n"
+                       "  NestedList(2, len=18)\n"
+                       "    CartesianList(4, len=12)\n"
+                       "      WordList(['white', 'black'], len=2)\n"
+                       "      WordList(['dog', 'cat', 'bird'], len=3)\n"
+                       "      Scalar(value='from')\n"
+                       "      PhraseList([('big', 'city'), ('small', 'town')], len=2)\n"
+                       "    CartesianList(2, len=6)\n"
+                       "      WordList(['white', 'black'], len=2)\n"
+                       "      WordList(['dog', 'cat', 'bird'], len=3)\n")
+        assert generator.render() == expected_all
+        expected = ("RandomGenerator\n"
+                    "   CartesianList(4, len=12)\n"
+                    "      WordList(['white', 'black'], len=2)\n"
+                    "      WordList(['dog', 'cat', ...], len=3)\n"
+                    "      Scalar(value='from')\n"
+                    "      PhraseList([('big', 'city'), ('small', 'town')], len=2)\n")
+        assert generator.render(pattern="long", indent='   ', max_items=2) == expected
+        assert generator.render(pattern="long", indent=3, max_items=2) == expected
+        expected_short = ("RandomGenerator\n"
+                          "  CartesianList(2, len=6)\n"
+                          "    WordList(['white', 'black'], len=2)\n"
+                          "    WordList(['dog', 'cat', 'bird'], len=3)\n")
+        assert generator.render(pattern='short') == expected_short
 
-        # 1. Re-seed default generator
-        random.seed(123)
-        self.assertEqual(random.random(), 0.052363598850944326)
-        self.assertEqual(coolname.generate_slug(), 'slim-bald-pronghorn-of-temperance')
-
-        # 2. Replace default generator
-        rand = random.Random()
-        rand.seed(456)
-        self.assertEqual(rand.random(), 0.7482025358782363)
-        coolname.replace_random(rand)
-        self.assertEqual(coolname.generate_slug(), 'enormous-elusive-mandrill-of-youth')
-
-        # 3. Custom generator with custom Random
-        config = {
-            'all': {
-                'type': 'cartesian',
-                'lists': ['digits', 'digits']
-            },
-            'digits': {
-                'type': 'words',
-                'words': list(str(x) for x in range(10))
-            }
-        }
-        generator = RandomGenerator(config)
-        generator.random.seed(12)
-        self.assertEqual(generator.generate_slug(), '6-0')
-        generator.random = FakeRandom(33)
-        self.assertEqual(generator.generate_slug(), '3-4')
 
     @patch.object(sys, 'argv', ['coolname', '3', '-s', '_', '-n', '10'])
     def test_command_line(self, *args):
         from coolname.__main__ import main
         main()  # just for the sake of coverage
-
-
-if __name__ == '__main__':
-    sys.exit(unittest.main())
