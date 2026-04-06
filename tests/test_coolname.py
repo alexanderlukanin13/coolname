@@ -558,13 +558,13 @@ class TestCoolname(TestCase):
                     "      WordList(['dog', 'cat', ...], len=3)\n"
                     "      Scalar(value='from')\n"
                     "      PhraseList([('big', 'city'), ('small', 'town')], len=2)\n")
-        assert generator.render(pattern="long", indent='   ', max_items=2) == expected
-        assert generator.render(pattern="long", indent=3, max_items=2) == expected
+        assert generator.render("long", indent='   ', max_items=2) == expected
+        assert generator.render("long", indent=3, max_items=2) == expected
         expected_short = ("RandomGenerator\n"
                           "  CartesianList(2, len=6)\n"
                           "    WordList(['white', 'black'], len=2)\n"
                           "    WordList(['dog', 'cat', 'bird'], len=3)\n")
-        assert generator.render(pattern='short') == expected_short
+        assert generator.render('short') == expected_short
 
 
     @patch.object(sys, 'argv', ['coolname', '3', '-s', '_', '-n', '10'])

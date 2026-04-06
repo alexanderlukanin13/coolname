@@ -151,8 +151,8 @@ class RandomGenerator:
         return lst.length
 
     def write(self,
-              stream: typing.TextIO, *,
-              pattern: str | int | None = None,
+              stream: typing.TextIO,
+              pattern: str | int | None = None, *,
               indent: str | int = 2,
               max_items: int = 4,
               ids: bool = False,
@@ -177,8 +177,8 @@ class RandomGenerator:
         self._lists[pattern].write(stream, indent=indent, base_indent=indent,
                                    max_items=max_items, ids=ids)  # noqa
 
-    def render(self, *,
-               pattern: str | int | None = None,
+    def render(self,
+               pattern: str | int | None = None, *,
                indent: str | int = 2,
                max_items: int = 4,
                ids: bool = False
@@ -189,7 +189,7 @@ class RandomGenerator:
         Text representation is the same as in write(). Arguments are also the same.
         """
         s = StringIO()
-        self.write(s, pattern=pattern, indent=indent, max_items=max_items, ids=ids)
+        self.write(s, pattern, indent=indent, max_items=max_items, ids=ids)
         return s.getvalue()
 
     def _check_not_hanging(self) -> None:
