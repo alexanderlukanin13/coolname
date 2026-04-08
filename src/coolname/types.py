@@ -20,7 +20,8 @@ else:
 # {"comment": "adjective-adjective-noun",
 #  "type": "cartesian",
 #  "lists": ["adj_far", "adj_near", "subj"]}
-CoolnameConfigListT = dict[str, str | list[str] | list[tuple[str, ...]] | int]
+# Note: bool parameters are also allowed because issubclass(bool, int) == True
+CoolnameConfigListT: TypeAlias = dict[str, str | int | list[str] | list[list[str]] | list[tuple[str, ...]]]
 
 # Whole configuration
 CoolnameConfigT = dict[str, CoolnameConfigListT]
