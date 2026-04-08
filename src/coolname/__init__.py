@@ -273,19 +273,27 @@ class RandomGenerator:
 def _create_default_generator() -> RandomGenerator:
     data_dir = os.getenv('COOLNAME_DATA_DIR')
     data_module = os.getenv('COOLNAME_DATA_MODULE')
+    delete_config = False
+    module = None
     if not data_dir and not data_module:
-        data_dir = op.join(op.dirname(op.abspath(__file__)), 'data')
-        data_module = 'coolname.data'  # used when imported from egg; consumes more memory
+        # Changed in 5.0.0: load from module by default, it's ~50 ms faster on my laptop
+        data_module = 'coolname.data'
+        delete_config = True
     if data_dir and op.isdir(data_dir):
         from coolname.loader import load_config
         config = load_config(data_dir)
     elif data_module:  # pragma: no cover (actually tested via subprocess - see test_coolname_env.py)
         import importlib
-        config = importlib.import_module(data_module).config
+        module = importlib.import_module(data_module)
+        config = module.config
     else:  # pragma: no cover
         raise ImportError('Configure valid COOLNAME_DATA_DIR and/or COOLNAME_DATA_MODULE')
     config['all']['__nocheck'] = True
-    return RandomGenerator(config)
+    try:
+        return RandomGenerator(config)
+    finally:
+        if delete_config and module:
+            del module.config  # For default config, frees ~130K
 
 
 # Default generator is a global object

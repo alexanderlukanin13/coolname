@@ -1,6 +1,7 @@
 from functools import partial
 from itertools import cycle
 import random
+from pathlib import Path
 from re import escape as esc
 import sys
 import warnings
@@ -571,3 +572,8 @@ class TestCoolname(TestCase):
     def test_command_line(self, *args):
         from coolname.__main__ import main
         main()  # just for the sake of coverage
+
+
+def test_load_default_from_data_dir(monkeypatch):
+    monkeypatch.setenv("COOLNAME_DATA_DIR", str(Path(coolname.__file__).parent / 'data'))
+    assert coolname._create_default_generator().generate_slug()
