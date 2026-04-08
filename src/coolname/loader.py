@@ -23,12 +23,10 @@ def load_config(path: str | Path) -> CoolnameConfigT:
     """
     Loads configuration from a path.
 
-    Path can be a json file, or a directory containing config.json
-    and zero or more *.txt files with word lists or phrase lists.
+    Path can be a json file, or a directory containing ``config.json``
+    and zero or more ``*.txt`` files with word lists or phrase lists.
 
-    Returns config dict.
-
-    Raises InitializationError when something is wrong.
+    Raises :py:class:`~coolname.exceptions.InitializationError` if something goes wrong.
     """
     path = os.path.abspath(path)
     if os.path.isdir(path):

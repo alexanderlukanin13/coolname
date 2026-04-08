@@ -29,8 +29,9 @@ class RandomGenerator:
 
     Create an instance of this class if you want to create custom
     configuration.
-    If default implementation is enough, just use `generate`,
-    `generate_slug` and other exported functions.
+    If default implementation is enough, just use
+    :py:func:`~coolname.generate`, :py:func:`~coolname.generate_slug`
+    and other exported functions.
     """
 
     # Structure that does the generation
@@ -106,6 +107,14 @@ class RandomGenerator:
 
     @property
     def random(self) -> types.RandomT | None:
+        """
+        :py:class:`~random.Random`-like random number generator (RNG)
+        to be used by this instance.
+
+        By default, the default RNG is used. You can also use something else,
+        as long as it supports :class:`~coolname.types.RandomSeedArgT`
+        protocol.
+        """
         return self._random
 
     @random.setter
@@ -120,6 +129,9 @@ class RandomGenerator:
     def generate(self, pattern: str | int | None = None) -> list[str]:
         """
         Generates and returns random name as a list of strings.
+
+        :param pattern: In the default generator, can be 2, 3, 4.
+            In a custom generator, can be any list with ``"generator": true``.
         """
         lst = self._lists[pattern]
         while True:
@@ -139,13 +151,22 @@ class RandomGenerator:
     def generate_slug(self, pattern: str | int | None = None) -> str:
         """
         Generates and returns random name as a slug.
+
+        :param pattern: In the default generator, can be 2, 3, 4.
+            In a custom generator, can be any list with ``"generator": true``.
         """
         return '-'.join(self.generate(pattern))
 
     def get_combinations_count(self, pattern: str | int | None = None) -> int:
         """
-        Returns total number of unique combinations
-        for the given pattern.
+        Returns the total theoretical number of unique combinations.
+
+        Actual number is a bit smaller, because some combinations
+        are rejected and never generated.
+        Examples: ``good-good-dog``, ``swift-swift``.
+
+        :param pattern: Return the number of combinations for the given
+            pattern only.
         """
         lst = self._lists[pattern]
         return lst.length
@@ -159,17 +180,20 @@ class RandomGenerator:
               ) -> None:
         """
         Writes the generator's tree-like structure into a text stream.
+        This is mostly for debugging purposes.
 
-        Text representation is the same as in render().
+        Text representation is the same as in :py:meth:`render`.
+        Arguments are also the same.
 
         :arg stream: Output stream to write into
-        :arg pattern: Same as in ``generate``
-        :arg indent: Single indent: any number of spaces, a tab,
-            or anything else really. If integer, number of spaces.
+        :arg pattern: Optional - meaning the same as in :meth:`generate`
+        :arg indent: Single indentation: any number of spaces, a tab,
+            or anything you want. If :py:class:`int`, a number of spaces.
         :arg max_items: Maximum number of words or phrases to display.
             If there are more, the remaining items are replaced with ellipsis.
-        :arg ids: If True, display Python ``id()`` for each object.
-            Useful to check which lists are reused in more than one place in the tree.
+        :arg ids: If True, display Python :py:func:`id` for each object.
+            Could be useful to check which word/phrase lists are reused
+            in more than one place in the tree.
         """
         if isinstance(indent, int):
             indent = ' ' * indent
@@ -184,9 +208,11 @@ class RandomGenerator:
                ids: bool = False
                ) -> str:
         """
-        Returns the generator's tree-like structure as a multiline string.
+        Returns the generator's tree-like structure as text.
+        This is mostly for debugging purposes.
 
-        Text representation is the same as in write(). Arguments are also the same.
+        Text representation is the same as in :py:meth:`write`.
+        Arguments are also the same.
         """
         s = StringIO()
         self.write(s, pattern, indent=indent, max_items=max_items, ids=ids)
@@ -270,5 +296,9 @@ get_combinations_count = _default.get_combinations_count
 
 
 def replace_random(rand: types.RandomT | None = None) -> None:
-    """Replaces random number generator for the default RandomGenerator instance."""
+    """
+    Replaces random number generator (RNG) for the default
+    :class:`~coolname.RandomGenerator` instance.
+    See :attr:`~coolname.RandomGenerator.random` property.
+    """
     _default.random = rand

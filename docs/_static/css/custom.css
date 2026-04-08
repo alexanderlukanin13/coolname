@@ -1,3 +1,6 @@
 section p {
     text-align: justify;
 }
+.sphinx_collapse__label {
+    font-weight: bold;
+}

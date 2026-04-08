@@ -1,20 +1,16 @@
-import typing
-
-__all__ = [
-    'HashT', 'CoolnameConfigListT', 'CoolnameConfigT',
-    'ListLike', 'CoolnameConfigT', 'CoolnameConfigListT',
-    'RandRangeT', 'RandomT'
-]
-
 from abc import ABC, abstractmethod
+import typing
+from typing import TypeAlias
+
+__all__ = ['CoolnameConfigT', 'RandomT', 'RandomSeedArgT']
 
 # For new Python versions with (possible) OpenSSL FIPS support,
 # we should pass usedforsecurity=False argument to md5().
 if typing.TYPE_CHECKING:
     import hashlib
-    HashT = hashlib._Hash
+    HashT: TypeAlias = hashlib._Hash
 else:
-    HashT = typing.Any
+    HashT: TypeAlias = typing.Any
 
 # Top-level values of config dict, for example:
 # {"comment": "adjective-adjective-noun",
@@ -23,7 +19,8 @@ else:
 # Note: bool parameters are also allowed because issubclass(bool, int) == True
 CoolnameConfigListT: TypeAlias = dict[str, str | int | list[str] | list[list[str]] | list[tuple[str, ...]]]
 
-# Whole configuration
+#: Whole configuration as a dictionary that is passed
+#: to :py:class:`~coolname.RandomGenerator` constructor.
 CoolnameConfigT = dict[str, CoolnameConfigListT]
 
 # random.randrange type
@@ -36,12 +33,27 @@ class RandRangeT(typing.Protocol):
                  /) -> int:
         ...
 
-RandomSeedArgT = None | int | float | str | bytes | bytearray
+#: Type alias used by :meth:`~coolname.types.RandomT.seed`.
+RandomSeedArgT: TypeAlias = None | int | float | str | bytes | bytearray
 
 class RandomT(typing.Protocol):
-    """Protocol for random module. We only require seed() and randrange()."""
+    """
+    Protocol for random module, used in :class:`~coolname.RandomGenerator`
+    constructor and in :attr:`RandomGenerator.random` property.
+
+    Similar to :py:class:`random.Random`, but only requires two methods:
+    :py:meth:`~random.Random.seed` and :py:func:`~random.randrange`.
+
+    You may need this in your code if you are using a Random object
+    *and* it's not a standard :py:class:`random.Random` instance.
+    """
 
     def seed(self, a: RandomSeedArgT = None, version: int = 2) -> None:
+        """
+        Re-seed the random number generator.
+
+        See documentation for :py:meth:`~random.Random.seed`.
+        """
         ...
 
     def randrange(self,
@@ -49,6 +61,11 @@ class RandomT(typing.Protocol):
                   stop: int | None = None,
                   step: int = 1,
                   /) -> int:  # position-only arguments as per docs
+        """
+        Return a randomly selected element from ``range(start, stop, step)``.
+
+        See documentation for :py:func:`~random.randrange`.
+        """
         ...
 
 
