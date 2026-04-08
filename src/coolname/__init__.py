@@ -182,6 +182,9 @@ class RandomGenerator:
         Text representation is the same as in :py:meth:`render`.
         Arguments are also the same.
 
+        **WARNING:** text representation format itself is not part of the API,
+        and may be changed without notice in future versions.
+
         :arg stream: Output stream to write into
         :arg pattern: Optional - meaning the same as in :meth:`generate`
         :arg indent: Single indentation: any number of spaces, a tab,
@@ -210,6 +213,9 @@ class RandomGenerator:
 
         Text representation is the same as in :py:meth:`write`.
         Arguments are also the same.
+
+        **WARNING:** text representation format itself is not part of the API,
+        and may be changed without notice in future versions.
         """
         s = StringIO()
         self.write(s, pattern, indent=indent, max_items=max_items, ids=ids)
