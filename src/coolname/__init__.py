@@ -28,10 +28,8 @@ class RandomGenerator:
     This class provides random name generation interface.
 
     Create an instance of this class if you want to create custom
-    configuration.
-    If default implementation is enough, just use
-    :py:func:`~coolname.generate`, :py:func:`~coolname.generate_slug`
-    and other exported functions.
+    configuration. Config dictionary is described by type alias
+    :py:class:`coolname.types.CoolnameConfigT`.
     """
 
     # Structure that does the generation
@@ -112,8 +110,7 @@ class RandomGenerator:
         to be used by this instance.
 
         By default, the default RNG is used. You can also use something else,
-        as long as it supports :class:`~coolname.types.RandomSeedArgT`
-        protocol.
+        as long as it supports :class:`~coolname.types.RandomT` protocol.
         """
         return self._random
 
