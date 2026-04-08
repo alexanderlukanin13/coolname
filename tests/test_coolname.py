@@ -546,7 +546,7 @@ class TestCoolname(TestCase):
                        "    CartesianList(4, len=12)\n"
                        "      WordList(['white', 'black'], len=2)\n"
                        "      WordList(['dog', 'cat', 'bird'], len=3)\n"
-                       "      Scalar(value='from')\n"
+                       "      Constant(value='from')\n"
                        "      PhraseList([('big', 'city'), ('small', 'town')], len=2)\n"
                        "    CartesianList(2, len=6)\n"
                        "      WordList(['white', 'black'], len=2)\n"
@@ -556,7 +556,7 @@ class TestCoolname(TestCase):
                     "   CartesianList(4, len=12)\n"
                     "      WordList(['white', 'black'], len=2)\n"
                     "      WordList(['dog', 'cat', ...], len=3)\n"
-                    "      Scalar(value='from')\n"
+                    "      Constant(value='from')\n"
                     "      PhraseList([('big', 'city'), ('small', 'town')], len=2)\n")
         assert generator.render("long", indent='   ', max_items=2) == expected
         assert generator.render("long", indent=3, max_items=2) == expected

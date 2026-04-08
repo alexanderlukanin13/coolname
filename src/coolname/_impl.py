@@ -260,7 +260,7 @@ class CartesianList(AbstractNestedList):
         return result
 
 
-class Scalar(AbstractNestedList):
+class Constant(AbstractNestedList):
 
     length: int
     value: str
@@ -456,7 +456,7 @@ def create_lists(
         elif list_type == _CONF.TYPE.CONST:
             _ = list_config[_CONF.FIELD.VALUE]
             assert isinstance(_, str)
-            results[current] = Scalar(_)
+            results[current] = Constant(_)
         # Unknown type
         else:
             raise InitializationError(f"Unknown list type: {list_type!r}")

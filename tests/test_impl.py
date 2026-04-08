@@ -6,7 +6,7 @@ import unittest
 import pytest
 
 from coolname import RandomGenerator, InitializationError, _default
-from coolname._impl import NestedList, CartesianList, Scalar, \
+from coolname._impl import NestedList, CartesianList, Constant, \
     WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists, _split_phrase
 
 from .common import TestCase, patch
@@ -116,8 +116,8 @@ class TestImplementation(TestCase):
         assert all_list._lists[0] == sorted(tuples)
         assert 3 <= len(generator.generate()) <= 4
 
-    def test_scalar(self):
-        self.assertTrue(Scalar(10).random(), 10)
+    def test_constant(self):
+        self.assertTrue(Constant('10').random(), '10')
 
     def test_str(self):
         nested_list = NestedList([
@@ -127,8 +127,8 @@ class TestImplementation(TestCase):
         self.assertEqual(str(nested_list), 'NestedList(2, len=28)')
         cart_list = CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']])
         self.assertEqual(str(cart_list), 'CartesianList(3, len=24)')
-        scalar = Scalar('10')
-        self.assertEqual(str(scalar), "Scalar(value='10')")
+        constant = Constant('10')
+        self.assertEqual(str(constant), "Constant(value='10')")
 
     def test_integers_no_error(self):
         # This is wrong, but we deliberately don't do validation within AbstractNestedList subclasses.
