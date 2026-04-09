@@ -29,7 +29,7 @@ class RandomGenerator:
 
     Create an instance of this class if you want to create custom
     configuration. Config dictionary is described by type alias
-    :py:class:`coolname.types.CoolnameConfigT`.
+    :py:class:`~coolname.types.CoolnameConfigT`.
     """
 
     # Structure that does the generation

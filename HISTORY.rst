@@ -3,6 +3,72 @@
 Release history
 ===============
 
+5.0.0 (2026-04-09)
+------------------
+
+* Complete typing support, tested with mypy ``strict = True``.
+
+* Default parameter value changed: ``ensure_unique=True``. Custom generators can forget about it
+  and still generate sequences without repeating words. Consider also using
+
+* Stricter config validation for custom generators, with more informative error messages.
+
+* Custom generator can be rendered into text representation via
+  :py:meth:`~coolname.RandomGenerator.render` and :py:meth:`~coolname.RandomGenerator.write`.
+  This can help in debugging and logging.
+
+* :py:func:`~coolname.loader.load_config` is documented as a part of public API.
+
+* Type :py:class:`~coolname.types.CoolnameConfigT` formally describes config dict.
+
+* Added a few more words.
+
+This major release has significant internal changes, but it is compatible with 4.x in any normal usage
+as described in documentation, and you can upgrade from 4.x with minimal unit test coverage.
+
+There are internal changes that *technically* can break user code in undocumented scenarios.
+Even if it breaks, most likely, it will take a minute to fix.
+
+.. collapse:: Boring technical details
+
+    * ``RandomGenerator`` and global methods now live in the top-level ``coolname`` namespace.
+      It won't affect your code if you've been importing directly from ``coolname`` as per documentation.
+
+      Basically, instead of this:
+
+      .. code-block:: python
+
+        >>> from coolname import generate_slug, RandomGenerator
+        >>> generate_slug
+        <bound method RandomGenerator.generate_slug of <coolname.impl.RandomGenerator object at 0x7a7cb248d6a0>>
+        >>> RandomGenerator
+        <class 'coolname.impl.RandomGenerator'>
+
+      You will see this (notice no ``impl``):
+
+      .. code-block:: python
+
+        >>> generate_slug
+        <bound method RandomGenerator.generate_slug of <coolname.RandomGenerator object at 0x75038bacde80>>
+        >>> RandomGenerator
+        <class 'coolname.RandomGenerator'>
+
+    * Using arbitrary types (such as int) is word/phrase lists is now *strictly forbidden*,
+      not just "undocumented and fails in most circumstances".
+
+      For example, the following invalid configuration always raises an exception:
+
+      .. code-block:: python
+
+        {
+          "all": {
+            "type": "phrases",
+            "phrases": [[1,2], [3,4]]}  # don't do this
+        }
+
+    * ``RandomGenerator`` does not accept py:class:`collections.abc.Mapping` as config anymore,
+      only plain ``dict`` as described by type ``coolname.types.CoolnameConfigT``.
+
 4.1.0 (2026-03-17)
 ------------------
 

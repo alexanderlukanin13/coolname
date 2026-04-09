@@ -21,7 +21,8 @@ __all__ = ['load_config']
 
 def load_config(path: str | Path) -> CoolnameConfigT:
     """
-    Loads configuration from a path.
+    Loads configuration from a path,
+    returns :py:class:`~coolname.types.CoolnameConfigT`.
 
     Path can be a json file, or a directory containing ``config.json``
     and zero or more ``*.txt`` files with word lists or phrase lists.
