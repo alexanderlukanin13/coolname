@@ -21,6 +21,8 @@ Custom generators
 .. autoclass:: InitializationError
 .. autoclass:: ConfigurationError()
 
+.. autofunction:: coolname.loader.load_config
+
 Types and Protocols
 ===================
 

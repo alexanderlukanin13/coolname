@@ -76,7 +76,7 @@ Features
     .. code-block:: python
 
         >>> from coolname import get_combinations_count
-        >>> get_combinations_count(4)
+        >>> get_combinations_count()
         83930205085
 
 * Hand-picked vocabulary. ``sexy`` and ``demonic`` are about the most "offensive" words here -
