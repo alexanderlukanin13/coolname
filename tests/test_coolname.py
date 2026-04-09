@@ -578,3 +578,17 @@ class TestCoolname(TestCase):
 def test_load_default_from_data_dir(monkeypatch):
     monkeypatch.setenv("COOLNAME_DATA_DIR", str(Path(coolname.__file__).parent / 'data'))
     assert coolname._create_default_generator().generate_slug()
+
+
+def test_phrase_separator():
+    generator = RandomGenerator({
+        'all': {
+            'type': 'phrases',
+            'phrases': ['a/b', ' c / d '],
+            'separator': '/'
+        }
+    })
+    random.seed(0)
+    assert generator.generate_slug() == 'c-d'
+    random.seed(1)
+    assert generator.generate_slug() == 'a-b'

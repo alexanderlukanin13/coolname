@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import io
-import re
-import unittest
+from re import escape as esc
 
 import pytest
 
 from coolname import RandomGenerator, InitializationError, _default
 from coolname._impl import NestedList, CartesianList, Constant, \
-    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists, _split_phrase
+    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists, _split_phrase, PhraseSplitter, \
+    PhraseSplitterError
 
 from .common import TestCase, patch
 
@@ -270,6 +270,44 @@ class TestImplementation(TestCase):
         assert results == {'twenty-one', 'twenty-two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
 
 
-if __name__ == '__main__':
-    import sys
-    sys.exit(unittest.main())
+def test_phrase_splitter():
+    split = PhraseSplitter()
+    assert split('') == []
+    assert split('  ') == []
+    assert split('abc') == ['abc']
+    assert split('  abc \t\r\n ') == ['abc']
+    assert split('  abc  def  ') == ['abc', 'def']
+
+    with pytest.raises(PhraseSplitterError, match=esc(r"Invalid regular expression in separator: (\s+")):
+        PhraseSplitter(separator=r're:(\s+')
+
+    split = PhraseSplitter(separator=r're:\s*\|\s*')
+    assert split('') == []
+    assert split(' ') == []
+    assert split('  abc|def| ghi  |  jkl ') == ['abc', 'def', 'ghi', 'jkl']
+
+    split = PhraseSplitter(separator=r're:\s*\|\s*', strip_whitespace=False)
+    assert split('') == []
+    assert split(' ') == [' ']
+    assert split('  abc|def| ghi  |  jkl ') == ['  abc', 'def', 'ghi', 'jkl ']
+
+    split = PhraseSplitter(strip_whitespace=False)
+    assert split('') == []
+    assert split('abc') == ['abc']
+    assert split('  abc \t\r\n ') == ['', 'abc', '']
+
+    # This doesn't make much sense
+    split = PhraseSplitter(separator=' ', strip_whitespace=False)
+    assert split('') == []
+    assert split(' ') == ['', '']
+    assert split('abc') == ['abc']
+    assert split('  abc \t\r\n') == ['', '', 'abc', '\t\r\n']
+    assert split('  abc \t\r\n ') == ['', '', 'abc', '\t\r\n', '']
+    assert split('  abc  def  ') == ['', '', 'abc', '', 'def', '', '']
+
+    split = PhraseSplitter(separator='/', strip_whitespace=False)
+    assert split('') == []
+    assert split('abc') == ['abc']
+    assert split(' abc/ def ') == [' abc', ' def ']
+    assert split('abc/ \t\r\n') == ['abc', ' \t\r\n']
+    assert split('//abc/def') == ['', '', 'abc', 'def']

@@ -1,6 +1,10 @@
 section p {
     text-align: justify;
 }
+table.docutils  p {
+    text-align: left;
+    font-size: 0.8rem;
+}
 .sphinx_collapse__label {
     font-weight: bold;
 }

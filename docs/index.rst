@@ -11,6 +11,7 @@
 
    Introduction <self>
    customization
+   customization-advanced
    environment-variables
    randomization
    classes-and-functions

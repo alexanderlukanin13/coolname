@@ -287,6 +287,39 @@ def _split_phrase(x: str) -> tuple[str, ...]:
         return tuple()
     return tuple(re.split(r'\s+', x))
 
+class PhraseSplitterError(ValueError):
+    pass
+
+
+class PhraseSplitter:
+    """Splits phrase (as a string) into list."""
+
+    def __init__(self, strip_whitespace: bool = True, separator: str = r're:\s+'):
+        if separator.startswith('re:'):
+            separator = separator[3:]
+            try:
+                self._split = re.compile(separator).split
+            except re.PatternError:
+                raise PhraseSplitterError(f'Invalid regular expression in separator: {separator}')
+        else:
+            def split(s: str) -> list[str]:
+                return s.split(separator)
+            self._split = split
+        self._strip_whitespace = strip_whitespace
+
+    def __call__(self, s: str) -> list[str]:
+        # 1. Strip the whole phrase if strip_whitespace=True
+        # 2. Empty string -> empty list
+        # 3. Split by separator, and strip every word if strip_whitespace=True
+        if self._strip_whitespace:
+            s = s.strip()
+        if not s:
+            return []
+        if self._strip_whitespace:
+            return [x.strip() for x in self._split(s)]
+        else:
+            return self._split(s)
+
 
 def validate_config(config: CoolnameConfigT) -> None:
     """
@@ -294,6 +327,7 @@ def validate_config(config: CoolnameConfigT) -> None:
     It would be nice to use cerberus, but we don't
     want to introduce dependencies just for that.
     """
+    _space = re.compile(r'\s+').search
     try:
         referenced_sublists: set[str] = set()
         for key, listdef in list(config.items()):
@@ -336,14 +370,24 @@ def validate_config(config: CoolnameConfigT) -> None:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
+                allow_spaces = listdef.get(_CONF.FIELD.ALLOW_WHITESPACE, False)
+                strip_spaces = listdef.get(_CONF.FIELD.STRIP_WHITESPACE, True)
                 for word in words:
                     if not isinstance(word, str):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
                                          f'expected all words to be str, got {word!r}')
-                    word = word.strip()
                     if not word:
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
-                                         f'empty or whitespace-only word not allowed')
+                                         f'empty word not allowed')
+                    if strip_spaces:
+                        word = word.strip()
+                        if not word:
+                            raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                             f'whitespace-only word not allowed: {word!r}')
+                    if not allow_spaces and _space(word) is not None:
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                         f'word {word!r} contains whitespace while '
+                                         f'strip_spaces={strip_spaces!r}, allow_spaces={allow_spaces!r}')
                     if max_length is not None and len(word) > max_length:
                         raise ValueError(f'Config at key {key!r} has invalid word {word!r} '
                                          f'(longer than {max_length} characters)')
