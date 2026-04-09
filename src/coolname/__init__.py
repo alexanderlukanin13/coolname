@@ -76,7 +76,7 @@ class RandomGenerator:
                 raise ValueError(f'expected boolean, got {ensure_unique!r}')
             self._ensure_unique = ensure_unique
         except KeyError:
-            self._ensure_unique = False
+            self._ensure_unique = True
         except ValueError as ex:
             raise ConfigurationError(f'Invalid {_CONF.FIELD.ENSURE_UNIQUE} value: {ex}')
         # Should we avoid duplicating prefixes?

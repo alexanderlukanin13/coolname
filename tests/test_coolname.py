@@ -182,6 +182,7 @@ class TestCoolname(TestCase):
             'all': {
                 'type': 'cartesian',
                 'lists': ['adjective', 'of', 'noun'],
+                'ensure_unique': False
             },
             'adjective': {
                 'type': 'words',
@@ -224,7 +225,7 @@ class TestCoolname(TestCase):
 
     def test_ensure_unique_error(self):
         config = {
-            'all': {'type': 'cartesian', 'lists': ['one', 'one']},
+            'all': {'type': 'cartesian', 'lists': ['one', 'one'], 'ensure_unique': False},
             'one': {'type': 'words', 'words': ['one', 'one']}
         }
         RandomGenerator(config)  # this is fine
@@ -234,7 +235,7 @@ class TestCoolname(TestCase):
 
     def test_ensure_unique_error_on_list(self):
         config = {
-            'all': {'type': 'cartesian', 'lists': ['one', 'two']},
+            'all': {'type': 'cartesian', 'ensure_unique': False, 'lists': ['one', 'two']},
             'bad': {'type': 'cartesian', 'generator': True, 'lists': ['one', 'one']},
             'one': {'type': 'words', 'words': ['one', 'one']},
             'two': {'type': 'words', 'words': ['two', 'two']}
