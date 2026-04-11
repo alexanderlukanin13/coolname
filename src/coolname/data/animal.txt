@@ -538,7 +538,7 @@ manatee
 shrew
 
 # Mammalia -> Tubulidentata
-aardwark
+aardvark
 
 # Mollusca -> Bivalvia
 clam
