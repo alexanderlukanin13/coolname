@@ -5,8 +5,7 @@ def test_import() -> None:
         generate, generate_slug,
         get_combinations_count, replace_random,
         RandomGenerator,
-        InitializationError, ConfigurationError
+        InitializationError
     )
     from coolname.exceptions import InitializationError, ConfigurationError  # this is also fine
     from coolname.loader import load_config  # rarely needed
-    from coolname.types import CoolnameConfigT, RandomT, RandomSeedArgT  # only these types are exported
