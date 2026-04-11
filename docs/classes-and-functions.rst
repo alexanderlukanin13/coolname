@@ -40,6 +40,7 @@ In advanced custom setup, you can use following protocols and types for typing:
 .. py:currentmodule:: coolname.types
 
 .. autodata:: CoolnameConfigT
+.. autodata:: CoolnameConfigListT
 .. autoclass:: RandomT
     :members:
 .. autodata:: RandomSeedArgT

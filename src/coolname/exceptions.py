@@ -1,8 +1,3 @@
-"""
-Do not import anything directly from this module.
-"""
-
-
 class InitializationError(Exception):
     """
     Base exception class for all coolname initialization errors

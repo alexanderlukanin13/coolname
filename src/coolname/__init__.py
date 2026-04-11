@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import os.path as op
 import random
@@ -15,11 +16,13 @@ from ._config import _CONF
 from .exceptions import InitializationError, ConfigurationError
 from . import _impl
 from . import types
+from .types import CoolnameConfigT, CoolnameConfigListT, RandomT, RandomSeedArgT
 
 __all__ = [
     'generate', 'generate_slug', 'get_combinations_count', 'replace_random',
     'RandomGenerator',
-    'InitializationError', 'ConfigurationError'
+    'InitializationError', 'ConfigurationError',
+    'CoolnameConfigT', 'CoolnameConfigListT', 'RandomT', 'RandomSeedArgT'
 ]
 
 
@@ -35,14 +38,14 @@ class RandomGenerator:
     # Structure that does the generation
     _lists: dict[str | int | None, types.ListLike]
     # Custom random (if any)
-    _random: types.RandomT | None
+    _random: RandomT | None
     _randrange: types.RandRangeT
     # ENSURE_UNIQUE_PREFIX - don't output combinations with two words having N same first letters
     _check_prefix: int | None
     # MAX_SLUG_LENGTH - don't output slugs with more than N characters, including hyphens
     _max_slug_length: int | None
 
-    def __init__(self, config: types.CoolnameConfigT, rand: types.RandomT | None = None):
+    def __init__(self, config: CoolnameConfigT, rand: RandomT | None = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
         config = dict(config)
         _impl.validate_config(config)
@@ -104,7 +107,7 @@ class RandomGenerator:
         assert self.generate_slug()
 
     @property
-    def random(self) -> types.RandomT | None:
+    def random(self) -> RandomT | None:
         """
         :py:class:`~random.Random`-like random number generator (RNG)
         to be used by this instance.
@@ -298,7 +301,7 @@ generate_slug = _default.generate_slug
 get_combinations_count = _default.get_combinations_count
 
 
-def replace_random(rand: types.RandomT | None = None) -> None:
+def replace_random(rand: RandomT | None = None) -> None:
     """
     Replaces random number generator (RNG) for the default
     :class:`~coolname.RandomGenerator` instance.

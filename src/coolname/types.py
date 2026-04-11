@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 import typing
 from typing import TypeAlias
@@ -12,15 +13,20 @@ if typing.TYPE_CHECKING:
 else:
     HashT: TypeAlias = typing.Any
 
-# Top-level values of config dict, for example:
-# {"comment": "adjective-adjective-noun",
-#  "type": "cartesian",
-#  "lists": ["adj_far", "adj_near", "subj"]}
+#: Top-level values of config dict - that is, list configurations. For example:
+#:
+#: .. code-block:: python
+#:
+#:     {
+#:         "comment": "adjective-adjective-noun",
+#:         "type": "cartesian",
+#:         "lists": ["adj_far", "adj_near", "subj"]
+#:     }
 CoolnameConfigListT: TypeAlias = dict[str, str | int | bool | list[str] | list[list[str]] | list[tuple[str, ...]]]
 
 #: Whole configuration as a dictionary that is passed
 #: to :py:class:`~coolname.RandomGenerator` constructor.
-CoolnameConfigT = dict[str, CoolnameConfigListT]
+CoolnameConfigT: TypeAlias = dict[str, CoolnameConfigListT]
 
 # random.randrange type
 class RandRangeT(typing.Protocol):

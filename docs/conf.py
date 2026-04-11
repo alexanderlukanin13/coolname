@@ -44,8 +44,9 @@ extensions = [
 intersphinx_mapping = {'python': ('https://docs.python.org/3/', None)}
 
 autodoc_type_aliases = {
-    "CoolnameConfigT": "coolname.types.CoolnameConfigT",
-    "RandomSeedArgT": "coolname.types.RandomSeedArgT",
+    "CoolnameConfigT": "CoolnameConfigT",
+    "CoolnameConfigListT": "CoolnameConfigListT",
+    "RandomSeedArgT": "RandomSeedArgT",
 }
 
 # Add any paths that contain templates here, relative to this directory.
