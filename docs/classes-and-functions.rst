@@ -21,7 +21,16 @@ Custom generators
 .. autoclass:: InitializationError
 .. autoclass:: ConfigurationError()
 
+Configuration
+=============
+
+These functions are primarily intended for development.
+
 .. autofunction:: coolname.loader.load_config
+
+.. autofunction:: coolname.loader.filter_config
+
+.. autofunction:: coolname.loader.save_config_as_module
 
 Types and Protocols
 ===================

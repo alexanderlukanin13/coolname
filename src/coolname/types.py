@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import typing
 from typing import TypeAlias
 
-__all__ = ['CoolnameConfigT', 'RandomT', 'RandomSeedArgT']
+__all__ = ['CoolnameConfigT', 'CoolnameConfigListT', 'RandomT', 'RandomSeedArgT']
 
 # For new Python versions with (possible) OpenSSL FIPS support,
 # we should pass usedforsecurity=False argument to md5().
@@ -16,8 +16,7 @@ else:
 # {"comment": "adjective-adjective-noun",
 #  "type": "cartesian",
 #  "lists": ["adj_far", "adj_near", "subj"]}
-# Note: bool parameters are also allowed because issubclass(bool, int) == True
-CoolnameConfigListT: TypeAlias = dict[str, str | int | list[str] | list[list[str]] | list[tuple[str, ...]]]
+CoolnameConfigListT: TypeAlias = dict[str, str | int | bool | list[str] | list[list[str]] | list[tuple[str, ...]]]
 
 #: Whole configuration as a dictionary that is passed
 #: to :py:class:`~coolname.RandomGenerator` constructor.

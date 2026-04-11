@@ -1,16 +1,21 @@
+import copy
+import importlib
+import sys
 from functools import partial
 from io import StringIO
 import os
 import os.path as op
 import tempfile
 
-import unittest
+from pathlib import Path
+from typing import Callable
+from unittest.mock import patch
 
 from coolname import InitializationError
-from coolname.loader import _load_wordlist, _load_data
+from coolname.loader import _load_wordlist, _load_data, load_config, filter_config, save_config_as_module
+from coolname.types import CoolnameConfigT
 
-from .common import patch, TestCase
-
+from .common import TestCase, DATA_DIR, COOLNAME_DATA_DIR
 
 NO_DATA_DIR = op.normpath(op.join('.', 'no_such_dir', 'data'))
 
@@ -82,12 +87,12 @@ class LoaderTest(TestCase):
         self.assertEqual(wordlist, {
             'type': 'phrases',
             'phrases': [
-                ('one', ),
-                ('two', ),
-                ('three', ),
-                ('four', 'five'),
-                ('six',),
-                ('seven', 'eight')
+                ['one'],
+                ['two'],
+                ['three'],
+                ['four', 'five'],
+                ['six'],
+                ['seven', 'eight']
             ]
         })
 
@@ -224,6 +229,60 @@ class LoaderTest(TestCase):
             _load_data(NO_DATA_DIR)
 
 
-if __name__ == '__main__':
-    import sys
-    sys.exit(unittest.main())
+def test_load_config_word_filter():
+
+    def load_and_filter(path: str | Path, word_filter_: Callable[[str], bool]) -> CoolnameConfigT:
+        config = load_config(path)
+        filter_config(config, word_filter_)
+        return config
+
+    def word_filter(s: str) -> bool:
+        return 'a' not in s
+
+    assert load_and_filter(DATA_DIR / 'load_config' / 'word_filter', word_filter) == {
+        "all": {
+            "type": "nested",
+            "lists": ["words1", "words2", "phrases1", "phrases2", "phrases3"]
+        },
+        "words1": {
+            "type": "words",
+            "words": ["bull", "dog"]
+        },
+        "words2": {
+            "type": "words",
+            "words": ["crow"]
+        },
+        "phrases1": {
+            "type": "phrases",
+            "phrases": ["little mouse"]
+        },
+        "phrases2": {
+            "type": "phrases",
+            "phrases": [["iron", "moose"]]
+        },
+        "phrases3": {
+            "type": "phrases",
+            "phrases": [["mini", "fish"]]
+        }
+    }
+
+def test_save_config(tmp_path):
+    # Save default config, load it again and compare to the original
+    config = load_config(COOLNAME_DATA_DIR)
+    filename = tmp_path / 'saved_config.py'
+    save_config_as_module(config, filename)
+    sys.path.append(str(tmp_path))
+    module = importlib.import_module('saved_config')
+    assert module.config
+    assert module.config['all']
+    assert module.config == config
+
+    # Filter out a word and try again
+    orig_config = copy.deepcopy(config)
+    filter_config(config, lambda x: x != 'aardvark')
+    filename = tmp_path / 'saved_config_filtered.py'
+    save_config_as_module(config, filename)
+    module = importlib.import_module('saved_config_filtered')
+    assert module.config
+    assert module.config['all']
+    assert module.config != orig_config

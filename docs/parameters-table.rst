@@ -26,6 +26,13 @@ It's to silently discard unwanted combinations.
       - Default value
       - Description
 
+    * - ``allow_whitespace``
+      - Words list, Phrases list, ``*.txt``
+      - ✅
+      - ``bool``
+      - ``False``
+      - Allow words or words within a phrase to contain whitespace.
+
     * - ``generator``
       - Any top-level list
       - ✅
@@ -49,7 +56,7 @@ It's to silently discard unwanted combinations.
         e.g. ``"great-fox-of-greatness"``.
 
     * - ``max_length``
-      - Words or Phrases list, ``*.txt``
+      - Words list, Phrases list, ``*.txt``
       - ✅
       - ``int | None``
       - ``None``
@@ -68,5 +75,19 @@ It's to silently discard unwanted combinations.
       - ``int | None``
       - ``None``
       - Exact number of words in every phrase in this list.
+
+    * - ``separator``
+      - Phrases list, ``*.txt``
+      - ✅
+      - ``str``
+      - ``r're:\s+'``
+      - Separator used to split phrases defined as plain strings (not as lists/tuples). Use ``'re:'`` prefix for regular expression.
+
+    * - ``strip_whitespace``
+      - Words list, Phrases list, ``*.txt``
+      - ✅
+      - ``bool``
+      - ``True``
+      - Strip leading and trailing whitespace from phrases and words before further processing.
 
 † Special cases where default is ``generator=True``: main ``"all"`` list and lists with integer names (such as ``"4"``).

@@ -1,0 +1,18 @@
+{
+  "all": {
+    "type": "nested",
+    "lists": ["words1", "words2", "phrases1", "phrases2", "phrases3"]
+  },
+  "words1": {
+    "type": "words",
+    "words": ["ant", "bull", "cat", "dog", "armadillo", "buffalo"]
+  },
+  "phrases1": {
+    "type": "phrases",
+    "phrases": ["funny hare", "brave lion", "little mouse", "wise ape"]
+  },
+  "phrases2": {
+    "type": "phrases",
+    "phrases": [["brass", "wolf"], ["iron", "moose"], ["stone", "badger"]]
+  }
+}

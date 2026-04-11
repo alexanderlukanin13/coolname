@@ -1,14 +1,15 @@
 """
 Do not import anything directly from this module.
 """
+import re
+from copy import deepcopy
 from functools import partial
 import hashlib
 import itertools
-import re
 import typing
 from typing import Callable, cast, ClassVar, Iterable
 
-from ._config import _CONF
+from ._config import _CONF, PhraseSplitter
 from .exceptions import ConfigurationError, InitializationError
 from .types import HashT, CoolnameConfigT, ListLike
 
@@ -128,9 +129,9 @@ class PhraseList(_BasicList):
 
     MULTIWORD: ClassVar[bool] = True
 
-    def __init__(self, lst: list[str | tuple[str, ...] | list[str]]):
+    def __init__(self, lst: list[tuple[str, ...] | list[str]]):
         # Accept mixed input, ensure that we store only tuple[str, ...]
-        _BasicList.__init__(self, [_split_phrase(x) if isinstance(x, str) else tuple(x) for x in lst])
+        _BasicList.__init__(self, [tuple(x) for x in lst])
 
 
 class WordAsPhraseWrapper(ListLike):
@@ -280,20 +281,13 @@ class Constant(AbstractNestedList):
         return self.value
 
 
-# Translate phrases defined as strings to tuples
-def _split_phrase(x: str) -> tuple[str, ...]:
-    x = x.strip()
-    if not x:
-        return tuple()
-    return tuple(re.split(r'\s+', x))
-
-
 def validate_config(config: CoolnameConfigT) -> None:
     """
     A big and ugly method for config validation.
     It would be nice to use cerberus, but we don't
     want to introduce dependencies just for that.
     """
+    _space = re.compile(r'\s+').search
     try:
         referenced_sublists: set[str] = set()
         for key, listdef in list(config.items()):
@@ -336,16 +330,28 @@ def validate_config(config: CoolnameConfigT) -> None:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
+                allow_spaces = listdef.get(_CONF.FIELD.ALLOW_WHITESPACE, False)
+                strip_spaces = listdef.get(_CONF.FIELD.STRIP_WHITESPACE, True)
                 for word in words:
+                    _word = word
                     if not isinstance(word, str):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
-                                         f'expected all words to be str, got {word!r}')
-                    word = word.strip()
+                                         f'expected all words to be str, got {_word!r}')
                     if not word:
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
-                                         f'empty or whitespace-only word not allowed')
+                                         f'empty word not allowed')
+                    if strip_spaces:
+                        word = word.strip()
+                        if not word:
+                            raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                             f'whitespace-only word not allowed: {_word!r}')
+                    if not allow_spaces and _space(word) is not None:
+                        raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
+                                         f'word {_word!r} contains whitespace while '
+                                         f'{_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}, '
+                                         f'{_CONF.FIELD.ALLOW_WHITESPACE}={allow_spaces!r}')
                     if max_length is not None and len(word) > max_length:
-                        raise ValueError(f'Config at key {key!r} has invalid word {word!r} '
+                        raise ValueError(f'Config at key {key!r} has invalid word {_word!r} '
                                          f'(longer than {max_length} characters)')
             # Phrases (sequences of one or more words)
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.PHRASES:
@@ -368,25 +374,45 @@ def validate_config(config: CoolnameConfigT) -> None:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
+                allow_spaces = listdef.get(_CONF.FIELD.ALLOW_WHITESPACE, False)
+                strip_spaces = listdef.get(_CONF.FIELD.STRIP_WHITESPACE, True)
+                # Note: PhraseSplitter raises errors compatible with standard ValueError format,
+                # so we don't wrap it in try-except
+                split = PhraseSplitter.from_config(listdef, list_name=key)
                 for phrase in phrases:
-                    if isinstance(phrase, str):
-                        phrase = _split_phrase(phrase)  # str -> sequence, if necessary
-                    if not phrase:
+                    _phrase = deepcopy(phrase)  # for accurate error reporting, since list[list]
+                    if not phrase:  # empty list or string - same message
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                         f'empty or whitespace-only phrase not allowed')
+                                         f'empty phrase not allowed')
+                    if isinstance(phrase, str):
+                        phrase = split(phrase)  # str -> sequence, if necessary
+                        if not phrase:
+                            raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                             f'whitespace-only phrase not allowed')
                     if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
                                          f'expected all phrases to be str | list[str] | tuple[str, ...], '
-                                         f'got {phrase!r}')
-                    if any(not x.strip() for x in phrase):
+                                         f'got {_phrase!r}')
+                    if not all(phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                         f'empty or whitespace-only word within phrase not allowed: {phrase!r}')
+                                         f'empty word within phrase not allowed: {_phrase!r}')
+                    if strip_spaces:
+                        phrase = [x.strip() for x in phrase]
+                        if not all(phrase):
+                            raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                             f'whitespace-only word within phrase not allowed: {_phrase!r}')
+                        if not allow_spaces and any(_space(x) is not None for x in phrase):
+                            raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
+                                             f'word within phrase {_phrase!r} contains whitespace while '
+                                             f'{_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}, '
+                                             f'{_CONF.FIELD.ALLOW_WHITESPACE}={allow_spaces!r}')
+
                     if number_of_words is not None and len(phrase) != number_of_words:
-                        raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
+                        raise ValueError(f'Config at key {key!r} has invalid phrase {_phrase!r} '
                                          f'({len(phrase)} word(s) but '
                                          f'{_CONF.FIELD.NUMBER_OF_WORDS}={number_of_words})')
                     if max_length is not None and sum(len(word) for word in phrase) > max_length:
-                        raise ValueError(f'Config at key {key!r} has invalid phrase {" ".join(phrase)!r} '
+                        raise ValueError(f'Config at key {key!r} has invalid phrase {_phrase} '
                                          f'(longer than {max_length} characters)')
             else:
                 raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.TYPE!r}')
@@ -434,7 +460,8 @@ def create_lists(
         elif list_type == _CONF.TYPE.PHRASES:
             _ = list_config[_CONF.FIELD.PHRASES]
             assert isinstance(_, list)
-            results[current] = PhraseList(_)
+            split = PhraseSplitter.from_config(list_config)
+            results[current] = PhraseList([split(x) if isinstance(x, str) else x for x in _])
         # 2. Simple list of lists
         elif list_type == _CONF.TYPE.NESTED:
             _ = list_config[_CONF.FIELD.LISTS]

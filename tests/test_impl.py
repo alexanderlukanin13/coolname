@@ -1,26 +1,43 @@
-# -*- coding: utf-8 -*-
 import io
-import re
+from re import escape as esc
 import unittest
+from unittest.mock import patch
 
 import pytest
 
 from coolname import RandomGenerator, InitializationError, _default
+from coolname._config import PhraseSplitter, PhraseSplitterError
 from coolname._impl import NestedList, CartesianList, Constant, \
-    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists, _split_phrase
+    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists
 
-from .common import TestCase, patch
+from .common import TestCase
 
 
 class TestImplementation(TestCase):
 
     def test_strip_phrase(self):
-        assert _split_phrase('') == tuple()
-        assert _split_phrase('  ') == tuple()
-        assert _split_phrase('\t') == tuple()
-        assert _split_phrase('lala haha') == ('lala', 'haha')
-        assert _split_phrase('   lala    haha   ') == ('lala', 'haha')
-        assert _split_phrase('\tlala\thaha\t') == ('lala', 'haha')
+        split = PhraseSplitter()
+        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': empty phrase not allowed")):
+            split('')
+        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': whitespace-only phrase not allowed")):
+            split('  ')
+        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': whitespace-only phrase not allowed")):
+            split('\t')
+        assert split('lala haha') == ['lala', 'haha']
+        assert split('   lala    haha   ') == ['lala', 'haha']
+        assert split('\tlala\thaha\t') == ['lala', 'haha']
+
+        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'separator': missing ), unterminated subpattern at position 0")):
+            PhraseSplitter(separator='re:(no closing bracket')
+
+        split = PhraseSplitter(separator='/')
+        assert split(' a / b ') == ['a', 'b']
+        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '/a/b' nicely into words - refusing to guess")):
+            split('/a/b')
+
+        split = PhraseSplitter(separator='/', strip_whitespace=False)
+        assert split(' a / b ') == [' a ', ' b ']
+
 
     def test_phrase_list(self):
         phrase_list = PhraseList([('black', 'cat'), ('white', 'dog')])
