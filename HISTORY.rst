@@ -3,6 +3,13 @@
 Release history
 ===============
 
+4.2.0 (2026-04-11)
+------------------
+
+* Backported changes in word lists from 5.0.0 (coming soon)
+
+* Better mypy support
+
 4.1.0 (2026-03-17)
 ------------------
 
