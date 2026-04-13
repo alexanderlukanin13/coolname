@@ -1,3 +1,4 @@
+import pathlib
 from functools import partial
 from itertools import cycle
 import random
@@ -86,8 +87,8 @@ class TestCoolname(TestCase):
                                     r'File or directory not found: .*dummy'):
             RandomGenerator(load_config('dummy'))
 
-    @patch('os.path.isdir', return_value=False)
-    @patch('os.path.isfile', return_value=True)
+    @patch.object(pathlib.Path, 'is_dir', return_value=False)
+    @patch.object(pathlib.Path, 'is_file', return_value=True)
     @patch('coolname.loader._load_config')
     def test_create_from_file(self, load_config_mock, *args):
         load_config_mock.return_value = {
@@ -104,8 +105,8 @@ class TestCoolname(TestCase):
         with patch.object(generator, '_randrange', return_value=35):
             self.assertEqual(generator.generate_slug(), '3-5')
 
-    @patch('os.path.isdir', return_value=True)
-    @patch('os.path.isfile', return_value=False)
+    @patch.object(pathlib.Path, 'is_dir', return_value=True)
+    @patch.object(pathlib.Path, 'is_file', return_value=False)
     @patch('coolname.loader._load_data')
     def test_create_from_directory_conflict(self, load_data_mock, *args):
         load_data_mock.return_value = (
@@ -121,9 +122,9 @@ class TestCoolname(TestCase):
             },
             {'mywords': ['a', 'b']})
         with self.assertRaisesRegex(InitializationError,
-                                    r"^Conflict: list 'mywords' is defined both in config "
-                                    r"and in \*\.txt file. If it's a 'words' list, "
-                                    r"you should remove it from config\.$"):
+                                    esc(r"Conflict: list 'mywords' is defined both in config.json "
+                                        r"and in mywords.txt file. If it's a 'words' or 'phrases' list, "
+                                        r"you should remove it from config.json - mywords.txt file is enough.")):
             RandomGenerator(load_config('dummy'))
 
     def test_generate_by_pattern(self):

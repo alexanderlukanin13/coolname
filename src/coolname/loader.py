@@ -1,6 +1,5 @@
 from __future__ import annotations
 import json
-import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -24,19 +23,19 @@ def load_config(path: str | Path) -> CoolnameConfigT:
 
     Raises :py:class:`InitializationError` if something goes wrong.
     """
-    path = os.path.abspath(path)
-    if os.path.isdir(path):
+    path = Path(path)
+    if path.is_dir():
         config, wordlists = _load_data(path)
-    elif os.path.isfile(path):
+    elif path.is_file():
         config = _load_config(path)
         wordlists = {}
     else:
         raise InitializationError(f'File or directory not found: {path}')
     for name, wordlist in wordlists.items():
         if name in config:
-            raise InitializationError(f"Conflict: list {name!r} is defined both in config "
-                                      f"and in *.txt file. If it's a {_CONF.TYPE.WORDS!r} list, "
-                                      f"you should remove it from config.")
+            raise InitializationError(f"Conflict: list {name!r} is defined both in config.json and in {name}.txt "
+                                      f"file. If it's a {_CONF.TYPE.WORDS!r} or {_CONF.TYPE.PHRASES!r} list, "
+                                      f"you should remove it from config.json - {name}.txt file is enough.")
         config[name] = wordlist
     return config
 
@@ -88,31 +87,26 @@ def save_config_as_module(config: CoolnameConfigT, filename: str | Path) -> None
                    f"config = {config!r}\n")
 
 
-def _load_data(path: str | Path) -> tuple[CoolnameConfigT, dict[str, CoolnameConfigListT]]:
+def _load_data(path: Path) -> tuple[CoolnameConfigT, dict[str, CoolnameConfigListT]]:
     """
     Loads data from a directory.
     Returns tuple (config_dict, wordlists).
     Raises Exception on failure (e.g. if data is corrupted).
     """
-    path = os.path.abspath(path)
-    if not os.path.isdir(path):
+    path = path.absolute()
+    if not path.is_dir():
         raise InitializationError(f'Directory not found: {path}')
     wordlists = {}
-    for file_name in os.listdir(path):
-        if os.path.splitext(file_name)[1] != '.txt':
-            continue
-        file_path = os.path.join(path, file_name)
-        name = os.path.splitext(os.path.split(file_path)[1])[0]
+    for file_path in path.glob('*.txt'):
         try:
             with open(file_path, encoding='utf-8') as file:
-                wordlists[name] = _load_wordlist(name, file)
+                wordlists[file_path.stem] = _load_wordlist(file_path.stem, file)
         except (OSError, FileNotFoundError) as ex:
             raise InitializationError(f'Failed to read {file_path}: {ex}')
-    config = _load_config(os.path.join(path, 'config.json'))
-    return (config, wordlists)
+    return _load_config(path / 'config.json'), wordlists
 
 
-def _load_config(config_file_path: str | Path) -> CoolnameConfigT:
+def _load_config(config_file_path: Path) -> CoolnameConfigT:
     try:
         with open(config_file_path, encoding='utf-8') as file:
             return cast(CoolnameConfigT, json.load(file))
