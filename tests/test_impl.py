@@ -15,30 +15,6 @@ from .common import TestCase
 
 class TestImplementation(TestCase):
 
-    def test_strip_phrase(self):
-        split = PhraseSplitter()
-        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': empty phrase not allowed")):
-            split('')
-        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': whitespace-only phrase not allowed")):
-            split('  ')
-        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': whitespace-only phrase not allowed")):
-            split('\t')
-        assert split('lala haha') == ['lala', 'haha']
-        assert split('   lala    haha   ') == ['lala', 'haha']
-        assert split('\tlala\thaha\t') == ['lala', 'haha']
-
-        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'separator': missing ), unterminated subpattern at position 0")):
-            PhraseSplitter(separator='re:(no closing bracket')
-
-        split = PhraseSplitter(separator='/')
-        assert split(' a / b ') == ['a', 'b']
-        with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '/a/b' nicely into words - refusing to guess")):
-            split('/a/b')
-
-        split = PhraseSplitter(separator='/', strip_whitespace=False)
-        assert split(' a / b ') == [' a ', ' b ']
-
-
     def test_phrase_list(self):
         phrase_list = PhraseList([('black', 'cat'), ('white', 'dog')])
         assert len(phrase_list) == 2
@@ -287,6 +263,82 @@ class TestImplementation(TestCase):
         assert results == {'twenty-one', 'twenty-two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
 
 
-if __name__ == '__main__':
-    import sys
-    sys.exit(unittest.main())
+def test_phrase_splitter():
+    NO_EMPTY = esc("Config at key '<???>' has invalid 'phrases': empty phrase is not allowed")
+    NO_WHITESPACE = esc("Config at key '<???>' has invalid 'phrases': whitespace-only phrase is not allowed with strip_whitespace=True")
+
+    # Normal (default) splitter
+    split = PhraseSplitter()
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    with pytest.raises(PhraseSplitterError, match=NO_WHITESPACE):
+        split('  ')
+    assert split('abc') == ['abc']
+    assert split('  abc \t\r\n ') == ['abc']
+    assert split('  abc  def  ') == ['abc', 'def']
+
+    # Invalid separator
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid separator 're:(\\s+': missing ), unterminated subpattern at position 0")):
+        PhraseSplitter(separator=r're:(\s+')
+
+    # word | word|word
+    split = PhraseSplitter(separator=r're:\s*\|\s*')
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    with pytest.raises(PhraseSplitterError, match=NO_WHITESPACE):
+        split(' ')
+    assert split('  abc|def| ghi  |  jkl ') == ['abc', 'def', 'ghi', 'jkl']
+
+    split = PhraseSplitter(separator=r're:\s*\|\s*', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('  ') == ['  ']
+    assert split('  abc|def| ghi  |  jkl ') == ['  abc', 'def', 'ghi', 'jkl ']
+
+    split = PhraseSplitter(separator='|', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('  ') == ['  ']
+    assert split('  abc|def| ghi  |  jkl ') == ['  abc', 'def', ' ghi  ', '  jkl ']
+
+    split = PhraseSplitter(strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('abc') == ['abc']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc \t\r\n ' nicely into words using separator 're:\\s+' - refusing to guess")):
+        split('  abc \t\r\n ')
+
+    # This doesn't make much sense, but is technically allowed
+    split = PhraseSplitter(separator=' ', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase ' ' nicely into words using separator ' ' - refusing to guess")):
+        split(' ')
+    assert split('abc') == ['abc']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc \t\r\n' nicely into words using separator ' ' - refusing to guess")):
+        split('  abc \t\r\n')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc \t\r\n ' nicely into words using separator ' ' - refusing to guess")):
+        split('  abc \t\r\n ')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc  def  ' nicely into words using separator ' ' - refusing to guess")):
+        split('  abc  def  ')
+
+    # / as separator - strip whitespace
+    split = PhraseSplitter(separator='/')
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('abc') == ['abc']
+    assert split(' abc/ def ') == ['abc', 'def']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase 'abc/ \t\r\n' nicely into words using separator '/' - refusing to guess")):
+        split('abc/ \t\r\n')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '//abc/def' nicely into words using separator '/' - refusing to guess")):
+        split('//abc/def')
+
+    # / as separator - keep whitespace
+    split = PhraseSplitter(separator='/', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('abc') == ['abc']
+    assert split(' abc/ def ') == [' abc', ' def ']
+    assert split('abc/ \t\r\n') == ['abc', ' \t\r\n']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '//abc/def' nicely into words using separator '/' - refusing to guess")):
+        split('//abc/def')

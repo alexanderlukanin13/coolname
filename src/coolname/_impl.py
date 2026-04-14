@@ -336,12 +336,12 @@ def validate_config(config: CoolnameConfigT) -> None:
                                          f'expected all words to be str, got {_word!r}')
                     if not word:
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
-                                         f'empty word not allowed')
+                                         f'empty word is not allowed')
                     if strip_spaces:
                         word = word.strip()
                         if not word:
                             raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
-                                             f'whitespace-only word not allowed: {_word!r}')
+                                             f'whitespace-only word {_word!r} is not allowed')
                     if not allow_spaces and _space(word) is not None:
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
                                          f'word {_word!r} contains whitespace while '
@@ -380,24 +380,26 @@ def validate_config(config: CoolnameConfigT) -> None:
                     _phrase = deepcopy(phrase)  # for accurate error reporting, since list[list]
                     if not phrase:  # empty list or string - same message
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                         f'empty phrase not allowed')
+                                         f'empty phrase is not allowed')
                     if isinstance(phrase, str):
                         phrase = split(phrase)  # str -> sequence, if necessary
                         if not phrase:
                             raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                             f'whitespace-only phrase not allowed')
+                                             f'whitespace-only phrase {_phrase!r} is not allowed while '
+                                             f'{_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}')
                     if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
                                          f'expected all phrases to be str | list[str] | tuple[str, ...], '
                                          f'got {_phrase!r}')
                     if not all(phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                         f'empty word within phrase not allowed: {_phrase!r}')
+                                         f'empty word within phrase {_phrase!r} is not allowed')
                     if strip_spaces:
                         phrase = [x.strip() for x in phrase]
                         if not all(phrase):
                             raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                             f'whitespace-only word within phrase not allowed: {_phrase!r}')
+                                             f'whitespace-only word within phrase {_phrase!r} is not allowed '
+                                             f'while {_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}')
                         if not allow_spaces and any(_space(x) is not None for x in phrase):
                             raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
                                              f'word within phrase {_phrase!r} contains whitespace while '

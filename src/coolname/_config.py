@@ -53,12 +53,14 @@ class PhraseSplitter:
     # Note: list_name is used solely for more user-friendly error messages
     def __init__(self, separator: str = DEFAULT_SEPARATOR, *,
                  strip_whitespace: bool = True, list_name: str = UNKNOWN_KEY):
+        self._separator = separator
         if separator.startswith('re:'):
             separator = separator[3:]
             try:
                 self._split = re.compile(separator).split
             except re.error as ex:
-                raise PhraseSplitterError(f'Config at key {list_name!r} has invalid {_CONF.FIELD.SEPARATOR!r}: {ex}')
+                raise PhraseSplitterError(f'Config at key {list_name!r} has invalid '
+                                          f'{_CONF.FIELD.SEPARATOR} {self._separator!r}: {ex}')
         else:
             def split(s: str) -> list[str]:
                 return s.split(separator)
@@ -78,19 +80,21 @@ class PhraseSplitter:
         _s = s
         if not s:
             raise PhraseSplitterError(f'Config at key {self._list_name!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                      f'empty phrase not allowed')
+                                      f'empty phrase is not allowed')
         if self._strip_whitespace:
             s = s.strip()
             if not s:
                 raise PhraseSplitterError(f'Config at key {self._list_name!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                          f'whitespace-only phrase not allowed')
+                                          f'whitespace-only phrase is not allowed '
+                                          f'with {_CONF.FIELD.STRIP_WHITESPACE}=True')
         if self._strip_whitespace:
             items = [x.strip() for x in self._split(s)]
         else:
             items = self._split(s)
         if any(not x for x in items):
             raise PhraseSplitterError(f'Config at key {self._list_name!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                      f"can't split phrase {_s!r} nicely into words - refusing to guess")
+                                      f"can't split phrase {_s!r} nicely into words using separator "
+                                      f"{self._separator!r} - refusing to guess")
         return items
 
     @classmethod
