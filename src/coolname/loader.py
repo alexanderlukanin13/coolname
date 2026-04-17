@@ -119,8 +119,10 @@ def _load_wordlist(name, stream):
     multiword_start = None
     number_of_words = None
     for i, line in enumerate(stream, start=1):
+        if '#' in line:
+            line = line.split('#')[0]
         line = line.strip()
-        if not line or line.startswith('#'):
+        if not line:
             continue
         # Is it an option line, e.g. 'max_length = 10'?
         if '=' in line:
