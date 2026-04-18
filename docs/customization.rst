@@ -51,6 +51,15 @@ with equal probability.
         'words': ['apple', 'banana']
     },
 
+.. collapse:: How whitespace is handled?
+
+    By default, leading/trailing whitespace is stripped, and whitespace in the middle of a word is forbidden.
+    You can change this behavior on per-list basis using ``strip_whitespace`` and ``allow_whitespace``
+    :doc:`parameters <parameters-table>`.
+
+    Empty word always raises an exception.
+
+    When words are in a ``*.txt`` file, leading/trailing whitespace for each line is always stripped.
 
 Phrases list
 ------------
@@ -62,10 +71,29 @@ Same as words list, but each element is one or more words.
     # This will produce random color
     'color': {
         'type': 'phrases',
-        'words': ['red', 'green', 'navy blue', ['royal', 'purple']]
+        'phrases': ['red', 'green', 'navy blue', ['royal', 'purple']]
     }
 
 Phrase can be written as a string (words are separated by space) or as a list of words.
+
+.. collapse:: How whitespace is handled, and what about custom separators?
+
+    Each phrase is processed at initialization time with the following algorithm:
+
+    1. If a phrase is defined as a string (like ``'navy blue'`` above):
+
+        1.1. If ``strip_whitespace=True``, leading/trailing whitespace is stripped.
+
+        1.2. Phrase is split into words by whitespace (everything that matches ``r'\s+'``),
+             or using ``separator`` :doc:`parameter <parameters-table>` if it's defined for this Phrase list.
+             Separator can be a plain string, or a regular expression starting with ``re:``
+
+    2. For each word in a phrase, if ``strip_whitespace=True``, leading/trailing whitespace is stripped.
+
+    Empty word or empty phrase always raises an exception, and whitespace in the middle of a word
+    raises an exception if ``allow_whitespace=False`` (default).
+
+    When phrases are in a ``*.txt`` file, leading/trailing whitespace for each line is always stripped.
 
 Nested list
 -----------

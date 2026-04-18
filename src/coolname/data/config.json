@@ -5,6 +5,7 @@
         "lists": ["2", "3", "4"],
         "ensure_unique": true,
         "ensure_unique_prefix": 4,
+        "word_regex": "[a-z]+",
         "max_slug_length": 50
     },
     "2": {

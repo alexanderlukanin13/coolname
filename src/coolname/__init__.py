@@ -47,8 +47,7 @@ class RandomGenerator:
 
     def __init__(self, config: CoolnameConfigT, rand: RandomT | None = None):
         self.random = rand  # sets _random and _randrange. Note that we assign via property setter.
-        config = dict(config)
-        _impl.validate_config(config)
+        _impl.validate_and_normalize_config(config)
         lists: dict[str, types.ListLike] = {}
         _impl.create_lists(config, lists, 'all', [])
         self._lists = {}

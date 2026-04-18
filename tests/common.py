@@ -1,4 +1,3 @@
-import os.path as op
 import unittest
 from pathlib import Path
 

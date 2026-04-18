@@ -3,31 +3,40 @@
 Release history
 ===============
 
-5.0.0 (2026-04-09)
+5.0.0 (2026-04-20)
 ------------------
+
+This major release has new features and significant internal changes, but it is compatible with 4.x in any normal usage
+as described in documentation, and you can upgrade from 4.x with minimal unit test coverage.
+
+There are implementation changes that *technically* can break user code in undocumented scenarios.
+Even if it breaks, most likely, it will take a minute to fix.
 
 * Complete typing support, tested with mypy ``strict = True``.
 
 * Default parameter value changed: ``ensure_unique=True``. Custom generators can forget about it
-  and still generate sequences without repeating words. Consider also using
+  and still generate sequences without repeating words.
+  Consider also using ``ensure_unique_prefix`` (disabled by default).
 
-* Stricter config validation for custom generators, with more informative error messages.
+* :doc:`New parameters <parameters-table>` for advanced words/phrases lists:
+  ``strip_whitespace``, ``allow_whitespace``, ``separator``.
+
+* What is considered a valid word? It's now controlled by ``word_regex`` parameter, ``\w+`` by default.
+
+* Stricter config validation for custom generators, with more helpful error messages.
 
 * Custom generator can be rendered into text representation via
   :py:meth:`~coolname.RandomGenerator.render` and :py:meth:`~coolname.RandomGenerator.write`.
-  This can help in debugging and logging.
+  Useful in debugging and logging.
 
-* :py:func:`~coolname.loader.load_config` is documented as a part of public API.
+* New public API for manipulating configuration files:
+    - :py:func:`~coolname.loader.load_config`
+    - :py:func:`~coolname.loader.filter_config`
+    - :py:func:`~coolname.loader.save_config_as_module`
 
 * Type :py:class:`~coolname.types.CoolnameConfigT` formally describes config dict.
 
-* Added a few more words.
-
-This major release has significant internal changes, but it is compatible with 4.x in any normal usage
-as described in documentation, and you can upgrade from 4.x with minimal unit test coverage.
-
-There are internal changes that *technically* can break user code in undocumented scenarios.
-Even if it breaks, most likely, it will take a minute to fix.
+* Added a few more words, and fixed one spelling mistake.
 
 .. collapse:: Boring technical details
 
@@ -66,8 +75,15 @@ Even if it breaks, most likely, it will take a minute to fix.
             "phrases": [[1,2], [3,4]]}  # don't do this
         }
 
-    * ``RandomGenerator`` does not accept py:class:`collections.abc.Mapping` as config anymore,
+    * ``RandomGenerator`` does not accept :py:class:`collections.abc.Mapping` as config anymore,
       only plain ``dict`` as described by type ``coolname.types.CoolnameConfigT``.
+
+4.2.0 (2026-04-11)
+------------------
+
+* Backported changes in word lists from 5.0.0
+
+* Better mypy support
 
 4.1.0 (2026-03-17)
 ------------------

@@ -8,3 +8,11 @@ table.docutils  p {
 .sphinx_collapse__label {
     font-weight: bold;
 }
+span.fn-bracket {
+    font-size: 1em;
+    vertical-align: middle;
+}
+a.footnote-reference {
+    font-size: 1em;
+    vertical-align: middle;
+}

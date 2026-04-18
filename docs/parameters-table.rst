@@ -27,7 +27,7 @@ It's to silently discard unwanted combinations.
       - Description
 
     * - ``allow_whitespace``
-      - Words list, Phrases list, ``*.txt``
+      - Words list, Phrases list, ``*.txt``, Constant list; ``"all"`` list as a fallback [#f1]_
       - ✅
       - ``bool``
       - ``False``
@@ -37,7 +37,7 @@ It's to silently discard unwanted combinations.
       - Any top-level list
       - ✅
       - ``bool``
-      - ``False``†
+      - ``False`` [#f2]_
       - List is a generator endpoint and can be used in :py:func:`generate`.
 
     * - ``ensure_unique``
@@ -77,17 +77,33 @@ It's to silently discard unwanted combinations.
       - Exact number of words in every phrase in this list.
 
     * - ``separator``
-      - Phrases list, ``*.txt``
+      - Phrases list, ``*.txt``; ``"all"`` list as a fallback [#f1]_
       - ✅
       - ``str``
       - ``r're:\s+'``
       - Separator used to split phrases defined as plain strings (not as lists/tuples). Use ``'re:'`` prefix for regular expression.
 
     * - ``strip_whitespace``
-      - Words list, Phrases list, ``*.txt``
+      - Words list, Phrases list, ``*.txt``; ``"all"`` list as a fallback [#f1]_
       - ✅
       - ``bool``
       - ``True``
       - Strip leading and trailing whitespace from phrases and words before further processing.
 
-† Special cases where default is ``generator=True``: main ``"all"`` list and lists with integer names (such as ``"4"``).
+    * - ``word_regex``
+      - Words list, Phrases list, ``*.txt``, Constant list; ``"all"`` list as a fallback [#f1]_
+      - ✅
+      - ``str``
+      - ``r'\w+'``
+      - Regex to validate all words. Default: any Unicode letters, numbers, underscore. [#f3]_
+
+.. rubric:: Footnotes
+
+.. [#f1] ``strip_whitespace``, ``allow_whitespace``, ``separator`` and ``word_regex`` can be defined at ``"all"`` level
+    (affects all Word/Phrase/Constant lists, lower precedence) or at individual list level (higher precedence).
+
+.. [#f2] Special cases where default is ``generator=True``: main ``"all"`` list and lists with integer names (such as ``"4"``).
+
+.. [#f3] If ``allow_whitespace=True``, then ``word_regex`` is applied only to non-whitespace parts of the word.
+    You can include whitespace in the regex in such configuration (like ``[a-z ]+``),
+    but you don't have to (``[a-z]+`` is fine).

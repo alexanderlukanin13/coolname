@@ -278,22 +278,53 @@ class Constant(AbstractNestedList):
         return self.value
 
 
-def validate_config(config: CoolnameConfigT) -> None:
+_remove_whitespace = partial(re.compile(r'\s+').sub, '')
+
+class MatchWordIgnoreWhitespace:
+
+    def __init__(self, match_word: Callable[[str], re.Match[str] | None]):
+        self.match_word = match_word
+
+    def __call__(self, s: str) -> re.Match[str] | None:
+        return self.match_word(_remove_whitespace(s))
+
+
+def validate_and_normalize_config(config: CoolnameConfigT) -> None:
     """
-    A big and ugly method for config validation.
-    It would be nice to use cerberus, but we don't
-    want to introduce dependencies just for that.
+    A big and ugly function for config validation.
+    It would be nice to use something like cerberus,
+    but we don't want to introduce dependencies just for that.
+
+    Also, this function normalizes words and phrases
+    (strip whitespace, use custom separators, etc.).
     """
     _space = re.compile(r'\s+').search
     try:
+        # Validate 'all' dict
+        if not isinstance(config, dict):
+            raise ValueError(f'Expected config dict, got {config.__class__.__qualname__}')
+        try:
+            all_list = config['all']
+        except KeyError:
+            raise ValueError("Config must have 'all' key")
+        if not isinstance(all_list, dict):
+            raise ValueError("Config at key 'all' is not a dict")
+
         referenced_sublists: set[str] = set()
         for key, listdef in list(config.items()):
-            # Check if section is a list
+            # Check if section is a dict
             if not isinstance(listdef, dict):
                 raise ValueError(f'Value at key {key!r} is not a dict')
             # Check if it has correct type
             if _CONF.FIELD.TYPE not in listdef:
                 raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.TYPE!r}')
+            # Get parameters
+            strip_spaces = _CONF.get_parameter_bool(config, key, _CONF.FIELD.STRIP_WHITESPACE, default=True)
+            allow_spaces = _CONF.get_parameter_bool(config, key, _CONF.FIELD.ALLOW_WHITESPACE, default=False)
+            word_regex = _CONF.get_parameter_str(config, key, _CONF.FIELD.WORD_REGEX, _CONF.WORD_REGEX_DEFAULT)
+            match_word = _CONF.get_parameter_match(config, key, _CONF.FIELD.WORD_REGEX, _CONF.WORD_REGEX_DEFAULT)
+            if match_word and allow_spaces:
+                match_word = MatchWordIgnoreWhitespace(match_word)
             # Nested or Cartesian
             if listdef[_CONF.FIELD.TYPE] in (_CONF.TYPE.NESTED, _CONF.TYPE.CARTESIAN):
                 sublists = listdef.get(_CONF.FIELD.LISTS)
@@ -310,7 +341,10 @@ def validate_config(config: CoolnameConfigT) -> None:
                 except KeyError:
                     raise ValueError(f'Config at key {key!r} has no {_CONF.FIELD.VALUE!r}')
                 if not isinstance(value, str):
-                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.VALUE!r}')
+                    raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.VALUE!r} (must be a string)')
+                if match_word is not None and not match_word(value):
+                    raise ValueError(f"Config at key {key!r} has invalid {_CONF.FIELD.VALUE!r} "
+                                     f"(doesn't match {_CONF.FIELD.WORD_REGEX}={word_regex!r})")
             # Words
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.WORDS:
                 try:
@@ -327,9 +361,7 @@ def validate_config(config: CoolnameConfigT) -> None:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
-                allow_spaces = listdef.get(_CONF.FIELD.ALLOW_WHITESPACE, False)
-                strip_spaces = listdef.get(_CONF.FIELD.STRIP_WHITESPACE, True)
-                for word in words:
+                for i, word in enumerate(words):
                     _word = word
                     if not isinstance(word, str):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: '
@@ -347,9 +379,15 @@ def validate_config(config: CoolnameConfigT) -> None:
                                          f'word {_word!r} contains whitespace while '
                                          f'{_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}, '
                                          f'{_CONF.FIELD.ALLOW_WHITESPACE}={allow_spaces!r}')
+                    if match_word is not None and not match_word(word):
+                        raise ValueError(f"Config at key {key!r} has invalid {_CONF.FIELD.WORDS!r}: "
+                                         f"word {_word!r} doesn't match "
+                                         f"{_CONF.FIELD.WORD_REGEX}={word_regex!r}")
                     if max_length is not None and len(word) > max_length:
                         raise ValueError(f'Config at key {key!r} has invalid word {_word!r} '
                                          f'(longer than {max_length} characters)')
+                    if word != _word:
+                        words[i] = word  # type: ignore
             # Phrases (sequences of one or more words)
             elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.PHRASES:
                 try:
@@ -371,22 +409,16 @@ def validate_config(config: CoolnameConfigT) -> None:
                     max_length = int(listdef[_CONF.FIELD.MAX_LENGTH])  # type: ignore[arg-type]
                 except KeyError:
                     max_length = None
-                allow_spaces = listdef.get(_CONF.FIELD.ALLOW_WHITESPACE, False)
-                strip_spaces = listdef.get(_CONF.FIELD.STRIP_WHITESPACE, True)
                 # Note: PhraseSplitter raises errors compatible with standard ValueError format,
                 # so we don't wrap it in try-except
                 split = PhraseSplitter.from_config(listdef, list_name=key)
-                for phrase in phrases:
+                for i, phrase in enumerate(phrases):
                     _phrase = deepcopy(phrase)  # for accurate error reporting, since list[list]
                     if not phrase:  # empty list or string - same message
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
                                          f'empty phrase is not allowed')
                     if isinstance(phrase, str):
                         phrase = split(phrase)  # str -> sequence, if necessary
-                        if not phrase:
-                            raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
-                                             f'whitespace-only phrase {_phrase!r} is not allowed while '
-                                             f'{_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}')
                     if not isinstance(phrase, (tuple, list)) or not all(isinstance(x, str) for x in phrase):
                         raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: '
                                          f'expected all phrases to be str | list[str] | tuple[str, ...], '
@@ -405,7 +437,10 @@ def validate_config(config: CoolnameConfigT) -> None:
                                              f'word within phrase {_phrase!r} contains whitespace while '
                                              f'{_CONF.FIELD.STRIP_WHITESPACE}={strip_spaces!r}, '
                                              f'{_CONF.FIELD.ALLOW_WHITESPACE}={allow_spaces!r}')
-
+                    if match_word is not None and not all(match_word(x) for x in phrase):
+                        raise ValueError(f"Config at key {key!r} has invalid {_CONF.FIELD.PHRASES!r}: "
+                                         f"word within phrase {_phrase!r} doesn't match "
+                                         f"{_CONF.FIELD.WORD_REGEX}={word_regex!r}")
                     if number_of_words is not None and len(phrase) != number_of_words:
                         raise ValueError(f'Config at key {key!r} has invalid phrase {_phrase!r} '
                                          f'({len(phrase)} word(s) but '
@@ -413,6 +448,8 @@ def validate_config(config: CoolnameConfigT) -> None:
                     if max_length is not None and sum(len(word) for word in phrase) > max_length:
                         raise ValueError(f'Config at key {key!r} has invalid phrase {_phrase} '
                                          f'(longer than {max_length} characters)')
+                    if phrase != _phrase:
+                        phrases[i] = phrase    # type: ignore
             else:
                 raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.TYPE!r}')
         # Check that all sublists are defined
@@ -459,8 +496,7 @@ def create_lists(
         elif list_type == _CONF.TYPE.PHRASES:
             _ = list_config[_CONF.FIELD.PHRASES]
             assert isinstance(_, list)
-            split = PhraseSplitter.from_config(list_config)
-            results[current] = PhraseList([split(x) if isinstance(x, str) else x for x in _])
+            results[current] = PhraseList(_)
         # 2. Simple list of lists
         elif list_type == _CONF.TYPE.NESTED:
             _ = list_config[_CONF.FIELD.LISTS]

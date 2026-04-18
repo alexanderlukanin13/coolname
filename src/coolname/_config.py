@@ -1,7 +1,7 @@
 import re
 from typing import cast, Callable
 
-from coolname.types import CoolnameConfigListT
+from coolname.types import CoolnameConfigListT, CoolnameConfigT
 
 
 class _CONF:
@@ -31,6 +31,63 @@ class _CONF:
         ALLOW_WHITESPACE = 'allow_whitespace'
         STRIP_WHITESPACE = 'strip_whitespace'
         SEPARATOR = 'separator'
+        WORD_REGEX = 'word_regex'
+
+    @classmethod
+    def all_fields(cls) -> list[str]:
+        return [getattr(cls.FIELD, x) for x in dir(cls.FIELD) if x.isupper()]
+
+    WORD_REGEX_DEFAULT = r'\w+'  # any Unicode letters, numbers and underscores
+
+    @staticmethod
+    def get_parameter(config: CoolnameConfigT, key: str, parameter: str) -> int | bool | str | None:
+        """
+        Get configuration parameter from a list named ``key``, if defined;
+        fall back to same parameter in 'all', if defined.
+
+        Raises ValueError if something is wrong with the config.
+        """
+        if key != 'all':
+            key_list = config[key]
+            value = key_list.get(parameter)
+            if value is not None:
+                return cast(int | bool | str, value)
+        try:
+            all_list = config['all']
+        except KeyError:
+            raise ValueError("Config must have 'all' key")
+        if not isinstance(all_list, dict):
+            raise ValueError("Config at key 'all' is not a dict")
+        return cast(int | bool | str | None, all_list.get(parameter))
+
+    @classmethod
+    def get_parameter_str(cls, config: CoolnameConfigT, key: str, parameter: str, default: str) -> str | None:
+        value = cls.get_parameter(config, key, parameter)
+        if value is None:
+            return default
+        if not isinstance(value, str):
+            raise ValueError(f"Config at key 'all' has invalid {parameter}: must be a string")
+        return value
+
+    @classmethod
+    def get_parameter_bool(cls, config: CoolnameConfigT, key: str, parameter: str, default: bool) -> bool | None:
+        value = cls.get_parameter(config, key, parameter)
+        if value is None:
+            return default
+        if not isinstance(value, bool):
+            raise ValueError(f"Config at key 'all' has invalid {parameter}: must be a boolean")
+        return value
+
+    @classmethod
+    def get_parameter_match(cls, config: CoolnameConfigT, key: str, parameter: str,
+                            default: str) -> Callable[[str], re.Match[str] | None] | None:
+        value = cls.get_parameter_str(config, key, parameter, default)
+        if value is None:  # pragma: no cover
+            return None
+        try:
+            return re.compile(value).fullmatch
+        except re.error as ex:
+            raise ValueError(f"Config at key 'all' has invalid {_CONF.FIELD.WORD_REGEX}: {ex}")
 
 
 class PhraseSplitterError(ValueError):

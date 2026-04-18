@@ -1,3 +1,4 @@
+import copy
 import pathlib
 from functools import partial
 from itertools import cycle
@@ -11,10 +12,12 @@ import pytest
 
 import coolname
 from coolname import RandomGenerator, InitializationError
+import coolname.data
 from coolname.exceptions import ConfigurationError
-from coolname.loader import load_config
+from coolname.loader import load_config, filter_config
 
-from .common import TestCase, FakeRandom
+from .common import TestCase, FakeRandom, DATA_DIR, EXAMPLES_DIR
+from .generate import PROJECT_PATH
 
 
 class TestCoolname(TestCase):
@@ -287,7 +290,7 @@ class TestCoolname(TestCase):
 
     def test_configuration_error(self):
         with self.assertRaisesRegex(InitializationError,
-                                    "Invalid config: Value at key 'all' is not a dict"):
+                                    "Invalid config: Config at key 'all' is not a dict"):
             RandomGenerator({'all': ['wrong']})
         with self.assertRaisesRegex(InitializationError,
                                     "Invalid config: Config at key 'all' has no 'type'"):
@@ -502,7 +505,7 @@ class TestCoolname(TestCase):
             },
             'word_list': {
                 'type': 'words',
-                'words': ['word1', 'word2'],
+                'words': ['one', 'two'],
             },
             'cart_list': {
                 'type': 'cartesian',
@@ -581,7 +584,142 @@ class TestCoolname(TestCase):
         assert generator.render('short') == expected_short
 
 
-    @patch.object(sys, 'argv', ['coolname', '3', '-s', '_', '-n', '10'])
-    def test_command_line(self, *args):
-        from coolname.__main__ import main
-        main()  # just for the sake of coverage
+@patch.object(sys, 'argv', ['coolname', '3', '-s', '_', '-n', '10'])
+def test_command_line():
+    from coolname.__main__ import main
+    main()  # just for the sake of coverage
+
+
+def test_phrases_in_txt_with_custom_separator():
+    generator = RandomGenerator(load_config(DATA_DIR / 'phrases_txt_custom_sep'))
+    assert {generator.generate_slug() for i in range(10)} == {
+        'big - dog',    # sic!
+        'small - cat',  # sic!
+        'quick-fox',
+        'lazy-dog',
+        'quick-baby fox',
+        'lazy-little puppy'
+    }
+
+
+def test_non_az_wordlist():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'words1' has invalid 'words': word 'not?az' doesn't match word_regex='\\w+'")):
+        RandomGenerator(load_config(DATA_DIR / 'non_az_wordlist'))
+
+
+def test_default_config_word_regex_error():
+    config = copy.deepcopy(coolname.data.config)
+    config['animal']['words'][0] = 'EarthWorm'
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'animal' has invalid 'words': word 'EarthWorm' doesn't match word_regex='[a-z]+'")):
+        RandomGenerator(config)
+
+def test_invalid_word_regex():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' has invalid word_regex: must be a string")):
+        RandomGenerator({'all': {'type': 'words', 'words': ['one', 'two'], 'word_regex': 123}})
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' has invalid word_regex: missing ), unterminated subpattern at position 0")):
+        RandomGenerator({'all': {'type': 'words', 'words': ['one', 'two'], 'word_regex': r"(\w+"}})
+
+def test_unexpected_option_in_txt():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Invalid assignment at list 'words1' line 1: 'max_slug_length = 50' (Parameter max_slug_length is not allowed in *.txt files)")):
+        RandomGenerator(load_config(DATA_DIR / 'unexpected_option'))
+
+def test_invalid_boolean_in_txt():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Invalid assignment at list 'words1' line 1: 'strip_whitespace = Ture' (Parameter must be a valid boolean)")):
+        RandomGenerator(load_config(DATA_DIR / 'invalid_boolean'))
+
+def test_invalid_config():
+    with pytest.raises(ConfigurationError, match=r"Invalid config: Expected config dict, got list"):
+        RandomGenerator([])
+    with pytest.raises(ConfigurationError, match=r"Invalid config: Config must have 'all' key"):
+        RandomGenerator({"alu": {"type": "words", "words": ["one", "two", "three"]}})
+
+def test_word_with_spaces_in_txt_error():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'words1' has invalid 'words': word 'beta gamma' contains whitespace while strip_whitespace=True, allow_whitespace=False")):
+        RandomGenerator(load_config(DATA_DIR / 'word_with_spaces_error'))
+
+def test_phrase_with_spaces_in_txt_error():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'phrases1' has invalid 'phrases': word within phrase ['three four', 'five'] contains whitespace while strip_whitespace=True, allow_whitespace=False")):
+        RandomGenerator(load_config(DATA_DIR / 'phrase_with_spaces_error'))
+
+def test_phrase_with_spaces_in_txt_ok():
+    assert RandomGenerator(load_config(DATA_DIR / 'phrase_with_spaces_ok')).generate_slug()
+
+def test_phrase_with_spaces_in_txt_ok_2():
+    assert RandomGenerator(load_config(DATA_DIR / 'phrase_with_spaces_ok_2')).generate_slug()
+
+def test_number_of_words_in_txt():
+    with pytest.raises(InitializationError, match=esc(r"Invalid config: Phrase has 1 word(s) (while number_of_words=2) at list 'phrases1' line 5: 'five'")):
+        RandomGenerator(load_config(DATA_DIR / 'number_of_words_in_txt'))
+
+def test_max_length_in_txt():
+    with pytest.raises(InitializationError, match=esc(r"Invalid config: Word is too long at list 'words1' line 4: 'abcdef'")):
+        RandomGenerator(load_config(DATA_DIR / 'max_length_in_txt'))
+
+def test_value_not_a_dict():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Value at key 'one' is not a dict")):
+        RandomGenerator({'all': {'type': 'nested', 'lists': ['one']}, 'one': []})
+
+def test_invalid_constant():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'one' has invalid 'value' (doesn't match word_regex='\\w+')")):
+        RandomGenerator({'all': {'type': 'nested', 'lists': ['one']}, 'one': {'type': 'const', 'value': '!!'}})
+
+def test_empty_phrase():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' has invalid 'phrases': whitespace-only phrase is not allowed with strip_whitespace=True")):
+        RandomGenerator({'all': {'type': 'phrases', 'phrases': ['one two', 'three four', '  ']}})
+    generator = RandomGenerator({
+        'all': {
+            'type': 'phrases',
+            'separator': '/',
+            'word_regex': r'.+',
+            'strip_whitespace': False,
+            'phrases': ['one/two', 'three/four', '  /xx']
+        }
+    })
+    random.seed(0)
+    assert set(generator.generate_slug() for i in range(5)) == {'one-two', 'three-four', '  -xx'}
+
+def test_invalid_word_in_phrase():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' has invalid 'phrases': word within phrase '@&! ???' doesn't match word_regex='\\w+'")):
+        RandomGenerator({'all': {'type': 'phrases', 'phrases': ['one two', 'three four', '@&! ???']}})
+
+def test_strip_words():
+    random.seed(0)
+    generator = RandomGenerator({'all': {'type': 'words', 'words': ['one ', ' two']}})
+    assert set(generator.generate_slug() for i in range(7)) == {'one', 'two'}
+
+    random.seed(0)
+    generator = RandomGenerator({'all': {'type': 'words', 'words': ['one ', ' two'], 'strip_whitespace': False, 'allow_whitespace': True}})
+    assert set(generator.generate_slug() for i in range(7)) == {'one ', ' two'}
+
+
+def test_ensure_unique_false():
+    # For the sake of coverage
+    random.seed(0)
+    config = {
+        'all': {
+            'type': 'cartesian',
+            'lists': ['words1', 'words2'],
+            'ensure_unique': False,
+            'max_slug_length': 50,
+        },
+        'words1': {
+            'type': 'words',
+            'words': ['one', 'two', 'three'],
+        },
+        'words2': {
+            'type': 'words',
+            'words': ['three', 'four'],
+        },
+    }
+    generator = RandomGenerator(config)
+    assert 'three-three' in [generator.generate_slug() for i in range(11)]
+
+def test_invalid_strip_whitespace():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' has invalid strip_whitespace: must be a boolean")):
+        RandomGenerator({'all': {'type': 'words', 'words': ['one', 'two'], 'strip_whitespace': 'true'}})
+
+def test_invalid_all():
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config must have 'all' key")):
+        RandomGenerator(load_config(DATA_DIR / 'invalid_all'))
+    with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' is not a dict")):
+        RandomGenerator(load_config(DATA_DIR / 'invalid_all_dict'))
