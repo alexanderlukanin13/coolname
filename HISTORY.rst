@@ -3,16 +3,47 @@
 Release history
 ===============
 
-5.0.0 (2026-04-20)
+5.0.0 (2026-04-22)
 ------------------
 
 This major release has new features and significant internal changes, but it is compatible with 4.x in any normal usage
 as described in documentation, and you can upgrade from 4.x with minimal unit test coverage.
 
-There are implementation changes that *technically* can break user code in undocumented scenarios.
+There are implementation changes that *theoretically* can break user code in undocumented scenarios.
 Even if it breaks, most likely, it will take a minute to fix.
 
+**What's new in the default generator:**
+
 * Complete typing support, tested with mypy ``strict = True``.
+
+* Added a few more words, and fixed one spelling mistake.
+
+.. collapse:: Boring technical details
+
+    * :py:class:`RandomGenerator` and global methods like :py:func:`generate_slug` now live in the top-level
+      ``coolname`` namespace.
+      It won't affect your code if you've been importing directly from ``coolname`` as per documentation.
+
+      Basically, instead of this:
+
+      .. code-block:: python
+
+        >>> from coolname import generate_slug, RandomGenerator
+        >>> generate_slug
+        <bound method RandomGenerator.generate_slug of <coolname.impl.RandomGenerator object at 0x7a7cb248d6a0>>
+        >>> RandomGenerator
+        <class 'coolname.impl.RandomGenerator'>
+
+      You will see this (notice no ``impl``):
+
+      .. code-block:: python
+
+        >>> generate_slug
+        <bound method RandomGenerator.generate_slug of <coolname.RandomGenerator object at 0x75038bacde80>>
+        >>> RandomGenerator
+        <class 'coolname.RandomGenerator'>
+
+**In custom generators:**
 
 * Default parameter value changed: ``ensure_unique=True``. Custom generators can forget about it
   and still generate sequences without repeating words.
@@ -36,31 +67,15 @@ Even if it breaks, most likely, it will take a minute to fix.
 
 * Type :py:class:`~coolname.types.CoolnameConfigT` formally describes config dict.
 
-* Added a few more words, and fixed one spelling mistake.
+* Config in ``*.txt`` allows comment after a word/phrase, Python-style:
+
+    .. code-block::
+
+        # this was allowed before
+        one
+        two  # this is now allowed too
 
 .. collapse:: Boring technical details
-
-    * ``RandomGenerator`` and global methods now live in the top-level ``coolname`` namespace.
-      It won't affect your code if you've been importing directly from ``coolname`` as per documentation.
-
-      Basically, instead of this:
-
-      .. code-block:: python
-
-        >>> from coolname import generate_slug, RandomGenerator
-        >>> generate_slug
-        <bound method RandomGenerator.generate_slug of <coolname.impl.RandomGenerator object at 0x7a7cb248d6a0>>
-        >>> RandomGenerator
-        <class 'coolname.impl.RandomGenerator'>
-
-      You will see this (notice no ``impl``):
-
-      .. code-block:: python
-
-        >>> generate_slug
-        <bound method RandomGenerator.generate_slug of <coolname.RandomGenerator object at 0x75038bacde80>>
-        >>> RandomGenerator
-        <class 'coolname.RandomGenerator'>
 
     * Using arbitrary types (such as int) is word/phrase lists is now *strictly forbidden*,
       not just "undocumented and fails in most circumstances".
