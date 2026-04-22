@@ -278,6 +278,30 @@ class Constant(AbstractNestedList):
         return self.value
 
 
+class Number(ListLike):
+
+    length: int
+    multiword: bool
+
+    def __init__(self, digits: int):
+        super().__init__()
+        self.digits = digits
+        self.length = 10 ** digits - 1
+        self.multiword = False
+
+    def __getitem__(self, item: int) -> str:
+        return str(item + 1)
+
+    def squash(self, hard: bool, cache: dict[bytes, 'ListLike']) -> 'ListLike':
+        return self
+
+    def write(self, stream: typing.TextIO, *,
+              indent: str = '  ', base_indent: str = '',
+              max_items: int = 4, ids: bool = False,
+              ) -> None:
+        stream.write(f'{base_indent}Number(digits={self.digits!r})\n')
+
+
 _remove_whitespace = partial(re.compile(r'\s+').sub, '')
 
 class MatchWordIgnoreWhitespace:
@@ -450,6 +474,11 @@ def validate_and_normalize_config(config: CoolnameConfigT) -> None:
                                          f'(longer than {max_length} characters)')
                     if phrase != _phrase:
                         phrases[i] = phrase    # type: ignore
+            elif listdef[_CONF.FIELD.TYPE] == _CONF.TYPE.NUMBER:
+                number_digits = int(listdef.get(_CONF.FIELD.NUMBER_DIGITS, _CONF.NUMBER_DIGITS_DEFAULT))  # type:ignore
+                if not (0 < number_digits <= _CONF.NUMBER_DIGITS_MAX):
+                    raise ValueError(f"Config at key {key!r} has invalid {_CONF.FIELD.NUMBER_DIGITS!r}: "
+                                     f"must be between 1 and {_CONF.NUMBER_DIGITS_MAX}")
             else:
                 raise ValueError(f'Config at key {key!r} has invalid {_CONF.FIELD.TYPE!r}')
         # Check that all sublists are defined
@@ -519,6 +548,10 @@ def create_lists(
             _ = list_config[_CONF.FIELD.VALUE]
             assert isinstance(_, str)
             results[current] = Constant(_)
+        # 5. Number
+        elif list_type == _CONF.TYPE.NUMBER:
+            number_digits = int(list_config.get(_CONF.FIELD.NUMBER_DIGITS, _CONF.NUMBER_DIGITS_DEFAULT))  # type:ignore
+            results[current] = Number(number_digits)
         # Unknown type
         else:
             raise InitializationError(f"Unknown list type: {list_type!r}")

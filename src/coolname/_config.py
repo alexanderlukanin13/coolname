@@ -14,6 +14,7 @@ class _CONF:
         WORDS = 'words'
         PHRASES = 'phrases'
         CONST = 'const'
+        NUMBER = 'number'
 
     class FIELD:
         """Allowed fields."""
@@ -32,6 +33,10 @@ class _CONF:
         STRIP_WHITESPACE = 'strip_whitespace'
         SEPARATOR = 'separator'
         WORD_REGEX = 'word_regex'
+        NUMBER_DIGITS = 'digits'
+
+    NUMBER_DIGITS_DEFAULT = 3
+    NUMBER_DIGITS_MAX = 7
 
     @classmethod
     def all_fields(cls) -> list[str]:

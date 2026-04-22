@@ -25,7 +25,7 @@ Configuration is a flat dictionary of rules:
 ``<rule_id>`` is the identifier of rule. Root rule must be named ``'all'`` - that's what you use
 when you call :func:`generate` or :func:`generate_slug` without arguments.
 
-There are five types of configuration rules.
+There are six types of configuration rules.
 
 Words list
 ----------
@@ -170,6 +170,42 @@ Let's try the config defined above:
     You can have many nested lists, but you should never put a Cartesian list inside another Cartesian list.
 
 .. _Cartesian: https://en.wikipedia.org/wiki/Cartesian_product
+
+Number
+------
+
+To add a random number to your slugs, use configuration like this:
+
+.. code-block:: python
+    :emphasize-lines: 9-12
+
+    'all': {
+        'type': 'cartesian',
+        'lists': ['word', 'number']
+    },
+    'word': {
+        'type': 'words',
+        'words': ['dog', 'cat', 'bird']
+    },
+    'number': {
+        'type': 'number',
+        'digits': '3'  # default is 3 if omitted; min=1, max=7
+    }
+
+Result:
+
+.. code-block:: python
+
+    >>> from coolname import RandomGenerator
+    >>> generator = RandomGenerator(config)
+    >>> for i in range(3):
+    ...     print(generator.generate_slug())
+    ...
+    cat-798
+    bird-931
+    cat-83
+
+Numbers start with 1 and have at most ``digits`` digits.
 
 Length limits
 =============

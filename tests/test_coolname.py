@@ -723,3 +723,31 @@ def test_invalid_all():
         RandomGenerator(load_config(DATA_DIR / 'invalid_all'))
     with pytest.raises(ConfigurationError, match=esc(r"Invalid config: Config at key 'all' is not a dict")):
         RandomGenerator(load_config(DATA_DIR / 'invalid_all_dict'))
+
+
+def test_number():
+    # Test validation
+    with pytest.raises(ConfigurationError, match=r"Invalid config: Config at key 'all' has invalid 'digits': must be between 1 and 7"):
+        RandomGenerator({'all': {'type': 'number', 'digits': 0}})
+
+    generator = RandomGenerator({
+        'all': {
+            'type': 'cartesian',
+            'lists': ['word', 'number']
+        },
+        'word': {
+            'type': 'words',
+            'words': ['dog', 'cat', 'bird']
+        },
+        'number': {
+            'type': 'number'
+        }
+    })
+    random.seed(0)
+    assert generator.generate_slug() == 'cat-579'
+
+    # Also test render() for the sake of coverage
+    assert generator.render() == ("RandomGenerator\n"
+                                  "  CartesianList(2, len=2997)\n"
+                                  "    WordList(['dog', 'cat', 'bird'], len=3)\n"
+                                  "    Number(digits=3)\n")
