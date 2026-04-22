@@ -1,15 +1,16 @@
-# -*- coding: utf-8 -*-
 import io
+from re import escape as esc
 import unittest
+from unittest.mock import patch
 
 import pytest
 
-from coolname import RandomGenerator, InitializationError
-from coolname.impl import NestedList, CartesianList, Scalar,\
-    WordList, PhraseList, WordAsPhraseWrapper,\
-    _create_lists, _to_bytes, _default
+from coolname import RandomGenerator, InitializationError, _default
+from coolname._config import PhraseSplitter, PhraseSplitterError
+from coolname._impl import NestedList, CartesianList, Constant, \
+    WordList, PhraseList, WordAsPhraseWrapper, _to_bytes, create_lists
 
-from .common import TestCase, patch
+from .common import TestCase
 
 
 class TestImplementation(TestCase):
@@ -18,52 +19,52 @@ class TestImplementation(TestCase):
         phrase_list = PhraseList([('black', 'cat'), ('white', 'dog')])
         assert len(phrase_list) == 2
         assert phrase_list.multiword
-        phrase_list[0] == ('black', 'cat')
-        phrase_list[1] == ('white', 'dog')
+        assert phrase_list[0] == ('black', 'cat')
+        assert phrase_list[1] == ('white', 'dog')
         assert str(phrase_list) == "PhraseList([('black', 'cat'), ('white', 'dog')], len=2)"
 
     def test_nested_list(self):
         # Note that lists are internally sorted
-        nested_list = NestedList([[1, 2, 3],
-                                  [4, 5],
-                                  [6, 7, 8, 9]])
+        nested_list = NestedList([['1', '2', '3'],
+                                  ['4', '5'],
+                                  ['6', '7', '8', '9']])
         self.assertEqual(nested_list.length, 9)
-        self.assertEqual(nested_list[0], 6)
-        self.assertEqual(nested_list[1], 7)
-        self.assertEqual(nested_list[2], 8)
-        self.assertEqual(nested_list[3], 9)
-        self.assertEqual(nested_list[4], 1)
-        self.assertEqual(nested_list[5], 2)
-        self.assertEqual(nested_list[6], 3)
-        self.assertEqual(nested_list[7], 4)
-        self.assertEqual(nested_list[8], 5)
+        self.assertEqual(nested_list[0], '6')
+        self.assertEqual(nested_list[1], '7')
+        self.assertEqual(nested_list[2], '8')
+        self.assertEqual(nested_list[3], '9')
+        self.assertEqual(nested_list[4], '1')
+        self.assertEqual(nested_list[5], '2')
+        self.assertEqual(nested_list[6], '3')
+        self.assertEqual(nested_list[7], '4')
+        self.assertEqual(nested_list[8], '5')
 
     def test_nested_list_out_of_range(self):
-        nested_list = NestedList([[1, 2, 3],
-                                  [4, 5]])
-        self.assertEqual(nested_list[4], 5)
+        nested_list = NestedList([['1', '2', '3'],
+                                  ['4', '5']])
+        self.assertEqual(nested_list[4], '5')
         with self.assertRaises(IndexError):
             nested_list[5]
 
     def test_carthesian_list(self):
-        cart_list = CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
+        cart_list = CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']])
         self.assertEqual(cart_list.length, 24)
-        self.assertEqual(cart_list[0], [1, 4, 6])
-        self.assertEqual(cart_list[1], [1, 4, 7])
-        self.assertEqual(cart_list[4], [1, 5, 6])
-        self.assertEqual(cart_list[8], [2, 4, 6])
-        self.assertEqual(cart_list[9], [2, 4, 7])
-        self.assertEqual(cart_list[23], [3, 5, 9])
+        self.assertEqual(cart_list[0], ['1', '4', '6'])
+        self.assertEqual(cart_list[1], ['1', '4', '7'])
+        self.assertEqual(cart_list[4], ['1', '5', '6'])
+        self.assertEqual(cart_list[8], ['2', '4', '6'])
+        self.assertEqual(cart_list[9], ['2', '4', '7'])
+        self.assertEqual(cart_list[23], ['3', '5', '9'])
         # One more level of nesting
         cart_list = NestedList([
-            CartesianList([[10, 11], [12, 13]]),
-            CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),
+            CartesianList([['10', '11'], ['12', '13']]),
+            CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']]),
         ])
         self.assertEqual(cart_list.length, 28)
-        self.assertEqual(cart_list[0], [1, 4, 6])
-        self.assertEqual(cart_list[23], [3, 5, 9])
-        self.assertEqual(cart_list[24], [10, 12])
-        self.assertEqual(cart_list[27], [11, 13])
+        self.assertEqual(cart_list[0], ['1', '4', '6'])
+        self.assertEqual(cart_list[23], ['3', '5', '9'])
+        self.assertEqual(cart_list[24], ['10', '12'])
+        self.assertEqual(cart_list[27], ['11', '13'])
 
     @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_phrase_list_squash_optimization(self):
@@ -108,36 +109,45 @@ class TestImplementation(TestCase):
         assert all_list._lists[0] == sorted(tuples)
         assert 3 <= len(generator.generate()) <= 4
 
-    def test_scalar(self):
-        self.assertTrue(Scalar(10).random(), 10)
+    def test_constant(self):
+        self.assertTrue(Constant('10').random(), '10')
 
     def test_str(self):
         nested_list = NestedList([
-            CartesianList([[10, 11], [12, 13]]),
-            CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),
+            CartesianList([['10', '11'], ['12', '13']]),
+            CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']]),
         ])
         self.assertEqual(str(nested_list), 'NestedList(2, len=28)')
-        cart_list = CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
+        cart_list = CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']])
         self.assertEqual(str(cart_list), 'CartesianList(3, len=24)')
-        scalar = Scalar('10')
-        self.assertEqual(str(scalar), "Scalar(value='10')")
+        constant = Constant('10')
+        self.assertEqual(str(constant), "Constant(value='10')")
+
+    def test_integers_no_error(self):
+        # This is wrong, but we deliberately don't do validation within AbstractNestedList subclasses.
+        # User must not instantiate them directly, they live in ``coolname._impl``
+        lst = NestedList([
+            CartesianList([[10, 11], [12, 13]]),               # type: ignore
+            CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),  # type: ignore
+        ])
+        assert isinstance(lst[0][0], int)
 
     def test_dump_list(self):
         cart_list = NestedList([
-            CartesianList([[10, 11], [12, 13]]),
-            CartesianList([[1, 2, 3], [4, 5], [6, 7, 8, 9]]),
+            CartesianList([['10', '11'], ['12', '13']]),
+            CartesianList([['1', '2', '3'], ['4', '5'], ['6', '7', '8', '9']]),
         ])
         stream = io.StringIO()
-        cart_list._dump(stream)
+        cart_list.write(stream, max_items=3)
         self.assertEqual(stream.getvalue(),
-                         'NestedList(2, len=28)\n'
-                         '  CartesianList(3, len=24)\n'
-                         '    WordList([1, 2, 3], len=3)\n'
-                         '    WordList([4, 5], len=2)\n'
-                         '    WordList([6, 7, 8, ...], len=4)\n'
-                         '  CartesianList(2, len=4)\n'
-                         '    WordList([10, 11], len=2)\n'
-                         '    WordList([12, 13], len=2)\n')
+                         "NestedList(2, len=28)\n"
+                         "  CartesianList(3, len=24)\n"
+                         "    WordList(['1', '2', '3'], len=3)\n"
+                         "    WordList(['4', '5'], len=2)\n"
+                         "    WordList(['6', '7', '8', ...], len=4)\n"
+                         "  CartesianList(2, len=4)\n"
+                         "    WordList(['10', '11'], len=2)\n"
+                         "    WordList(['12', '13'], len=2)\n")
 
     def test_dump_generator(self):
         config = {
@@ -147,10 +157,21 @@ class TestImplementation(TestCase):
             }
         }
         generator = RandomGenerator(config)
+        expected = ("RandomGenerator\n"
+                    "  TopLevelMultiWrapper\n"
+                    "    WordList(['one', 'two', 'three'], len=3)\n")
+
         stream = io.StringIO()
-        generator._dump(stream)
-        self.assertEqual(stream.getvalue(),
-                         "WordList(['one', 'two', 'three'], len=3)\n")
+        generator.write(stream)
+        self.assertEqual(stream.getvalue(), expected)
+
+        self.assertEqual(generator.render(), expected)
+
+        print(generator._lists[None])
+        expected = (f"RandomGenerator\n"
+                    f"  TopLevelMultiWrapper  # id={id(generator._lists[None])}\n"
+                    f"    WordList(['one', 'two', 'three'], len=3)  # id={id(generator._lists[None]._list)}\n")
+        self.assertEqual(generator.render(ids=True), expected)
 
     def test_create_lists(self):
         # For the sake of coverage
@@ -158,7 +179,7 @@ class TestImplementation(TestCase):
             config = {
                 'all': {'type': 'wrong'}
             }
-            _create_lists(config, {}, 'all', [])
+            create_lists(config, {}, 'all', [])
 
     def test_encode(self):
         # _encode must encode unicode strings
@@ -207,7 +228,7 @@ class TestImplementation(TestCase):
             'words': {'type': 'words', 'words': ['one', 'two']},
             'words2': {'type': 'words', 'words': ['three', 'four']},
         })
-        results = set(generator.generate_slug() for _ in range(20))
+        results = set(generator.generate_slug() for _ in range(30))
         assert results == {'one', 'two', 'three', 'four'}
 
     def test_degen_words_and_phrases(self):
@@ -216,7 +237,7 @@ class TestImplementation(TestCase):
             'words': {'type': 'words', 'words': ['one', 'two']},
             'phrases': {'type': 'phrases', 'phrases': ['twenty one', 'twenty two']},
         })
-        results = set(generator.generate_slug() for _ in range(20))
+        results = set(generator.generate_slug() for _ in range(30))
         assert results == {'one', 'two', 'twenty-one', 'twenty-two'}
 
     def test_degen_words_and_cartesian(self):
@@ -227,7 +248,7 @@ class TestImplementation(TestCase):
             'tens': {'type': 'words', 'words': ['thirty', 'forty']},
             'ones': {'type': 'words', 'words': ['three', 'four']},
         })
-        results = set(generator.generate_slug() for _ in range(30))
+        results = set(generator.generate_slug() for _ in range(50))
         assert results == {'one', 'two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
 
     def test_degen_phrases_and_cartesian(self):
@@ -238,10 +259,86 @@ class TestImplementation(TestCase):
             'tens': {'type': 'words', 'words': ['thirty', 'forty']},
             'ones': {'type': 'words', 'words': ['three', 'four']},
         })
-        results = set(generator.generate_slug() for _ in range(30))
+        results = set(generator.generate_slug() for _ in range(50))
         assert results == {'twenty-one', 'twenty-two', 'thirty-three', 'thirty-four', 'forty-three', 'forty-four'}
 
 
-if __name__ == '__main__':
-    import sys
-    sys.exit(unittest.main())
+def test_phrase_splitter():
+    NO_EMPTY = esc("Config at key '<???>' has invalid 'phrases': empty phrase is not allowed")
+    NO_WHITESPACE = esc("Config at key '<???>' has invalid 'phrases': whitespace-only phrase is not allowed with strip_whitespace=True")
+
+    # Normal (default) splitter
+    split = PhraseSplitter()
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    with pytest.raises(PhraseSplitterError, match=NO_WHITESPACE):
+        split('  ')
+    assert split('abc') == ['abc']
+    assert split('  abc \t\r\n ') == ['abc']
+    assert split('  abc  def  ') == ['abc', 'def']
+
+    # Invalid separator
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid separator 're:(\\s+': missing ), unterminated subpattern at position 0")):
+        PhraseSplitter(separator=r're:(\s+')
+
+    # word | word|word
+    split = PhraseSplitter(separator=r're:\s*\|\s*')
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    with pytest.raises(PhraseSplitterError, match=NO_WHITESPACE):
+        split(' ')
+    assert split('  abc|def| ghi  |  jkl ') == ['abc', 'def', 'ghi', 'jkl']
+
+    split = PhraseSplitter(separator=r're:\s*\|\s*', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('  ') == ['  ']
+    assert split('  abc|def| ghi  |  jkl ') == ['  abc', 'def', 'ghi', 'jkl ']
+
+    split = PhraseSplitter(separator='|', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('  ') == ['  ']
+    assert split('  abc|def| ghi  |  jkl ') == ['  abc', 'def', ' ghi  ', '  jkl ']
+
+    split = PhraseSplitter(strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('abc') == ['abc']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc \t\r\n ' nicely into words using separator 're:\\s+' - refusing to guess")):
+        split('  abc \t\r\n ')
+
+    # This doesn't make much sense, but is technically allowed
+    split = PhraseSplitter(separator=' ', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase ' ' nicely into words using separator ' ' - refusing to guess")):
+        split(' ')
+    assert split('abc') == ['abc']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc \t\r\n' nicely into words using separator ' ' - refusing to guess")):
+        split('  abc \t\r\n')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc \t\r\n ' nicely into words using separator ' ' - refusing to guess")):
+        split('  abc \t\r\n ')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '  abc  def  ' nicely into words using separator ' ' - refusing to guess")):
+        split('  abc  def  ')
+
+    # / as separator - strip whitespace
+    split = PhraseSplitter(separator='/')
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('abc') == ['abc']
+    assert split(' abc/ def ') == ['abc', 'def']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase 'abc/ \t\r\n' nicely into words using separator '/' - refusing to guess")):
+        split('abc/ \t\r\n')
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '//abc/def' nicely into words using separator '/' - refusing to guess")):
+        split('//abc/def')
+
+    # / as separator - keep whitespace
+    split = PhraseSplitter(separator='/', strip_whitespace=False)
+    with pytest.raises(PhraseSplitterError, match=NO_EMPTY):
+        split('')
+    assert split('abc') == ['abc']
+    assert split(' abc/ def ') == [' abc', ' def ']
+    assert split('abc/ \t\r\n') == ['abc', ' \t\r\n']
+    with pytest.raises(PhraseSplitterError, match=esc(r"Config at key '<???>' has invalid 'phrases': can't split phrase '//abc/def' nicely into words using separator '/' - refusing to guess")):
+        split('//abc/def')

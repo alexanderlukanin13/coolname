@@ -75,4 +75,4 @@ if __name__ == '__main__':
     if arguments.dump:
         print()
         import coolname.impl
-        print(coolname.impl._default._dump(sys.stdout, object_ids=True))
+        print(coolname.impl._default.write(sys.stdout, ids=True))

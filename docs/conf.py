@@ -34,12 +34,20 @@ from setuptools_scm import get_version
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinxcontrib.fulltoc',
+    'sphinx_collapse',
     'rst_pypi_ref.sphinx',
 ]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3/', None)}
+
+autodoc_type_aliases = {
+    "CoolnameConfigT": "CoolnameConfigT",
+    "CoolnameConfigListT": "CoolnameConfigListT",
+    "RandomSeedArgT": "RandomSeedArgT",
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -152,6 +160,10 @@ html_static_path = ['_static']
 if not op.isdir('_static'):  # To avoid warning if it doesn't exist
     os.mkdir('_static')
 
+html_css_files = [
+    'css/custom.css',
+]
+
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
@@ -235,7 +247,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'coolname.tex', 'coolname Documentation',
+  (master_doc, 'coolname.tex', 'coolname documentation',
    'Alexander Lukanin', 'manual'),
 ]
 
@@ -265,7 +277,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'coolname', 'coolname Documentation',
+    (master_doc, 'coolname', 'coolname documentation',
      [author], 1)
 ]
 
@@ -279,8 +291,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'coolname', 'coolname Documentation',
-   author, 'coolname', 'One line description of project.',
+  (master_doc, 'coolname', 'coolname documentation',
+   author, 'coolname', 'Random Name and Slug Generator.',
    'Miscellaneous'),
 ]
 

@@ -1,0 +1,4 @@
+strip_whitespace = Ture
+
+lala
+haha

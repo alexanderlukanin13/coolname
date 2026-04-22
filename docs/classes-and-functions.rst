@@ -2,63 +2,45 @@
 Classes and functions
 =====================
 
-.. py:module:: coolname
-
 Default generator
 =================
 
-.. py:function:: generate(pattern=None)
+.. py:currentmodule:: coolname
 
-    Returns a random sequence as a list of strings.
-
-    :param int pattern: Can be 2, 3 or 4.
-    :rtype: list of strings
-
-.. py:function:: generate_slug(pattern=None)
-
-    Same as :func:`generate`, but returns a slug as a string.
-
-    :param int pattern: Can be 2, 3 or 4.
-    :rtype: str
-
-.. py:function:: get_combinations_count(pattern=None)
-
-    Returns the number of possible combinations.
-
-    :param int pattern: Can be 2, 3 or 4.
-    :rtype: int
-
-.. py:function:: replace_random(random)
-
-    Replaces the random number generator. It doesn't affect custom generators.
-
-    :param random: :class:`random.Random` instance.
+.. autofunction:: generate
+.. autofunction:: generate_slug
+.. autofunction:: get_combinations_count
+.. autofunction:: replace_random
 
 Custom generators
 =================
 
-.. py:class:: RandomGenerator(config, random=None)
+.. autoclass:: RandomGenerator
+    :members:
 
-    :param dict config: Custom configuration dictionary.
-    :param random: :class:`random.Random` instance. If not provided, :func:`random.randrange` will be used.
+.. autoclass:: InitializationError
+.. autoclass:: ConfigurationError()
 
-    .. py:method:: generate(pattern=None)
+Configuration
+=============
 
-        Returns a random sequence as a list of strings.
+These functions are primarily intended for development.
 
-        :param pattern: Not applicable by default. Can be configured.
-        :rtype: list of strings
+.. autofunction:: coolname.loader.load_config
 
-    .. py:method:: generate_slug(pattern=None)
+.. autofunction:: coolname.loader.filter_config
 
-        Same as :meth:`generate`, but returns a slug as a string.
+.. autofunction:: coolname.loader.save_config_as_module
 
-        :param pattern: Not applicable by default. Can be configured.
-        :rtype: str
+Types and Protocols
+===================
 
-    .. py:method:: get_combinations_count(pattern=None)
+In advanced custom setup, you can use following protocols and types for typing:
 
-        Returns the number of possible combinations.
+.. py:currentmodule:: coolname.types
 
-        :param pattern: Not applicable by default. Can be configured.
-        :rtype: int
+.. autodata:: CoolnameConfigT
+.. autodata:: CoolnameConfigListT
+.. autoclass:: RandomT
+    :members:
+.. autodata:: RandomSeedArgT

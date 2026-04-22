@@ -1,15 +1,15 @@
-"""
-Do not import anything directly from this module.
-"""
-
-
 class InitializationError(Exception):
-    """Custom exception for all generator initialization errors."""
-    pass
+    """
+    Base exception class for all coolname initialization errors
+    (configuration files are missing, file reading error, etc.)
+    """
 
 
 class ConfigurationError(InitializationError):
-    """Specific exception for invalid configuration."""
+    """
+    Subclass of :py:class:`~coolname.exceptions.InitializationError`,
+    raised when coolname configuration is invalid.
+    """
 
-    def __init__(self, msg):
-        super(ConfigurationError, self).__init__('Invalid config: {}'.format(msg))
+    def __init__(self, msg: str):
+        super(ConfigurationError, self).__init__(f'Invalid config: {msg}')

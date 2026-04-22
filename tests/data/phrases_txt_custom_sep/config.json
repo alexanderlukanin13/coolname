@@ -1,0 +1,6 @@
+{
+  "all": {
+    "type": "nested",
+    "lists": ["phrases1", "phrases2", "phrases3"]
+  }
+}

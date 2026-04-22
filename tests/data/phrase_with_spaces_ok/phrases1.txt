@@ -1,0 +1,6 @@
+separator = /
+number_of_words = 2
+allow_whitespace = True
+
+one / two
+three four / five

@@ -11,6 +11,7 @@
 
    Introduction <self>
    customization
+   parameters-table
    environment-variables
    randomization
    classes-and-functions

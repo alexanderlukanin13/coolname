@@ -1,0 +1,8 @@
+separator = /
+strip_whitespace = False
+word_regex = [\w\s]+
+
+  big / dog    # yields ['big ', ' dog']
+  small / cat  # yields ['small ', ' cat']
+               # ^ probably not what we want! (this line is ignored, by the way)
+

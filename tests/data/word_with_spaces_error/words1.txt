@@ -1,0 +1,5 @@
+separator = /
+number_of_words = 1
+
+alpha
+beta gamma  # NOTE: this is interpreted as word, not phrase

@@ -53,3 +53,6 @@ docs/_build
 # Dynamically generated code
 src/coolname/_version.py
 src/coolname/data/__init__.py
+
+# output of: mypy src | tee mypy.txt
+mypy.txt

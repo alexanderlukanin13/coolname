@@ -76,8 +76,8 @@ Features
     .. code-block:: python
 
         >>> from coolname import get_combinations_count
-        >>> get_combinations_count(4)
-        83377588406
+        >>> get_combinations_count()
+        83930205085
 
 * Hand-picked vocabulary. ``sexy`` and ``demonic`` are about the most "offensive" words here -
   but there is only a pinch of them, for spice. Most words are either neutral, such as ``red``, or positive,

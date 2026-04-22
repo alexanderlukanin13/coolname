@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+import os
+from pathlib import Path
+import sys
 
 from setuptools import setup, Command
 from setuptools.command.build import build
@@ -18,8 +21,9 @@ from setuptools.command.sdist import sdist
 # coolname/data/__init__.py.
 # ---------
 def compile_init_py():
-    import os
-    import sys
+    sys.path.append(str(Path(__file__).parent / 'src'))
+    from coolname.loader import save_config_as_module
+
     current_path = os.path.join(os.path.dirname(__file__), 'src')
     current_path_appended = False
     if current_path not in sys.path:
@@ -31,10 +35,7 @@ def compile_init_py():
     config_path = os.path.join(current_path, 'coolname', 'data')
     config = load_config(config_path)
     # Write to data/__init__.py to be used from .egg
-    with open(os.path.join(config_path, '__init__.py'), 'w', encoding='utf-8') as file:
-        file.write(f'''# THIS FILE IS AUTO-GENERATED, DO NOT EDIT
-config = {config!r}
-''')
+    save_config_as_module(config, os.path.join(config_path, '__init__.py'))
 
 
 class GenerateData(Command):

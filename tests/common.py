@@ -1,18 +1,18 @@
-import os.path as op
 import unittest
-from unittest import mock
-from unittest.mock import patch
+from pathlib import Path
 
-TESTS_DIR = op.dirname(op.abspath(__file__))
-PROJECT_DIR = op.abspath(op.join(TESTS_DIR, '..'))
-EXAMPLES_DIR = op.join(PROJECT_DIR, 'examples')
+TESTS_DIR = Path(__file__).parent
+PROJECT_DIR = TESTS_DIR.parent
+EXAMPLES_DIR = PROJECT_DIR / 'examples'
+DATA_DIR = TESTS_DIR / 'data'
+COOLNAME_DATA_DIR = PROJECT_DIR / 'src' / 'coolname' / 'data'
 
 
 class TestCase(unittest.TestCase):
     pass
 
 
-class FakeRandom(object):
+class FakeRandom:
     """Generates 0, 1, 2..."""
 
     def __init__(self, i=0):

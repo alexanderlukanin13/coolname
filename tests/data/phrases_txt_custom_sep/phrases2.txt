@@ -1,0 +1,7 @@
+separator = re:\s+/\s+
+strip_whitespace = False
+
+  quick  /  fox   # yields ['quick', 'fox']
+  lazy  /  dog    # yields ['lazy', 'dog']
+
+     # comment-only line is ignored

@@ -25,7 +25,7 @@ Configuration is a flat dictionary of rules:
 ``<rule_id>`` is the identifier of rule. Root rule must be named ``'all'`` - that's what you use
 when you call :func:`generate` or :func:`generate_slug` without arguments.
 
-There are five types of configuration rules.
+There are six types of configuration rules.
 
 Words list
 ----------
@@ -51,6 +51,15 @@ with equal probability.
         'words': ['apple', 'banana']
     },
 
+.. collapse:: How whitespace is handled?
+
+    By default, leading/trailing whitespace is stripped, and whitespace in the middle of a word is forbidden.
+    You can change this behavior on per-list basis using ``strip_whitespace`` and ``allow_whitespace``
+    :doc:`parameters <parameters-table>`.
+
+    Empty word always raises an exception.
+
+    When words are in a ``*.txt`` file, leading/trailing whitespace for each line is always stripped.
 
 Phrases list
 ------------
@@ -62,10 +71,29 @@ Same as words list, but each element is one or more words.
     # This will produce random color
     'color': {
         'type': 'phrases',
-        'words': ['red', 'green', 'navy blue', ['royal', 'purple']]
+        'phrases': ['red', 'green', 'navy blue', ['royal', 'purple']]
     }
 
 Phrase can be written as a string (words are separated by space) or as a list of words.
+
+.. collapse:: How whitespace is handled, and what about custom separators?
+
+    Each phrase is processed at initialization time with the following algorithm:
+
+    1. If a phrase is defined as a string (like ``'navy blue'`` above):
+
+        1.1. If ``strip_whitespace=True``, leading/trailing whitespace is stripped.
+
+        1.2. Phrase is split into words by whitespace (everything that matches ``r'\s+'``),
+             or using ``separator`` :doc:`parameter <parameters-table>` if it's defined for this Phrase list.
+             Separator can be a plain string, or a regular expression starting with ``re:``
+
+    2. For each word in a phrase, if ``strip_whitespace=True``, leading/trailing whitespace is stripped.
+
+    Empty word or empty phrase always raises an exception, and whitespace in the middle of a word
+    raises an exception if ``allow_whitespace=False`` (default).
+
+    When phrases are in a ``*.txt`` file, leading/trailing whitespace for each line is always stripped.
 
 Nested list
 -----------
@@ -142,6 +170,42 @@ Let's try the config defined above:
     You can have many nested lists, but you should never put a Cartesian list inside another Cartesian list.
 
 .. _Cartesian: https://en.wikipedia.org/wiki/Cartesian_product
+
+Number
+------
+
+To add a random number to your slugs, use configuration like this:
+
+.. code-block:: python
+    :emphasize-lines: 9-12
+
+    'all': {
+        'type': 'cartesian',
+        'lists': ['word', 'number']
+    },
+    'word': {
+        'type': 'words',
+        'words': ['dog', 'cat', 'bird']
+    },
+    'number': {
+        'type': 'number',
+        'digits': '3'  # default is 3 if omitted; min=1, max=7
+    }
+
+Result:
+
+.. code-block:: python
+
+    >>> from coolname import RandomGenerator
+    >>> generator = RandomGenerator(config)
+    >>> for i in range(3):
+    ...     print(generator.generate_slug())
+    ...
+    cat-798
+    bird-931
+    cat-83
+
+Numbers start with 1 and have at most ``digits`` digits.
 
 Length limits
 =============

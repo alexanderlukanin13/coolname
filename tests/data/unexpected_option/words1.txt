@@ -1,0 +1,4 @@
+max_slug_length = 50
+
+alpha
+beta
