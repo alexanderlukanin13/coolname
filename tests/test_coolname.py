@@ -250,6 +250,26 @@ class TestCoolname(TestCase):
             RandomGenerator(config)
 
 
+    def test_nocheck_skips_hanging_check(self):
+        # __nocheck must skip _check_not_hanging() entirely. Due to operator
+        # precedence (and binds tighter than or), it previously only suppressed
+        # the ensure_unique branch, so the check still ran when
+        # ensure_unique_prefix / max_slug_length were set (as in the default
+        # config, which sets __nocheck precisely to skip this).
+        config = {
+            'all': {
+                'type': 'cartesian',
+                'lists': ['w1', 'w2'],
+                'max_slug_length': 50,
+                '__nocheck': True,
+            },
+            'w1': {'type': 'words', 'words': ['brave', 'agile']},
+            'w2': {'type': 'words', 'words': ['bravery', 'brass']},
+        }
+        with patch.object(RandomGenerator, '_check_not_hanging') as mock_check:
+            RandomGenerator(config)
+        mock_check.assert_not_called()
+
     def test_ensure_unique_prefix(self):
         config = {
             'all': {

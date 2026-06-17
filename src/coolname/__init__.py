@@ -100,7 +100,7 @@ class RandomGenerator:
         # Make sure that generate() does not go into long loop.
         # Default generator is a special case, we don't need check.
         if (not config['all'].get('__nocheck') and
-                self._ensure_unique or self._check_prefix or self._max_slug_length):
+                (self._ensure_unique or self._check_prefix or self._max_slug_length)):
             self._check_not_hanging()
         # Fire it up
         assert self.generate_slug()
