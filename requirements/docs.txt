@@ -3,5 +3,5 @@ Sphinx==9.1.0
 sphinx-collapse==0.1.4
 sphinxcontrib-fulltoc==1.2.0
 sphinxcontrib-websupport==1.2.7
-setuptools==80.10.1
+setuptools==83.0.0
 setuptools-scm==9.2.2
